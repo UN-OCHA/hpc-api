@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "graphql-type-json": "^0.3.2",
     "graphql-upload": "^11.0.0",
+    "knex": "^0.21.17",
     "lodash": "^4.17.20",
     "minio": "^7.0.18",
     "pg": "^8.5.1",

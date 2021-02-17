@@ -1,4 +1,4 @@
-import {createConnection} from "typeorm";
+import * as Knex from 'knex';
 
 import AuthGrant from '../models/AuthGrant';
 import AuthGrantee from '../models/AuthGrantee';
@@ -17,31 +17,12 @@ import ReportingWindowVersion from '../models/ReportingWindowVersion';
 import ReportingWindowAssignment from '../models/ReportingWindowAssignment';
 import ReportingWindowAssignmentVersion from '../models/ReportingWindowAssignmentVersion';
 
-export const connection = createConnection({
-    type: "postgres", 
-    host: process.env.DEV_DB_HOST,
-    port:  5432,
-    username: "postgres", 
-    password: null, 
-    database: "hpc",
-    entities: [
-        AuthGrant,
-        AuthGrantee,
-        AuthGrantLog,
-        AuthInvite,
-        AuthTarget,
-        AuthToken,
-        FileRecord,
-        Location,
-        Organization,
-        Participant,
-        ParticipantCountry,
-        ParticipantOrganizations,
-        ReportingWindow,
-        ReportingWindowVersion, 
-        ReportingWindowAssignment,
-        ReportingWindowAssignmentVersion,
-    ],
-    synchronize: false,
-    logging: false
+export const knex = require('knex')({
+    client: 'mysql',
+    connection: {
+      host : '127.0.0.1',
+      user : 'your_database_user',
+      password : 'your_database_password',
+      database : 'myapp_test'
+    }
 });
