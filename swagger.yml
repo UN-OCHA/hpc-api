@@ -1,0 +1,390 @@
+openapi: 3.0.0
+info:
+  title: HPC Service V3
+  version: 3.0.0
+paths:
+  /rest/all-participants:
+    get:
+      operationId: allParticipantsQuery
+      parameters:
+        - in: query
+          name: email
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get all the participants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+  /rest/get-assignment:
+    get:
+      operationId: getAssignmentQuery
+      parameters:
+        - in: query
+          name: assignmentId
+          required: true
+          schema:
+            type: number
+            format: float
+      responses:
+        '200':
+          description: Get A particular reporting window assignment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportingWindowAssignment'
+  /rest/update-assignment:
+    post:
+      operationId: updateAssignmentMutation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body:
+                  $ref: '#/components/schemas/UpdateAssignmentInput'
+                assignmentId:
+                  type: number
+                  format: float
+              required:
+                - body
+                - assignmentId
+      responses:
+        '200':
+          description: Get all the reporting window assignments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportingWindowAssignment'
+  /rest/upload-assignment-file:
+    post:
+      operationId: uploadAssignmentFileMutation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileHash:
+                  type: string
+                file:
+                  $ref: '#/components/schemas/Upload'
+                assignmentId:
+                  type: number
+                  format: float
+              required:
+                - fileHash
+                - file
+                - assignmentId
+      responses:
+        '200':
+          description: Get all the reporting window assignments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileRecord'
+components:
+  schemas:
+    Query:
+      type: object
+      required:
+        - allParticipants
+        - getAssignment
+      properties:
+        allParticipants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+          description: Get all the participants
+        getAssignment:
+          $ref: '#/components/schemas/ReportingWindowAssignment'
+          description: Get A particular reporting window assignment
+    Participant:
+      type: object
+      required:
+        - id
+        - hidId
+        - email
+        - name_given
+        - name_family
+      properties:
+        id:
+          type: string
+        hidId:
+          type: string
+          description: The HID ID of the user
+        email:
+          type: string
+          description: The email of the user
+        name_given:
+          type: string
+          description: The Name given to the user
+        name_family:
+          type: string
+          description: The name of the family of users to which the user belongs to
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+          description: The organizations to which the participant belongs to
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+          description: The locations associated with the participant
+    Organization:
+      type: object
+      required:
+        - id
+        - name
+        - abbreviation
+        - verified
+        - active
+        - collectiveInd
+        - participants
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: Name of the organization
+        nativeName:
+          type: string
+          description: The native name given to the organization
+        abbreviation:
+          type: string
+          description: The abbrevation given to the organization
+        url:
+          type: string
+          description: The URL of the organization
+        comments:
+          type: string
+          description: The comments made on the organization
+        verified:
+          type: boolean
+          description: Is the organization verified
+        notes:
+          type: string
+          description: The notes on the organization
+        active:
+          type: boolean
+          description: Is the organization active
+        collectiveInd:
+          type: boolean
+          description: The collectiveind?
+        newOrganization:
+          $ref: '#/components/schemas/Organization'
+          description: New organization?
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+          description: The children of the organization
+        parent:
+          $ref: '#/components/schemas/Organization'
+          description: The parent organization
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Participant'
+          description: the participants associated with the organization
+    Location:
+      type: object
+      required:
+        - id
+        - externalId
+        - name
+        - adminLevel
+        - latitude
+        - longitude
+        - iso3
+        - pcode
+        - validOn
+        - status
+        - itosSync
+        - participants
+      properties:
+        id:
+          type: string
+        externalId:
+          type: string
+          description: external ID
+        name:
+          type: string
+          description: The name of the location
+        adminLevel:
+          type: number
+          format: float
+          description: The admin level of the location
+        latitude:
+          type: number
+          format: float
+          description: latitude of the location
+        longitude:
+          type: number
+          format: float
+          description: longitude of the location
+        iso3:
+          type: string
+          description: ISO3
+        pcode:
+          type: string
+          description: PCODE
+        validOn:
+          type: number
+          format: float
+          description: validon
+        status:
+          type: string
+          description: status
+        itosSync:
+          type: boolean
+          description: itosSync
+        participants:
+          $ref: '#/components/schemas/Participant'
+          description: Participants in the location
+    ReportingWindowAssignment:
+      type: object
+      required:
+        - id
+        - assigneeType
+        - assigneeId
+        - assigneeOperation
+        - reportingWindow
+      properties:
+        id:
+          type: string
+        assigneeType:
+          type: string
+          description: The type of assignee for the reporting window assignment
+        assigneeId:
+          type: number
+          format: float
+          description: The ID of the assignee to which the assignment belongs to
+        assigneeOperation:
+          type: number
+          format: float
+          description: assignee operation
+        reportingWindow:
+          $ref: '#/components/schemas/ReportingWindow'
+          description: reporting window to which the assignment belongs to
+    ReportingWindow:
+      type: object
+      required:
+        - id
+        - belongsToType
+        - assignments
+      properties:
+        id:
+          type: string
+        belongsToType:
+          type: string
+          description: The type of the entity to which the reporting window belongs to
+        belongsToId:
+          type: number
+          format: float
+          description: The ID of the entity to which the window belongs to
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportingWindowAssignment'
+          description: assignments that belong to the reporting window
+    Mutation:
+      type: object
+      required:
+        - updateAssignment
+        - uploadAssignmentFile
+      properties:
+        updateAssignment:
+          $ref: '#/components/schemas/ReportingWindowAssignment'
+          description: Get all the reporting window assignments
+        uploadAssignmentFile:
+          $ref: '#/components/schemas/FileRecord'
+          description: Get all the reporting window assignments
+    UpdateAssignmentInput:
+      type: object
+      required:
+        - previousVersion
+        - form
+      properties:
+        previousVersion:
+          type: number
+          format: float
+          description: The Previous Version of the assignment
+        form:
+          type: object
+          description: Form Input
+      description: The input fields for a package address
+    UpdateAssignmentInputForm:
+      type: object
+      required:
+        - data
+        - finalized
+        - files
+      properties:
+        data:
+          type: string
+          description: data to be entered
+        finalized:
+          type: boolean
+          description: is it finalized?
+        files:
+          type: array
+          items:
+            type: object
+          description: List of file objects to be used as input in the form
+      description: FormInput for update Assignment
+    FileObject:
+      type: object
+      required:
+        - name
+        - data
+      properties:
+        name:
+          type: string
+          description: Name of the file
+        data:
+          type: object
+          description: The data representing the file content
+      description: Object representing a file
+    FileData:
+      type: object
+      required:
+        - fileHash
+      properties:
+        fileHash:
+          type: string
+          description: hash of the file
+      description: Data representing the file content
+    FileRecord:
+      type: object
+      required:
+        - namespace
+        - hash
+        - createdAt
+        - updatedAt
+      properties:
+        namespace:
+          type: string
+          description: Namespace to which the file belongs to
+        hash:
+          type: string
+          description: Hash of the file
+        fileType:
+          type: string
+          description: type of the file
+        metadata:
+          type: object
+          description: metadata of the file
+        createdAt:
+          type: object
+          description: date at which the file was created at
+        updatedAt:
+          type: object
+          description: date at which the file was last updated at

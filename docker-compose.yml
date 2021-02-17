@@ -1,0 +1,81 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:12.4-alpine
+    container_name: newServiceDB
+    environment:
+      - POSTGRES_PASSWORD=demo
+      - POSTGRES_USER=demo
+      - POSTGRES_DB=demo
+    ports:
+      - 5437:5432
+    volumes:
+      - newServiceDBData:/var/lib/postgresql/data
+    networks:
+      - newService
+  api:
+    build: .
+    container_name: newServiceAPI
+    env_file:
+      - .env
+    environment:
+      - DEV_DB_HOST=host.docker.internal
+      - DNSDOCK_NAME=node
+      - DNSDOCK_IMAGE=hpc
+      - PORT=5100
+      - NODE_ENV=dockerdev
+      - NEW_RELIC_LICENSE_KEY=
+      - NAME=${NAME}
+      - FTPHOST=${FTPHOST}
+      - FTPUSER=${FTPUSER}
+      - FTPPASS=${FTPPASS}
+      - SMTPHOST=${SMTPHOST}
+      - SMTPUSER=${SMTPUSER}
+      - SMTPPASS=${SMTPPASS}
+      - SMTPPORT=${SMTPPORT}
+      - AUTHCLIENTID=${AUTHCLIENTID}
+      - AUTHCLIENTSECRET=${AUTHCLIENTSECRET}
+      - HID_ADMIN_KEY=${HID_ADMIN_KEY}
+      - POSTGRES_SERVER=${POSTGRES_SERVER}
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_LOGGING=${POSTGRES_LOGGING}
+      - SOLR_HOST=${SOLR_HOST}
+      - SOLR_PORT=${SOLR_PORT}
+      - SOLR_CORE=${SOLR_CORE}
+      - SOLR_PATH=${SOLR_PATH}
+      - SOLR_VERSION=${SOLR_VERSION}
+      - ROOT_URL=${ROOT_URL}
+      - DOCS_URL=${DOCS_URL}
+      - REQUIRE_SSL=${REQUIRE_SSL}
+      - AUTHBASE_URL=${AUTHBASE_URL}
+      - HRINFOBASE_URL=${HRINFOBASE_URL}
+      - APPBASE_URL=${APPBASE_URL}
+      - FTSBASE_URL=${FTSBASE_URL}
+      - UPLOAD_DIRECTORY=${UPLOAD_DIRECTORY}
+      - FILEHREF_PREFIX=${FILEHREF_PREFIX}
+      - TMP_DIRECTORY=${TMP_DIRECTORY}
+      - DOCS_DIRECTORY=${DOCS_DIRECTORY}
+      - EDRIS_DIRECTORY=${EDRIS_DIRECTORY}
+      - EDRIS_ARCHIVE_DIRECTORY=${EDRIS_ARCHIVE_DIRECTORY}
+      - REPORT_DOCS_DIRECTORY=${REPORT_DOCS_DIRECTORY}
+      - IATI_DIRECTORY=${IATI_DIRECTORY}
+      - FTS_DATA_CONSISTENCY_EMAIL=${FTS_DATA_CONSISTENCY_EMAIL}
+      - NO_REPLY_EMAIL=${NO_REPLY_EMAIL}
+      - WAIT_HOSTS=pgsql:5432
+      - WAIT_HOSTS_TIMEOUT=120
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - 4000:5100
+    depends_on:
+      - db
+    networks:
+      - service
+      - newService
+volumes: 
+  newServiceDBData:
+networks:
+  service:
+    external:
+      name: hpcservice_service
+  newService:

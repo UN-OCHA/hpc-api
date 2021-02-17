@@ -1,0 +1,21 @@
+.env
+media
+node_modules
+*.log
+
+# IDE artifacts
+*~
+\#*\#
+*.swp
+.project
+.idea
+*.DS*
+._entypo
+._entypo-social
+.smbdelete*
+test-data/*
+/data/*
+.env
+.vscode
+*.sublime-project
+*.sublime-workspace
