@@ -101,6 +101,7 @@ export default class Participant extends Base implements IParticipant {
   }
 
   static async findAllParticipants(where: Partial<IParticipant>) {
+    console.log("executing the query");
     const rawParticipants = await db('participant').select('*').where(where).whereNotNull('email');
     return rawParticipants.map(rawParticipant => new Participant(rawParticipant));
   }

@@ -48,7 +48,6 @@ class App {
           participant = await getParticipantFromToken(token);
         }
         const logger = await createRootContextFromContext(req, participant);
-        console.log("connection: ", connection);
         return {
           req,
           participant,

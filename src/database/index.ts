@@ -1,4 +1,4 @@
-import * as config from '../../knexfile';
+import config from '../../knexfile';
 import * as knex from 'knex';
 
 import { IAuthGrant, ICreateAuthGrant, IUpdateAuthGrant } from './models/AuthGrant';

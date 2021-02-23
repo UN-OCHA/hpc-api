@@ -1,9 +1,10 @@
 // Update with your config settings.
 export default {
 
-    development: {
+    dockerdev: {
         client: 'postgresql',
         connection: {
+          host: process.env.DEV_DB_HOST,
           database: 'hpc',
           user:     'postgres',
           password: null
