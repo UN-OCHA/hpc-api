@@ -1,6 +1,6 @@
 import { Application, Request, Response } from 'express';
 
-import FileRecord from '../../models/FileRecord';
+import FileRecord from '../../database/models/FileRecord';
 import FileService from '../../services/FileService';
 import * as config from '../../config';
 
@@ -31,9 +31,7 @@ export default (app: Application) => {
     }
     // TODO: Add authentication and authorization logic
     const file = await FileRecord.findOne({
-        where: {
-            hash: fileHash
-        }
+      hash: fileHash
     })
     if (!file) {
       return res.status(404).send('File Not Found');

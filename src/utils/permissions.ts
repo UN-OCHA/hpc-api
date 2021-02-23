@@ -1,7 +1,7 @@
 import { GrantedPermissions, PermissionStrings, GLOBAL_PERMISSIONS, OPERATION_PERMISSIONS, OPERATION_CLUSTER_PERMISSIONS, PLAN_PERMISSIONS, GOVERNING_ENTITY_PERMISSIONS } from '../types/Permissions';
 
-import AuthGrant from "../models/AuthGrant";
-import AuthGrantee from "../models/AuthGrantee";
+import AuthGrant from "../database/models/AuthGrant";
+import AuthGrantee, { AuthGranteeType } from "../database/models/AuthGrantee";
 import Context from "../types/Context";
 
 import { calculateRolesGrantFromTargetAndRoleStrings } from './roles';
@@ -183,28 +183,23 @@ export const calculatePermissions = async (
     const addGrantedPermissions = async () => {
       // Get the grantee
       const grantee = await AuthGrantee.findOne({
-        where: {
-          type: 'user',
+          type: AuthGranteeType.user,
           granteeId: participant.id
-        }
       });
       console.log("grantee obtained: ", grantee);
       if (!grantee) {
         return;
       }
       // Get all grants (along with their targets)
-      const grants = await AuthGrant.find({
-        where: {
+      const grants = await AuthGrant.findWithTarget({
           grantee: grantee.id
-        },
-        relations: ['target']
       });
       console.log("grants: ", grants);
       // Calculate the allowed permissions for each of these grants
       const allowedFromGrants = await Promise.all(grants.map(grant =>
         calculatePermissionsFromRolesGrant(
           calculateRolesGrantFromTargetAndRoleStrings(
-            grant.target,
+            grant.targetInst,
             grant.roles
           )
         )

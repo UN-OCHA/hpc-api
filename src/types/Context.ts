@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import Participant from '../models/Participant';
+import Participant from '../database/models/Participant';
 
 import { LogContext } from '../lib/loggerWithContext';
 

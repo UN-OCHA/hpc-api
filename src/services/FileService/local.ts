@@ -1,7 +1,7 @@
 import { createWriteStream } from 'fs';
 import { join } from 'path';
 
-import FileRecord from '../../models/FileRecord';
+import FileRecord from '../../database/models/FileRecord';
 import * as config from '../../config';
 
 export default class Local {

@@ -1,4 +1,4 @@
-import AuthTarget from '../models/AuthTarget';
+import AuthTarget from '../database/models/AuthTarget';
 import { RoleAuthTargetString, RolesStrings, AUTH_ROLES, RolesGrant } from '../types/Roles';
 
 /**

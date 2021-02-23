@@ -7,7 +7,7 @@ import { buildSchema } from 'type-graphql';
 import * as swaggerUI from 'swagger-ui-express';
 import 'reflect-metadata';
 
-import Participant from './models/Participant';
+import Participant from './database/models/Participant';
 
 //Resolvers
 import ParticipantResolver from './features/Participant/resolver';

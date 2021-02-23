@@ -4,8 +4,8 @@ import { URL } from 'url';
 import * as fetch from 'node-fetch';
 import { ForbiddenError } from "apollo-server-express";
 
-import AuthToken from '../models/AuthToken';
-import Participant, { ParticipantId } from '../models/Participant';
+import AuthToken from '../database/models/AuthToken';
+import Participant from '../database/models/Participant';
 import {calculatePermissions} from './permissions';
 import AuthRequirements, { RequiredPermission, RequiredPermissionsCondition, RequiredPermissionsConditionOr, RequiredPermissionsConjunctionAnd } from '../types/AuthRequirements';
 import Context from "../types/Context";
@@ -69,15 +69,12 @@ export const getParticipantFromToken = async (
     const tokenHash =
       crypto.createHash('sha256').update(token).digest().toString('hex');
   
-    const proxy = await AuthToken.findOne({
-        where: {
-            tokenHash
-        },
-        relations: [ 'participantObj' ]
+    const proxy = await AuthToken.findOneWithParticipant({
+      tokenHash
     });
   
     if (proxy && proxy.expires.getTime() > Date.now()) {
-        return proxy.participantObj;
+        return proxy.participantInst;
     }
     const hidPromise = getHidInfo(token)
       .then(hidInfo => ({ result: 'success' as 'success', hidInfo }))
@@ -92,14 +89,12 @@ export const getParticipantFromToken = async (
       return undefined;
     }
     let participant = await Participant.findOne({
-      where: {
-        hidId: hidInfo.userId,
-      },
+      hidId: hidInfo.userId,
     }) || undefined;
     if (!participant) {
       // Create a new participant for this HID account
       // and transfer over all invites
-      participant = await Participant.create({
+      participant = new Participant({
         email: hidInfo.email,
         hidId: hidInfo.userId,
         name_family: hidInfo.family_name,
@@ -123,17 +118,18 @@ export const createToken = async ({
     participant,
     expires,
   }: {
-    participant: ParticipantId;
+    participant: Participant['id'];
     expires: Date;
   }) => {
     const token = (await crypto.randomBytes(48)).toString('hex');
     const tokenHash =
       crypto.createHash('sha256').update(token).digest().toString('hex');
-    const authToken = AuthToken.create();
-    authToken.participant = participant;
-    authToken.tokenHash = tokenHash;
-    authToken.expires = expires;
-    await authToken.save();
+    const authToken = new AuthToken({
+      participant,
+      tokenHash,
+      expires
+    });
+    await authToken.save(true);
     return {
       instance: authToken,
       token
