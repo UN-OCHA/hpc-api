@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
 import { createRootContext } from "../lib/loggerWithContext";
-import Participant from '../models/Participant';
+import Participant from '../database/models/Participant';
 
 /**
  * Create a fresh context for an Graphql Context

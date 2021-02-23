@@ -2,7 +2,7 @@ import { FileUpload as IFileUpload } from 'graphql-upload';
 
 import Local from './local';
 import Minio from './minio';
-import FileRecord from '../../models/FileRecord';
+import FileRecord from '../../database/models/FileRecord';
 import * as config from '../../config';
 import { FileStorageNamespace } from '../../types/FileStorageNamespace'
 
@@ -38,16 +38,17 @@ export default class FileService {
    * @returns {Files} an instance of Files DB Model
    */
   private _asFile(uploadObj: IFileUpload, fileHash: string, namespace: FileStorageNamespace) {
-    const fileRecord = new FileRecord();
-    fileRecord.hash = fileHash;
-    fileRecord.namespace = JSON.stringify(namespace);
-    fileRecord.fileType = uploadObj.mimetype;
-    fileRecord.metadata = {
-      provider: config.uploadTo,
-      encoding: uploadObj.encoding,
-      key: fileHash,
-      originalName: uploadObj.filename
-    }
+    const fileRecord = new FileRecord({
+      hash: fileHash,
+      namespace: JSON.stringify(namespace),
+      fileType: uploadObj.mimetype,
+      metadata: {
+        provider: config.uploadTo,
+        encoding: uploadObj.encoding,
+        key: fileHash,
+        originalName: uploadObj.filename
+      }
+    });
     return fileRecord;
   }
 
