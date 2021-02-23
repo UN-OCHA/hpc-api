@@ -46,6 +46,10 @@ export default class VersionModel<Data> extends Base implements IVersionModel<Da
         return this.modifiedByParticipant;
     }
 
+    getTableName(): string {
+        throw new Error("this is VersionModel, please use one of the classes inheriting this class")
+    }
+
     public save() {
         // This is implemented in the Versioned Model class
         return Promise.resolve(true);

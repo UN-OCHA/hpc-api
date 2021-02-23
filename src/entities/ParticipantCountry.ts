@@ -6,7 +6,7 @@ import Location from './Location';
 import { Brand } from "../utils/branding";
 
 @ObjectType()
-export default class participantOrganization extends Base {
+export default class participantCountry extends Base {
     @Field(_type => ID)
     id: Brand<
         number,
