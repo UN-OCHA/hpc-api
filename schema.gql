@@ -3,289 +3,52 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
-"""
-The javascript `Date` as string. Type represents date and time as the ISO Date string.
-"""
-scalar DateTime
-
-"""Data representing the file content"""
-input FileData {
-  """hash of the file"""
-  fileHash: String!
+type Plan {
+  caseloads: [PlanCaseload!]!
+  clusters: [PlanCluster!]!
+  funding: PlanFunding!
+  fundingRequirements: PlanFunding!
+  id: ID!
+  name: String!
+  year: Float!
 }
 
-"""Object representing a file"""
-input FileObject {
-  """The data representing the file content"""
-  data: FileData!
+type PlanCaseload {
+  """How many people are affected by the humanitarian crisis"""
+  affected: Float
+  expectedReach: Float
+  id: ID!
+  inNeed: Float
+  name: String!
+  population: Float
 
-  """Name of the file"""
+  """How many people does this plan aim to target"""
+  targeted: Float
+}
+
+type PlanCluster {
+  id: ID!
   name: String!
 }
 
-type FileRecord {
-  """date at which the file was created at"""
-  createdAt: DateTime!
-
-  """type of the file"""
-  fileType: String
-
-  """Hash of the file"""
-  hash: String!
-
-  """metadata of the file"""
-  metadata: JSONObject
-
-  """Namespace to which the file belongs to"""
-  namespace: String!
-
-  """date at which the file was last updated at"""
-  updatedAt: DateTime!
+type PlanFunding {
+  amountUSD: Float!
+  breakdown: PlanFundingBreakdown!
 }
 
-"""
-The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
-
-type Location {
-  """The admin level of the location"""
-  adminLevel: Float!
-
-  """external ID"""
-  externalId: String!
-  id: ID!
-
-  """ISO3"""
-  iso3: String!
-
-  """itosSync"""
-  itosSync: Boolean!
-
-  """latitude of the location"""
-  latitude: Float!
-
-  """Relationship table between participants and locations"""
-  locationParticipants: [participantCountry!]!
-
-  """longitude of the location"""
-  longitude: Float!
-
-  """The name of the location"""
-  name: String!
-
-  """Participants in the location"""
-  participants: Participant!
-
-  """PCODE"""
-  pcode: String!
-
-  """status"""
-  status: String!
-
-  """validon"""
-  validOn: Float!
+type PlanFundingBreakdown {
+  byCluster: [PlanFundingBreakdownCluster!]
 }
 
-type Mutation {
-  """Get all the reporting window assignments"""
-  updateAssignment(
-    """ID of the assignment to get"""
-    assignmentId: Float!
-
-    """The body of the request"""
-    body: UpdateAssignmentInput!
-  ): ReportingWindowAssignment!
-
-  """Get all the reporting window assignments"""
-  uploadAssignmentFile(
-    """ID of the assignment to get"""
-    assignmentId: Float!
-    file: Upload!
-
-    """hash of the file"""
-    fileHash: String!
-  ): FileRecord!
-}
-
-type Organization {
-  """The abbrevation given to the organization"""
-  abbreviation: String!
-
-  """Is the organization active"""
-  active: Boolean!
-
-  """The children of the organization"""
-  children: [Organization!]
-
-  """The collectiveind?"""
-  collectiveInd: Boolean!
-
-  """The comments made on the organization"""
-  comments: String
-  id: ID!
-
-  """Name of the organization"""
-  name: String!
-
-  """The native name given to the organization"""
-  nativeName: String
-
-  """New organization?"""
-  newOrganization: Organization
-
-  """The notes on the organization"""
-  notes: String
-
-  """relationship table between participants and organizations"""
-  organizationParticipants: [participantOrganization!]!
-
-  """The parent organization"""
-  parent: Organization
-
-  """the participants associated with the organization"""
-  participants: [Participant!]!
-
-  """The URL of the organization"""
-  url: String
-
-  """Is the organization verified"""
-  verified: Boolean!
-}
-
-type Participant {
-  """The email of the user"""
-  email: String!
-
-  """The HID ID of the user"""
-  hidId: String!
-  id: ID!
-
-  """The locations associated with the participant"""
-  locations: [Location!]
-
-  """The name of the family of users to which the user belongs to"""
-  name_family: String!
-
-  """The Name given to the user"""
-  name_given: String!
-
-  """The organizations to which the participant belongs to"""
-  organizations: [Organization!]
-
-  """Relationship table between participants and locations"""
-  participantCountry: [participantCountry!]
-
-  """Relationship table between participants and organizations"""
-  participantOrganizations: [participantOrganization!]
+type PlanFundingBreakdownCluster {
+  amountUSD: Float!
+  cluster: PlanCluster!
 }
 
 type Query {
-  """Get all the participants"""
-  allParticipants(
-    """email of the participant to filter by"""
-    email: String
-  ): [Participant!]!
-
-  """Get A particular reporting window assignment"""
-  getAssignment(
-    """ID of the assignment to get"""
-    assignmentId: Float!
-  ): ReportingWindowAssignment!
-}
-
-type ReportingWindow {
-  """assignments that belong to the reporting window"""
-  assignments: [ReportingWindowAssignment!]!
-
-  """The ID of the entity to which the window belongs to"""
-  belongsToId: Float
-
-  """The type of the entity to which the reporting window belongs to"""
-  belongsToType: String!
-  id: ID!
-
-  """Instance of the currently active version of the reporting window"""
-  versionModelInstance: ReportingWindowVersion!
-}
-
-type ReportingWindowAssignment {
-  """The ID of the assignee to which the assignment belongs to"""
-  assigneeId: Float!
-
-  """assignee operation"""
-  assigneeOperation: Float!
-
-  """The type of assignee for the reporting window assignment"""
-  assigneeType: String!
-  id: ID!
-
-  """reporting window to which the assignment belongs to"""
-  reportingWindow: ReportingWindow!
-
-  """ID of the reporting window the assignment belongs to"""
-  reportingWindowId: Float!
-
-  """
-  Instance of the currently active version of the reporting window assignment
-  """
-  versionModelInstance: ReportingWindowAssignmentVersion!
-}
-
-type ReportingWindowAssignmentVersion {
-  rootInst: ReportingWindowAssignment
-}
-
-type ReportingWindowVersion {
-  rootInst: ReportingWindow
-}
-
-"""The input fields for a package address"""
-input UpdateAssignmentInput {
-  """Form Input"""
-  form: UpdateAssignmentInputForm!
-
-  """The Previous Version of the assignment"""
-  previousVersion: Float!
-}
-
-"""FormInput for update Assignment"""
-input UpdateAssignmentInputForm {
-  """data to be entered"""
-  data: String!
-
-  """List of file objects to be used as input in the form"""
-  files: [FileObject!]!
-
-  """is it finalized?"""
-  finalized: Boolean!
-}
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload
-
-type participantCountry {
-  id: ID!
-
-  """location involved in the relationship"""
-  location: Location!
-
-  """participant involved in the relationship"""
-  participant: Participant!
-
-  """indicates when this was last validated on"""
-  validated: Boolean!
-}
-
-type participantOrganization {
-  id: ID!
-
-  """Organization involved in the relationship"""
-  organization: Organization!
-
-  """participant involved in the relationship"""
-  participant: Participant!
-
-  """indicates when this was last validated on"""
-  validated: Boolean!
+  """Get all the plans"""
+  allPlans(
+    """plan years interested in"""
+    year: Float
+  ): [Plan!]!
 }

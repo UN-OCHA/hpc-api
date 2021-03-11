@@ -10,8 +10,7 @@ import 'reflect-metadata';
 import Participant from './database/models/Participant';
 
 //Resolvers
-import ParticipantResolver from './features/Participant/resolver';
-import ReportingWindowResolver from './features/ReportingWindow/resolver';
+import PlanResolver from './features/Plan/resolver';
 
 import Context from './types/Context';
 import logEventsPlugin from './plugins/logEvents';
@@ -64,7 +63,7 @@ class App {
 
   private buildGraphQLSchema() {
     return buildSchema({
-      resolvers: [ParticipantResolver, ReportingWindowResolver],
+      resolvers: [PlanResolver],
       emitSchemaFile: true,
       validate: true,
       authChecker: async ({ context, root, info, args }: { context: Context; root: any; info: any; args: any }, permissions: AuthRequirements[]) => {
