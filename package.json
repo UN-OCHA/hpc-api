@@ -9,11 +9,12 @@
     "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
-    "apollo-server-express": "^2.19.2",
+    "apollo-server-express": "^2.21.1",
     "apollo-server-plugin-base": "^0.10.4",
     "bunyan": "^1.8.15",
     "class-validator": "^0.13.1",
     "express": "^4.17.1",
+    "graphql": "^15.5.0",
     "graphql-type-json": "^0.3.2",
     "graphql-upload": "^11.0.0",
     "lodash": "^4.17.20",
