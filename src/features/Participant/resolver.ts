@@ -1,6 +1,7 @@
 import { Arg, Ctx, FieldResolver, Query, Resolver, ResolverInterface, Root } from 'type-graphql';
 
-import Participant from '../../models/Participant';
+import Participant from '../../entities/Participant';
+import ParticipantModel, { IParticipant } from '../../database/models/Participant';
 import Context from '../../types/Context';
 
 @Resolver(_of => Participant)
@@ -12,15 +13,12 @@ export default class ParticipantResolver implements ResolverInterface<Participan
         @Arg('email', { description: "email of the participant to filter by", nullable: true }) email: string,
         @Ctx() ctx: Context
     ) {
-        let query = Participant.createQueryBuilder('participant')
-        .innerJoinAndSelect(`participant.participantOrganizations`, 'participantOrganizations')
-        .innerJoinAndSelect('participantOrganizations.organization','organizations');
+        const whereObj: Partial<IParticipant> = {};
         if (email) {
-            query = query.where(`email = '${email}'`);
-        } else {
-            query = query.where("email IS NOT NULL")
+            whereObj['email'] = email;
         }
-        return query.getMany();
+        let participants = await ParticipantModel.findAllParticipants(whereObj);
+        return participants;
     }
 
     @FieldResolver()

@@ -1,9 +1,8 @@
-// import { Files } from '../../database/models/Files';
 import { PassThrough } from 'stream';
 import * as Minio from 'minio';
 
 import * as config from '../../config';
-import FileRecord from 'models/FileRecord';
+import FileRecord from '../../database/models/FileRecord';
 
 export default class S3 {
   /**

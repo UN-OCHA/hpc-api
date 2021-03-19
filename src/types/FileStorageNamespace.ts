@@ -1,4 +1,4 @@
-import ReportingWindowAssignment from '../models/ReportingWindowAssignment'
+import ReportingWindowAssignment from '../database/models/ReportingWindowAssignment'
 
 export type FileStorageNamespace =
   | {

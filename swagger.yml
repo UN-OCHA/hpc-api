@@ -128,16 +128,45 @@ components:
         name_family:
           type: string
           description: The name of the family of users to which the user belongs to
+        participantOrganizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/participantOrganization'
+          description: Relationship table between participants and organizations
         organizations:
           type: array
           items:
             $ref: '#/components/schemas/Organization'
           description: The organizations to which the participant belongs to
+        participantCountry:
+          type: array
+          items:
+            $ref: '#/components/schemas/participantCountry'
+          description: Relationship table between participants and locations
         locations:
           type: array
           items:
             $ref: '#/components/schemas/Location'
           description: The locations associated with the participant
+    participantOrganization:
+      type: object
+      required:
+        - id
+        - validated
+        - participant
+        - organization
+      properties:
+        id:
+          type: string
+        validated:
+          type: boolean
+          description: indicates when this was last validated on
+        participant:
+          $ref: '#/components/schemas/Participant'
+          description: participant involved in the relationship
+        organization:
+          $ref: '#/components/schemas/Organization'
+          description: Organization involved in the relationship
     Organization:
       type: object
       required:
@@ -147,6 +176,7 @@ components:
         - verified
         - active
         - collectiveInd
+        - organizationParticipants
         - participants
       properties:
         id:
@@ -189,11 +219,35 @@ components:
         parent:
           $ref: '#/components/schemas/Organization'
           description: The parent organization
+        organizationParticipants:
+          type: array
+          items:
+            $ref: '#/components/schemas/participantOrganization'
+          description: relationship table between participants and organizations
         participants:
           type: array
           items:
             $ref: '#/components/schemas/Participant'
           description: the participants associated with the organization
+    participantCountry:
+      type: object
+      required:
+        - id
+        - validated
+        - participant
+        - location
+      properties:
+        id:
+          type: string
+        validated:
+          type: boolean
+          description: indicates when this was last validated on
+        participant:
+          $ref: '#/components/schemas/Participant'
+          description: participant involved in the relationship
+        location:
+          $ref: '#/components/schemas/Location'
+          description: location involved in the relationship
     Location:
       type: object
       required:
@@ -208,6 +262,7 @@ components:
         - validOn
         - status
         - itosSync
+        - locationParticipants
         - participants
       properties:
         id:
@@ -246,6 +301,11 @@ components:
         itosSync:
           type: boolean
           description: itosSync
+        locationParticipants:
+          type: array
+          items:
+            $ref: '#/components/schemas/participantCountry'
+          description: Relationship table between participants and locations
         participants:
           $ref: '#/components/schemas/Participant'
           description: Participants in the location
@@ -256,7 +316,9 @@ components:
         - assigneeType
         - assigneeId
         - assigneeOperation
+        - reportingWindowId
         - reportingWindow
+        - versionModelInstance
       properties:
         id:
           type: string
@@ -271,15 +333,25 @@ components:
           type: number
           format: float
           description: assignee operation
+        reportingWindowId:
+          type: number
+          format: float
+          description: ID of the reporting window the assignment belongs to
         reportingWindow:
           $ref: '#/components/schemas/ReportingWindow'
           description: reporting window to which the assignment belongs to
+        versionModelInstance:
+          $ref: '#/components/schemas/ReportingWindowAssignmentVersion'
+          description: >-
+            Instance of the currently active version of the reporting window
+            assignment
     ReportingWindow:
       type: object
       required:
         - id
         - belongsToType
         - assignments
+        - versionModelInstance
       properties:
         id:
           type: string
@@ -295,6 +367,19 @@ components:
           items:
             $ref: '#/components/schemas/ReportingWindowAssignment'
           description: assignments that belong to the reporting window
+        versionModelInstance:
+          $ref: '#/components/schemas/ReportingWindowVersion'
+          description: Instance of the currently active version of the reporting window
+    ReportingWindowVersion:
+      type: object
+      properties:
+        rootInst:
+          $ref: '#/components/schemas/ReportingWindow'
+    ReportingWindowAssignmentVersion:
+      type: object
+      properties:
+        rootInst:
+          $ref: '#/components/schemas/ReportingWindowAssignment'
     Mutation:
       type: object
       required:
