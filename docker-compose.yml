@@ -2,20 +2,20 @@ version: "3.8"
 services:
   db:
     image: postgres:12.4-alpine
-    container_name: newServiceDB
+    container_name: hpc_v3_db
     environment:
       - POSTGRES_PASSWORD=demo
       - POSTGRES_USER=demo
       - POSTGRES_DB=demo
     ports:
-      - 5437:5432
+      - 5432:5432
+
     volumes:
-      - newServiceDBData:/var/lib/postgresql/data
-    networks:
-      - newService
+      - hpc_v3_db:/var/lib/postgresql/data
+      - ./data/backups:/backups
   api:
     build: .
-    container_name: newServiceAPI
+    container_name: hpc_v3_api
     env_file:
       - .env
     environment:
@@ -25,8 +25,6 @@ services:
       - PORT=5100
       - NODE_ENV=dockerdev
       - NAME=${NAME}
-      - POSTGRES_SERVER=${POSTGRES_SERVER}
-      - POSTGRES_NAME=${POSTGRES_NAME}
       - POSTGRES_LOGGING=${POSTGRES_LOGGING}
       - ROOT_URL=${ROOT_URL}
       - AUTHBASE_URL=${AUTHBASE_URL}
@@ -38,13 +36,5 @@ services:
       - 4000:5100
     depends_on:
       - db
-    networks:
-      - service
-      - newService
 volumes:
-  newServiceDBData:
-networks:
-  service:
-    external:
-      name: hpcservice_service
-  newService:
+  hpc_v3_db:
