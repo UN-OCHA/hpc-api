@@ -22,8 +22,9 @@ const config = {
     name: process.env.NODE_ENV,
     authBaseUrl: process.env.AUTHBASE_URL,
     db: {
-      server: process.env.POSTGRES_SERVER,
-      name: process.env.POSTGRES_NAME,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD,
+      database: process.env.POSTGRES_DB,
       logging: !!parseInt(process.env.POSTGRES_LOGGING || ''),
     },
     logging: {

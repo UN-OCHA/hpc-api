@@ -1,3 +1,5 @@
+import * as config from "./src/config/index"
+
 // Update with your config settings.
 export default {
 
@@ -5,9 +7,9 @@ export default {
         client: 'postgresql',
         connection: {
           host: process.env.DEV_DB_HOST,
-          database: 'hpc',
-          user:     'postgres',
-          password: null
+          database: config.db.database,
+          user:     config.db.user,
+          password: config.db.password,
         },
         pool: {
           min: 2,
