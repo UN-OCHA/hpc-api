@@ -1,4 +1,5 @@
-version: "3.8"
+
+version: "3.3"
 services:
   db:
     image: postgres:12.4-alpine
@@ -36,5 +37,19 @@ services:
       - 4000:5100
     depends_on:
       - db
+
+  redis:
+    image: bitnami/redis:6.2
+    restart: always
+    environment:
+      # - ALLOW_EMPTY_PASSWORD=yes # Basically No auth. For development only
+      - REDIS_PASSWORD=password123 # If you login via the tty shell, use the command redis-cli -a $REDIS_PASSWORD to access the cli
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/bitnami/redis/data
+
 volumes:
   hpc_v3_db:
+  redis_data:
+
