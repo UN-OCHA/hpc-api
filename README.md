@@ -17,7 +17,10 @@ available for early user feedback or use, please see the [Keeping Up-To-Date](#k
 
 ## API Documentation
 
-The documentation for our `v2` api endpoints is available here: <https://api.hpc.tools/docs/v2/>.
+The Swagger documentation for our `v2` api endpoints is available here: <https://api.hpc.tools/docs/v2/>.
+
+More detailed guides on how to use the API can be found in
+[the HPC.tools API Wiki](https://github.com/UN-OCHA/hpc-api/wiki).
 
 ## Contributing / Development
 
