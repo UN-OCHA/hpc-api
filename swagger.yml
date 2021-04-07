@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: HPC Service V3
-  version: 3.0.0
+  title: HPC API
+  version: 4.0.0
 paths:
   /rest/all-participants:
     get:
@@ -13,14 +13,14 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Get all the participants
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Participant'
+                  $ref: "#/components/schemas/Participant"
   /rest/get-assignment:
     get:
       operationId: getAssignmentQuery
@@ -32,12 +32,12 @@ paths:
             type: number
             format: float
       responses:
-        '200':
+        "200":
           description: Get A particular reporting window assignment
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReportingWindowAssignment'
+                $ref: "#/components/schemas/ReportingWindowAssignment"
   /rest/update-assignment:
     post:
       operationId: updateAssignmentMutation
@@ -48,7 +48,7 @@ paths:
               type: object
               properties:
                 body:
-                  $ref: '#/components/schemas/UpdateAssignmentInput'
+                  $ref: "#/components/schemas/UpdateAssignmentInput"
                 assignmentId:
                   type: number
                   format: float
@@ -56,12 +56,12 @@ paths:
                 - body
                 - assignmentId
       responses:
-        '200':
+        "200":
           description: Get all the reporting window assignments
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReportingWindowAssignment'
+                $ref: "#/components/schemas/ReportingWindowAssignment"
   /rest/upload-assignment-file:
     post:
       operationId: uploadAssignmentFileMutation
@@ -74,7 +74,7 @@ paths:
                 fileHash:
                   type: string
                 file:
-                  $ref: '#/components/schemas/Upload'
+                  $ref: "#/components/schemas/Upload"
                 assignmentId:
                   type: number
                   format: float
@@ -83,12 +83,12 @@ paths:
                 - file
                 - assignmentId
       responses:
-        '200':
+        "200":
           description: Get all the reporting window assignments
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileRecord'
+                $ref: "#/components/schemas/FileRecord"
 components:
   schemas:
     Query:
@@ -100,10 +100,10 @@ components:
         allParticipants:
           type: array
           items:
-            $ref: '#/components/schemas/Participant'
+            $ref: "#/components/schemas/Participant"
           description: Get all the participants
         getAssignment:
-          $ref: '#/components/schemas/ReportingWindowAssignment'
+          $ref: "#/components/schemas/ReportingWindowAssignment"
           description: Get A particular reporting window assignment
     Participant:
       type: object
@@ -131,22 +131,22 @@ components:
         participantOrganizations:
           type: array
           items:
-            $ref: '#/components/schemas/participantOrganization'
+            $ref: "#/components/schemas/participantOrganization"
           description: Relationship table between participants and organizations
         organizations:
           type: array
           items:
-            $ref: '#/components/schemas/Organization'
+            $ref: "#/components/schemas/Organization"
           description: The organizations to which the participant belongs to
         participantCountry:
           type: array
           items:
-            $ref: '#/components/schemas/participantCountry'
+            $ref: "#/components/schemas/participantCountry"
           description: Relationship table between participants and locations
         locations:
           type: array
           items:
-            $ref: '#/components/schemas/Location'
+            $ref: "#/components/schemas/Location"
           description: The locations associated with the participant
     participantOrganization:
       type: object
@@ -162,10 +162,10 @@ components:
           type: boolean
           description: indicates when this was last validated on
         participant:
-          $ref: '#/components/schemas/Participant'
+          $ref: "#/components/schemas/Participant"
           description: participant involved in the relationship
         organization:
-          $ref: '#/components/schemas/Organization'
+          $ref: "#/components/schemas/Organization"
           description: Organization involved in the relationship
     Organization:
       type: object
@@ -209,25 +209,25 @@ components:
           type: boolean
           description: The collectiveind?
         newOrganization:
-          $ref: '#/components/schemas/Organization'
+          $ref: "#/components/schemas/Organization"
           description: New organization?
         children:
           type: array
           items:
-            $ref: '#/components/schemas/Organization'
+            $ref: "#/components/schemas/Organization"
           description: The children of the organization
         parent:
-          $ref: '#/components/schemas/Organization'
+          $ref: "#/components/schemas/Organization"
           description: The parent organization
         organizationParticipants:
           type: array
           items:
-            $ref: '#/components/schemas/participantOrganization'
+            $ref: "#/components/schemas/participantOrganization"
           description: relationship table between participants and organizations
         participants:
           type: array
           items:
-            $ref: '#/components/schemas/Participant'
+            $ref: "#/components/schemas/Participant"
           description: the participants associated with the organization
     participantCountry:
       type: object
@@ -243,10 +243,10 @@ components:
           type: boolean
           description: indicates when this was last validated on
         participant:
-          $ref: '#/components/schemas/Participant'
+          $ref: "#/components/schemas/Participant"
           description: participant involved in the relationship
         location:
-          $ref: '#/components/schemas/Location'
+          $ref: "#/components/schemas/Location"
           description: location involved in the relationship
     Location:
       type: object
@@ -304,10 +304,10 @@ components:
         locationParticipants:
           type: array
           items:
-            $ref: '#/components/schemas/participantCountry'
+            $ref: "#/components/schemas/participantCountry"
           description: Relationship table between participants and locations
         participants:
-          $ref: '#/components/schemas/Participant'
+          $ref: "#/components/schemas/Participant"
           description: Participants in the location
     ReportingWindowAssignment:
       type: object
@@ -338,10 +338,10 @@ components:
           format: float
           description: ID of the reporting window the assignment belongs to
         reportingWindow:
-          $ref: '#/components/schemas/ReportingWindow'
+          $ref: "#/components/schemas/ReportingWindow"
           description: reporting window to which the assignment belongs to
         versionModelInstance:
-          $ref: '#/components/schemas/ReportingWindowAssignmentVersion'
+          $ref: "#/components/schemas/ReportingWindowAssignmentVersion"
           description: >-
             Instance of the currently active version of the reporting window
             assignment
@@ -365,21 +365,21 @@ components:
         assignments:
           type: array
           items:
-            $ref: '#/components/schemas/ReportingWindowAssignment'
+            $ref: "#/components/schemas/ReportingWindowAssignment"
           description: assignments that belong to the reporting window
         versionModelInstance:
-          $ref: '#/components/schemas/ReportingWindowVersion'
+          $ref: "#/components/schemas/ReportingWindowVersion"
           description: Instance of the currently active version of the reporting window
     ReportingWindowVersion:
       type: object
       properties:
         rootInst:
-          $ref: '#/components/schemas/ReportingWindow'
+          $ref: "#/components/schemas/ReportingWindow"
     ReportingWindowAssignmentVersion:
       type: object
       properties:
         rootInst:
-          $ref: '#/components/schemas/ReportingWindowAssignment'
+          $ref: "#/components/schemas/ReportingWindowAssignment"
     Mutation:
       type: object
       required:
@@ -387,10 +387,10 @@ components:
         - uploadAssignmentFile
       properties:
         updateAssignment:
-          $ref: '#/components/schemas/ReportingWindowAssignment'
+          $ref: "#/components/schemas/ReportingWindowAssignment"
           description: Get all the reporting window assignments
         uploadAssignmentFile:
-          $ref: '#/components/schemas/FileRecord'
+          $ref: "#/components/schemas/FileRecord"
           description: Get all the reporting window assignments
     UpdateAssignmentInput:
       type: object
