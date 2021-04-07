@@ -56,7 +56,7 @@ if [[ $(docker inspect -f {{.State.Running}} $PG_CONTAINER) == 'false' ]]; then
 fi
 
 SCRIPT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-BACKUP_PATH="data/backups/$DISTANT_ENV"
+BACKUP_PATH="backups/$DISTANT_ENV"
 BACKUP_DIR="$SCRIPT_DIR/../$BACKUP_PATH"
 
 PG_DB_NAME=$(docker exec $PG_CONTAINER printenv POSTGRES_DB)

@@ -14,7 +14,7 @@ node_modules
 ._entypo-social
 .smbdelete*
 test-data/*
-/data/*
+/backups/*
 .env
 .vscode
 *.sublime-project

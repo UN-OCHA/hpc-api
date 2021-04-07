@@ -2,7 +2,7 @@ version: "3.8"
 services:
   db:
     image: postgres:12.4-alpine
-    container_name: hpc_v3_db
+    container_name: hpc_postgres_db
     environment:
       - POSTGRES_PASSWORD=demo
       - POSTGRES_USER=demo
@@ -11,11 +11,11 @@ services:
       - 5432:5432
 
     volumes:
-      - hpc_v3_db:/var/lib/postgresql/data
-      - ./data/backups:/backups
+      - hpc_postgres_db:/var/lib/postgresql/data
+      - ./backups:/backups
   api:
     build: .
-    container_name: hpc_v3_api
+    container_name: hpc_api
     env_file:
       - .env
     environment:
@@ -37,4 +37,4 @@ services:
     depends_on:
       - db
 volumes:
-  hpc_v3_db:
+  hpc_postgres_db:

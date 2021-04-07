@@ -1,4 +1,4 @@
-import * as config from "./src/config/index"
+import config from './config'
 
 // Update with your config settings.
 export default {
