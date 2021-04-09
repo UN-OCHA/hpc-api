@@ -9,13 +9,15 @@ services:
       - POSTGRES_DB=demo
     ports:
       - 5432:5432
-
     volumes:
       - hpc_postgres_db:/var/lib/postgresql/data
       - ./backups:/backups
   api:
-    build: .
     container_name: hpc_api
+    build: .
+    command: npm run dev
+    ports:
+      - 4000:5100
     env_file:
       - .env
     environment:
@@ -23,7 +25,7 @@ services:
       - DNSDOCK_NAME=node
       - DNSDOCK_IMAGE=hpc
       - PORT=5100
-      - NODE_ENV=dockerdev
+      - NODE_ENV=development
       - NAME=${NAME}
       - POSTGRES_LOGGING=${POSTGRES_LOGGING}
       - ROOT_URL=${ROOT_URL}
@@ -31,10 +33,12 @@ services:
       - WAIT_HOSTS=pgsql:5432
       - WAIT_HOSTS_TIMEOUT=120
     volumes:
-      - ./:/usr/src/app
-    ports:
-      - 4000:5100
+      - ./:/app
+      - nodemodules:/app/node_modules
+    links:
+      - db
     depends_on:
       - db
 volumes:
+  nodemodules: {}
   hpc_postgres_db:
