@@ -24,6 +24,9 @@ To run this projects docker containers:
 
 `docker-compose up -d`
 
+NOTE: You must have the development server running whilst you are working on this project as nexus
+generates type definitions from from the graphql schema.
+
 ## Restore database
 
 You will need an LDAP account to populate the local db with data.

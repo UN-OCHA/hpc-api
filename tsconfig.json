@@ -9,7 +9,6 @@
        "pretty":true,
        "sourceMap":true,
        "outDir":"./dist",
-       "baseUrl":"./src",
        "emitDecoratorMetadata": true,
        "experimentalDecorators": true,
        "typeRoots":[  
