@@ -1,22 +1,29 @@
 import * as Hapi from '@hapi/hapi';
-import { ApolloServer, gql } from 'apollo-server-hapi';
-import "reflect-metadata";
-import { buildSchema } from 'type-graphql';
+import { ApolloServer } from 'apollo-server-hapi';
+import { makeSchema } from 'nexus'
+import { join } from 'path'
+
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres'
-import ParticipantResolver from './domain-services/participants/graphql/participant-resolvers';
-
+import * as types from './graphql-types'
 
 async function StartServer() {
-  const graphqlSchema = await buildSchema({
-    resolvers: [ParticipantResolver],
-    emitSchemaFile: true,
-  });
+  const schema = makeSchema({
+    types,
+    outputs: {
+      typegen: join(__dirname, '..', 'nexus-typegen.ts'),
+      schema: join(__dirname, '..', 'schema.graphql'),
+    },
+    // contextType: {
+    //   module: join(__dirname, "./context.ts"),
+    //   export: "Context",
+    // },
+  })
 
   const dbConnection = await createDbConnetion();
   
   const apolloServer = new ApolloServer({ 
-    schema: graphqlSchema, 
+    schema, 
     context: ({ req }) => ({ knex: dbConnection }),
   });
 
