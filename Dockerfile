@@ -1,11 +1,13 @@
 FROM node:14.16.0-alpine3.11
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY . .
+ADD package.json /app 
 
 RUN yarn install
 
+ADD . /app 
+
 EXPOSE 4000
 
-CMD yarn run dev
+CMD yarn run start
