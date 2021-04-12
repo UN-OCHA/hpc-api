@@ -1,11 +1,11 @@
 import * as Hapi from '@hapi/hapi';
 import { ApolloServer } from 'apollo-server-hapi';
-import { makeSchema } from 'nexus'
-import { join } from 'path'
+import { makeSchema } from 'nexus';
+import { join } from 'path';
 
 import config from '../config';
-import { createDbConnetion } from './data-providers/postgres'
-import * as types from './graphql-types'
+import { createDbConnetion } from './data-providers/postgres';
+import * as types from './graphql-types';
 
 async function StartServer() {
   const schema = makeSchema({
@@ -18,17 +18,17 @@ async function StartServer() {
     //   module: join(__dirname, "./context.ts"),
     //   export: "Context",
     // },
-  })
+  });
 
   const dbConnection = await createDbConnetion();
-  
-  const apolloServer = new ApolloServer({ 
-    schema, 
+
+  const apolloServer = new ApolloServer({
+    schema,
     context: ({ req }) => ({ knex: dbConnection }),
   });
 
   const server = new Hapi.server({
-    port: config.httpPort
+    port: config.httpPort,
   });
 
   await apolloServer.applyMiddleware({
@@ -41,7 +41,7 @@ async function StartServer() {
   server.app.knex = dbConnection;
 
   await server.start();
-  console.log(`🚀 Server ready at http://localhost:4000`)
+  console.log(`🚀 Server ready at http://localhost:4000`);
 }
 
-StartServer().catch(error => console.log(error));
+StartServer().catch((error) => console.log(error));

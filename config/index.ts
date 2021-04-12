@@ -15,7 +15,7 @@ const config = {
     },
     local: {
       uploadDirectory: process.env.UPLOAD_DIRECTORY || 'media',
-    }
+    },
   },
   mediaURI: process.env.MEDIA_PATH || 'media',
   uploadTo: 'aws',
@@ -30,7 +30,7 @@ const config = {
     logging: !!parseInt(process.env.POSTGRES_LOGGING || ''),
     poolMin: 2,
     poolMax: 10,
-    poolIdle: 10000
+    poolIdle: 10000,
   },
   logging: {
     mode: process.env.LOG_MODE,

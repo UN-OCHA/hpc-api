@@ -1,24 +1,18 @@
-{  
-    "compilerOptions":{ 
-       "target": "es2019",
-       "module": "commonjs",
-       "lib": ["es2019", "esnext.asynciterable"],
-       "forceConsistentCasingInFileNames": true,
-       "resolveJsonModule": true,
-       "moduleResolution":"node",
-       "pretty":true,
-       "sourceMap":true,
-       "outDir":"./dist",
-       "emitDecoratorMetadata": true,
-       "experimentalDecorators": true,
-       "typeRoots":[  
-          "node_modules/@types"
-       ]
-    },
-    "include":[  
-       "src/**/*.ts"
-    ],
-    "exclude":[  
-       "node_modules"
-    ]
- }
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "lib": ["es2019", "esnext.asynciterable"],
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "pretty": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
