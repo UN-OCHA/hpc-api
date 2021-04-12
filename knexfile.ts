@@ -1,55 +1,53 @@
-import config from './config'
+import config from './config';
 
 // Update with your config settings.
 export default {
+  dockerdev: {
+    client: 'postgresql',
+    connection: {
+      host: process.env.DEV_DB_HOST,
+      database: config.db.database,
+      user: config.db.user,
+      password: config.db.password,
+    },
+    pool: {
+      min: 2,
+      max: 10,
+    },
+    migrations: {
+      tableName: 'knex_migrations',
+    },
+  },
 
-    dockerdev: {
-        client: 'postgresql',
-        connection: {
-          host: process.env.DEV_DB_HOST,
-          database: config.db.database,
-          user:     config.db.user,
-          password: config.db.password,
-        },
-        pool: {
-          min: 2,
-          max: 10
-        },
-        migrations: {
-          tableName: 'knex_migrations'
-        }
+  staging: {
+    client: 'postgresql',
+    connection: {
+      database: 'my_db',
+      user: 'username',
+      password: 'password',
     },
-  
-    staging: {
-      client: 'postgresql',
-      connection: {
-        database: 'my_db',
-        user:     'username',
-        password: 'password'
-      },
-      pool: {
-        min: 2,
-        max: 10
-      },
-      migrations: {
-        tableName: 'knex_migrations'
-      }
+    pool: {
+      min: 2,
+      max: 10,
     },
-  
-    production: {
-      client: 'postgresql',
-      connection: {
-        database: 'my_db',
-        user:     'username',
-        password: 'password'
-      },
-      pool: {
-        min: 2,
-        max: 10
-      },
-      migrations: {
-        tableName: 'knex_migrations'
-      }
-    }
-  
-  };
+    migrations: {
+      tableName: 'knex_migrations',
+    },
+  },
+
+  production: {
+    client: 'postgresql',
+    connection: {
+      database: 'my_db',
+      user: 'username',
+      password: 'password',
+    },
+    pool: {
+      min: 2,
+      max: 10,
+    },
+    migrations: {
+      tableName: 'knex_migrations',
+    },
+  },
+};

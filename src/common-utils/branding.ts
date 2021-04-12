@@ -14,10 +14,10 @@
  * const b: IDB = a; // <-- this will cause a type error
  * ```
  */
- export type Brand<T, S extends { s: symbol }, Label extends string = ''> = T & {
-    readonly __brand__: S;
-    readonly __label__: Label;
+export type Brand<T, S extends { s: symbol }, Label extends string = ''> = T & {
+  readonly __brand__: S;
+  readonly __label__: Label;
 };
 
-export const createBrandedValue =
-  <T, B extends Brand<T, any, any>>(v: T): B => v as B;
+export const createBrandedValue = <T, B extends Brand<T, any, any>>(v: T): B =>
+  v as B;

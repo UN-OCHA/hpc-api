@@ -1,10 +1,10 @@
-import Knex from 'knex'
-import config from '../../../config'
+import Knex from 'knex';
+import config from '../../../config';
 
 /**
  * Initialize a new Postgres provider
  */
-export async function createDbConnetion () {
+export async function createDbConnetion() {
   const knex = Knex({
     client: 'pg',
     connection: {
@@ -12,23 +12,25 @@ export async function createDbConnetion () {
       password: config.db.password,
       host: config.db.hostname,
       port: 5432,
-      database: config.db.database
+      database: config.db.database,
     },
     pool: {
       min: config.db.poolMin,
       max: config.db.poolMax,
-      idleTimeoutMillis: config.db.poolIdle
+      idleTimeoutMillis: config.db.poolIdle,
     },
-    acquireConnectionTimeout: 2000
-  })
+    acquireConnectionTimeout: 2000,
+  });
 
   // Verify the connection before proceeding
   try {
-    await knex.raw('SELECT now()')
+    await knex.raw('SELECT now()');
 
-    return knex
+    return knex;
   } catch (error) {
-    throw new Error('Unable to connect to Postgres via Knex. Ensure a valid connection.')
+    throw new Error(
+      'Unable to connect to Postgres via Knex. Ensure a valid connection.'
+    );
   }
 }
 

@@ -9,7 +9,7 @@ We have recently announced a number of upcoming changes to the HPC API,
 including the development of `v4` of the API that will use GraphQL at its core.
 
 These changes are at the very early planning and development stages at the
-moment, and are not yet ready to be tested or used, so for the time being we 
+moment, and are not yet ready to be tested or used, so for the time being we
 recommend continuing to use the `v2` endpoints that are documented here.
 
 If you'd like to keep updated as to when these new endpoints will become
@@ -37,13 +37,13 @@ API features.
 If you would like to join either of these mailing lists,
 please send an email to <api-support@hpc.tools> with your request:
 
-* `api-announce@hpc.tools`
+- `api-announce@hpc.tools`
 
   This mailing list will be used for official announcements from the HPC.tools
   team regarding changes in the API, including new features and deprecation
   notices.
 
-* `api-discuss@hpc.tools`
+- `api-discuss@hpc.tools`
 
   This mailing list allows for open discussion between different users of the
   HPC API, as well as the development team. Feel free to use this mailing list
