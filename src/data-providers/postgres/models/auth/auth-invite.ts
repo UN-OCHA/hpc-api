@@ -1,5 +1,4 @@
-import { Knex } from 'knex';
-import { ModelBase, TableBase } from './common/Base';
+import { ModelBase, TableBase } from '../common/Base';
 
 export interface AuthInviteTable extends TableBase {
   email: string;
