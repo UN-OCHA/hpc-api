@@ -14,7 +14,14 @@ export const authInviteModel: AuthInviteModel = {
   table: (db) => db(authInviteModel.tableName),
   getOne: (db, id) => db(authInviteModel.tableName).select({ where: { id } }),
   getAll: (db) => db(authInviteModel.tableName).select('*'),
-  // create: (db, authGrant) => db(authGrantModel.tableName).insert(authGrant),
-  // update: (db, id, authGrant) => db(AuthGrantModel.tableName).update(authGrant).where({ id }),
-  // delete: (db, id) =>  db(AuthGrantModel.tableName).update({ deletedAt: new Date()}).where({ id }),
+  create: (db, authInvite) => db(authInviteModel.tableName).insert(authInvite),
+  update: async (db, id, changes) => {
+    await db(authInviteModel.tableName).update(changes).where({ id });
+    return authInviteModel.getOne(db, id);
+  },
+  deleteOne: async (db, id) => {
+    await db(authInviteModel.tableName)
+      .update({ deletedAt: new Date() })
+      .where({ id });
+  },
 };

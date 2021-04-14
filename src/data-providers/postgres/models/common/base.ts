@@ -15,5 +15,5 @@ export interface ModelBase<T> {
   getAll: (db: Knex) => Promise<T[]>;
   create?: (db: Knex, type: T) => Promise<T>;
   update?: (db: Knex, id: number, type: Partial<T>) => Promise<T>;
-  delete?: (db: Knex, type: T) => Promise<void>;
+  deleteOne?: (db: Knex, id: number) => Promise<void>;
 }

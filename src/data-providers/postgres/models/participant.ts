@@ -16,7 +16,15 @@ export const participantModel: ParticipantModel = {
   table: (db) => db(participantModel.tableName),
   getOne: (db, id) => db(participantModel.tableName).select({ where: { id } }),
   getAll: (db) => db(participantModel.tableName).select('*'),
-  // create: (db, authGrant) => db(authGrantModel.tableName).insert(authGrant),
-  // update: (db, id, authGrant) => db(AuthGrantModel.tableName).update(authGrant).where({ id }),
-  // delete: (db, id) =>  db(AuthGrantModel.tableName).update({ deletedAt: new Date()}).where({ id }),
+  create: (db, participant) =>
+    db(participantModel.tableName).insert(participant),
+  update: async (db, id, changes) => {
+    await db(participantModel.tableName).update(changes).where({ id });
+    return participantModel.getOne(db, id);
+  },
+  deleteOne: async (db, id) => {
+    await db(participantModel.tableName)
+      .update({ deletedAt: new Date() })
+      .where({ id });
+  },
 };
