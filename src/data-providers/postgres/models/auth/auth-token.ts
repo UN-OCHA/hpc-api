@@ -13,7 +13,14 @@ export const authTokenModel: AuthTokenModel = {
   table: (db) => db(authTokenModel.tableName),
   getOne: (db, id) => db(authTokenModel.tableName).select({ where: { id } }),
   getAll: (db) => db(authTokenModel.tableName).select('*'),
-  // create: (db, authGrant) => db(authGrantModel.tableName).insert(authGrant),
-  // update: (db, id, authGrant) => db(AuthGrantModel.tableName).update(authGrant).where({ id }),
-  // delete: (db, id) =>  db(AuthGrantModel.tableName).update({ deletedAt: new Date()}).where({ id }),
+  create: (db, authToken) => db(authTokenModel.tableName).insert(authToken),
+  update: async (db, id, changes) => {
+    await db(authTokenModel.tableName).update(changes).where({ id });
+    return authTokenModel.getOne(db, id);
+  },
+  deleteOne: async (db, id) => {
+    await db(authTokenModel.tableName)
+      .update({ deletedAt: new Date() })
+      .where({ id });
+  },
 };

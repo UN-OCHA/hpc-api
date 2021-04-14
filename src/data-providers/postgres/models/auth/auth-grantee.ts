@@ -12,7 +12,15 @@ export const authGranteeModel: AuthGranteeModel = {
   table: (db) => db(authGranteeModel.tableName),
   getOne: (db, id) => db(authGranteeModel.tableName).select({ where: { id } }),
   getAll: (db) => db(authGranteeModel.tableName).select('*'),
-  // create: (db, authGrant) => db(authGrantModel.tableName).insert(authGrant),
-  // update: (db, id, authGrant) => db(AuthGrantModel.tableName).update(authGrant).where({ id }),
-  // delete: (db, id) =>  db(AuthGrantModel.tableName).update({ deletedAt: new Date()}).where({ id }),
+  create: (db, authGrantee) =>
+    db(authGranteeModel.tableName).insert(authGrantee),
+  update: async (db, id, changes) => {
+    await db(authGranteeModel.tableName).update(changes).where({ id });
+    return authGranteeModel.getOne(db, id);
+  },
+  deleteOne: async (db, id) => {
+    await db(authGranteeModel.tableName)
+      .update({ deletedAt: new Date() })
+      .where({ id });
+  },
 };

@@ -15,7 +15,15 @@ export const authGrantLogModel: AuthGrantLogModel = {
   table: (db) => db(authGrantLogModel.tableName),
   getOne: (db, id) => db(authGrantLogModel.tableName).select({ where: { id } }),
   getAll: (db) => db(authGrantLogModel.tableName).select('*'),
-  // create: (db, authGrant) => db(authGrantModel.tableName).insert(authGrant),
-  // update: (db, id, authGrant) => db(AuthGrantModel.tableName).update(authGrant).where({ id }),
-  // delete: (db, id) =>  db(AuthGrantModel.tableName).update({ deletedAt: new Date()}).where({ id }),
+  create: (db, authGrantLog) =>
+    db(authGrantLogModel.tableName).insert(authGrantLog),
+  update: async (db, id, changes) => {
+    await db(authGrantLogModel.tableName).update(changes).where({ id });
+    return authGrantLogModel.getOne(db, id);
+  },
+  deleteOne: async (db, id) => {
+    await db(authGrantLogModel.tableName)
+      .update({ deletedAt: new Date() })
+      .where({ id });
+  },
 };

@@ -12,7 +12,14 @@ export const authTargetModel: AuthTargetModel = {
   table: (db) => db(authTargetModel.tableName),
   getOne: (db, id) => db(authTargetModel.tableName).select({ where: { id } }),
   getAll: (db) => db(authTargetModel.tableName).select('*'),
-  // create: (db, authGrant) => db(authGrantModel.tableName).insert(authGrant),
-  // update: (db, id, authGrant) => db(AuthGrantModel.tableName).update(authGrant).where({ id }),
-  // delete: (db, id) =>  db(AuthGrantModel.tableName).update({ deletedAt: new Date()}).where({ id }),
+  create: (db, authTarget) => db(authTargetModel.tableName).insert(authTarget),
+  update: async (db, id, changes) => {
+    await db(authTargetModel.tableName).update(changes).where({ id });
+    return authTargetModel.getOne(db, id);
+  },
+  deleteOne: async (db, id) => {
+    await db(authTargetModel.tableName)
+      .update({ deletedAt: new Date() })
+      .where({ id });
+  },
 };
