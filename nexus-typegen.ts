@@ -83,6 +83,39 @@ export interface NexusGenObjects {
     participant: NexusGenRootTypes['Participant']; // Participant!
     validated: boolean; // Boolean!
   }
+  Plan: { // root type
+    caseloads: NexusGenRootTypes['PlanCaseload'][]; // [PlanCaseload!]!
+    clusters: NexusGenRootTypes['PlanCluster'][]; // [PlanCluster!]!
+    funding: NexusGenRootTypes['PlanFunding']; // PlanFunding!
+    fundingRequirements: NexusGenRootTypes['PlanFunding']; // PlanFunding!
+    id: string; // ID!
+    name: string; // String!
+    year: number; // Float!
+  }
+  PlanCaseload: { // root type
+    affected?: number | null; // Float
+    expectedReach?: number | null; // Float
+    id: string; // ID!
+    inNeed?: number | null; // Float
+    name: string; // String!
+    population?: number | null; // Float
+    targeted?: number | null; // Float
+  }
+  PlanCluster: { // root type
+    id: string; // ID!
+    name: string; // String!
+  }
+  PlanFunding: { // root type
+    amountUSD: number; // Float!
+    breakdown: NexusGenRootTypes['PlanFundingBreakdown']; // PlanFundingBreakdown!
+  }
+  PlanFundingBreakdown: { // root type
+    byCluster?: NexusGenRootTypes['PlanFundingBreakdownCluster'][] | null; // [PlanFundingBreakdownCluster!]
+  }
+  PlanFundingBreakdownCluster: { // root type
+    amountUSD: number; // Float!
+    cluster: NexusGenRootTypes['PlanCluster']; // PlanCluster!
+  }
   Query: {};
 }
 
@@ -152,8 +185,42 @@ export interface NexusGenFieldTypes {
     participant: NexusGenRootTypes['Participant']; // Participant!
     validated: boolean; // Boolean!
   }
+  Plan: { // field return type
+    caseloads: NexusGenRootTypes['PlanCaseload'][]; // [PlanCaseload!]!
+    clusters: NexusGenRootTypes['PlanCluster'][]; // [PlanCluster!]!
+    funding: NexusGenRootTypes['PlanFunding']; // PlanFunding!
+    fundingRequirements: NexusGenRootTypes['PlanFunding']; // PlanFunding!
+    id: string; // ID!
+    name: string; // String!
+    year: number; // Float!
+  }
+  PlanCaseload: { // field return type
+    affected: number | null; // Float
+    expectedReach: number | null; // Float
+    id: string; // ID!
+    inNeed: number | null; // Float
+    name: string; // String!
+    population: number | null; // Float
+    targeted: number | null; // Float
+  }
+  PlanCluster: { // field return type
+    id: string; // ID!
+    name: string; // String!
+  }
+  PlanFunding: { // field return type
+    amountUSD: number; // Float!
+    breakdown: NexusGenRootTypes['PlanFundingBreakdown']; // PlanFundingBreakdown!
+  }
+  PlanFundingBreakdown: { // field return type
+    byCluster: NexusGenRootTypes['PlanFundingBreakdownCluster'][] | null; // [PlanFundingBreakdownCluster!]
+  }
+  PlanFundingBreakdownCluster: { // field return type
+    amountUSD: number; // Float!
+    cluster: NexusGenRootTypes['PlanCluster']; // PlanCluster!
+  }
   Query: { // field return type
     allParticipants: NexusGenRootTypes['Participant'][]; // [Participant!]!
+    allPlans: NexusGenRootTypes['Plan'][]; // [Plan!]!
   }
 }
 
@@ -213,12 +280,51 @@ export interface NexusGenFieldTypeNames {
     participant: 'Participant'
     validated: 'Boolean'
   }
+  Plan: { // field return type name
+    caseloads: 'PlanCaseload'
+    clusters: 'PlanCluster'
+    funding: 'PlanFunding'
+    fundingRequirements: 'PlanFunding'
+    id: 'ID'
+    name: 'String'
+    year: 'Float'
+  }
+  PlanCaseload: { // field return type name
+    affected: 'Float'
+    expectedReach: 'Float'
+    id: 'ID'
+    inNeed: 'Float'
+    name: 'String'
+    population: 'Float'
+    targeted: 'Float'
+  }
+  PlanCluster: { // field return type name
+    id: 'ID'
+    name: 'String'
+  }
+  PlanFunding: { // field return type name
+    amountUSD: 'Float'
+    breakdown: 'PlanFundingBreakdown'
+  }
+  PlanFundingBreakdown: { // field return type name
+    byCluster: 'PlanFundingBreakdownCluster'
+  }
+  PlanFundingBreakdownCluster: { // field return type name
+    amountUSD: 'Float'
+    cluster: 'PlanCluster'
+  }
   Query: { // field return type name
     allParticipants: 'Participant'
+    allPlans: 'Plan'
   }
 }
 
 export interface NexusGenArgTypes {
+  Query: {
+    allPlans: { // args
+      year?: number | null; // Float
+    }
+  }
 }
 
 export interface NexusGenAbstractTypeMembers {

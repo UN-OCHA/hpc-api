@@ -147,8 +147,8 @@ export const ParticipantOrganization = objectType({
  * Queries
  */
 
-export const Query = objectType({
-  name: 'Query',
+export const ParticipantQuery = extendType({
+  type: 'Query',
   definition(t) {
     t.nonNull.list.nonNull.field('allParticipants', {
       type: Participant,
