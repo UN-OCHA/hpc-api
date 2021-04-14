@@ -139,7 +139,55 @@ type ParticipantOrganization {
   validated: Boolean!
 }
 
+type Plan {
+  caseloads: [PlanCaseload!]!
+  clusters: [PlanCluster!]!
+  funding: PlanFunding!
+  fundingRequirements: PlanFunding!
+  id: ID!
+  name: String!
+  year: Float!
+}
+
+type PlanCaseload {
+  """How many people are affected by the humanitarian crisis"""
+  affected: Float
+  expectedReach: Float
+  id: ID!
+  inNeed: Float
+  name: String!
+  population: Float
+
+  """How many people does this plan aim to target"""
+  targeted: Float
+}
+
+type PlanCluster {
+  id: ID!
+  name: String!
+}
+
+type PlanFunding {
+  amountUSD: Float!
+  breakdown: PlanFundingBreakdown!
+}
+
+type PlanFundingBreakdown {
+  byCluster: [PlanFundingBreakdownCluster!]
+}
+
+type PlanFundingBreakdownCluster {
+  amountUSD: Float!
+  cluster: PlanCluster!
+}
+
 type Query {
   """Get all the participants"""
   allParticipants: [Participant!]!
+
+  """Get all the plans"""
+  allPlans(
+    """plan years interested in"""
+    year: Float
+  ): [Plan!]!
 }
