@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { ModelBase, TableBaseWithTimeStamps } from './common/Base';
+import { ModelBase, TableBaseWithTimeStamps } from './common/base';
 
 export interface ParticipantTable extends TableBaseWithTimeStamps {
   id: number;

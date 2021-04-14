@@ -1,4 +1,4 @@
-import { ModelBase, TableBase } from '../common/Base';
+import { ModelBase, TableBase } from '../common/base';
 
 export interface AuthGrantLogTable extends TableBase {
   actor: number;

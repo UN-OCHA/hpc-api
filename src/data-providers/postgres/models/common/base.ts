@@ -3,7 +3,7 @@ import { Knex } from 'knex';
 export interface TableBase {
   id: number;
 }
-export interface TableBaseWithTimeStamps {
+export interface TableBaseWithTimeStamps extends TableBase {
   createdAt: Date;
   updatedAt: Date;
 }
