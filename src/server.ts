@@ -41,6 +41,7 @@ async function StartServer() {
 
   await apolloServer.applyMiddleware({
     app: server,
+    path: '/v4/graphql'
   });
 
   await apolloServer.installSubscriptionHandlers(server.listener);
