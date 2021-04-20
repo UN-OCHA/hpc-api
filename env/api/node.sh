@@ -7,5 +7,8 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
+echo "==> Waiting for postgres to start"
+/wait
+
 echo "==> Starting the server"
 npm run dev
