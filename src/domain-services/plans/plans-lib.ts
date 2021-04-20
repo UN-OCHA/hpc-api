@@ -9,6 +9,9 @@ const PlansLib = {
       planModel.getAll(db),
       planVersionModel.getAll(db),
     ]);
+
+    console.log({ plans, planVersions });
+
     return plans.map((plan) => ({
       ...plan,
       ...planVersions.find((planversion) => planversion.planId === plan.id),

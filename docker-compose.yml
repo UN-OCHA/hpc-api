@@ -17,7 +17,7 @@ services:
     build: .
     command: npm run dev
     ports:
-      - 4000:5100
+      - '4000:5100'
     env_file:
       - .env
     environment:
@@ -26,6 +26,7 @@ services:
       - DNSDOCK_IMAGE=hpc
       - PORT=5100
       - NODE_ENV=development
+      # - NODE_ENV=dockerdev
       - NAME=${NAME}
       - POSTGRES_LOGGING=${POSTGRES_LOGGING}
       - ROOT_URL=${ROOT_URL}
@@ -33,8 +34,8 @@ services:
       - WAIT_HOSTS=pgsql:5432
       - WAIT_HOSTS_TIMEOUT=120
     volumes:
-      - ./:/app
-      - nodemodules:/app/node_modules
+      - .:/svr/www
+      - nodemodules:/svr/www/node_modules
     links:
       - db
     depends_on:

@@ -1,13 +1,13 @@
-FROM node:14.16.0-alpine3.11
+FROM unocha/nodejs:12
 
-WORKDIR /app
+WORKDIR /srv/www
 
-ADD package.json /app 
+ADD package.json /srv/www/package.json
 
 RUN yarn install
 
-ADD . /app 
+ADD . /srv/www
 
 EXPOSE 4000
 
-CMD yarn run start
+# CMD npm run dev
