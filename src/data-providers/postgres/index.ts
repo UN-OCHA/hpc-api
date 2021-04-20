@@ -7,13 +7,7 @@ import config from '../../../config';
 export async function createDbConnetion() {
   const knex = Knex({
     client: 'pg',
-    connection: {
-      user: config.db.user,
-      password: config.db.password,
-      host: config.db.hostname,
-      port: 5432,
-      database: config.db.database,
-    },
+    connection: config.db.connection,
     pool: {
       min: config.db.poolMin,
       max: config.db.poolMax,
