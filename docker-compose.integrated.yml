@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: ./env/api/Dockerfile
-    ports:
-      - '4000:5100'
+    expose:
+      - "5100"
     volumes:
       - .:/srv/www
       - ./env/api/node.sh:/etc/services.d/node/run
@@ -24,23 +24,11 @@ services:
       - AUTHBASE_URL=${AUTHBASE_URL}
       - WAIT_HOSTS=pgsql:5432
       - WAIT_HOSTS_TIMEOUT=120
-      # - nodemodules:/svr/www/node_modules
-    # links:
-    #   - db
-    # depends_on:
-    #   - db
-  # db:
-  #   image: postgres:12.4-alpine
-  #   container_name: hpc_postgres_db
-  #   environment:
-  #     - POSTGRES_PASSWORD=demo
-  #     - POSTGRES_USER=demo
-  #     - POSTGRES_DB=demo
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - hpc_postgres_db:/var/lib/postgresql/data
-  #     - ./backups:/backups
-volumes:
-  # nodemodules: {}
-  hpc_postgres_db:
+    networks:
+      service:
+        aliases:
+          - api.hpc.vm
+networks:
+  service:
+    external:
+      name: hpcservice_service
