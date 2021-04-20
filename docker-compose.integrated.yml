@@ -13,9 +13,7 @@ services:
     env_file:
       - .env
     environment:
-      - DEV_DB_HOST=host.docker.internal
-      - DNSDOCK_NAME=node
-      - DNSDOCK_IMAGE=hpc
+      - POSTGRES_SERVER=postgres://postgres:@pgsql:5432/hpc
       - PORT=5100
       - NODE_ENV=development
       - NAME=${NAME}

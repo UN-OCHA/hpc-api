@@ -20,11 +20,11 @@ async function StartServer() {
     // },
   });
 
-  // const dbConnection = await createDbConnetion();
+  const dbConnection = await createDbConnetion();
 
   const apolloServer = new ApolloServer({
     schema,
-    // context: ({ req }) => ({ knex: dbConnection }),
+    context: ({ req }) => ({ knex: dbConnection }),
   });
 
   const server = new Hapi.server({
@@ -39,6 +39,7 @@ async function StartServer() {
     },
   });
 
+
   await apolloServer.applyMiddleware({
     app: server,
     path: '/v4/graphql'
@@ -47,7 +48,7 @@ async function StartServer() {
   await apolloServer.installSubscriptionHandlers(server.listener);
 
   server.app.config = config;
-  // server.app.knex = dbConnection;
+  server.app.knex = dbConnection;
 
   await server.start();
   console.log(`🚀 Server ready at http://localhost:4000`);
