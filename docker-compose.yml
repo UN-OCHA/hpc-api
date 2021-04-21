@@ -27,7 +27,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:12.4-alpine
+    image: postgres:11.7
     container_name: hpc_postgres_db
     environment:
       - POSTGRES_PASSWORD=demo
