@@ -27,7 +27,7 @@ async function StartServer() {
     context: ({ req }) => ({ knex: dbConnection }),
   });
 
-  const server = new Hapi.server({
+  const server = Hapi.server({
     port: config.httpPort,
   });
 
