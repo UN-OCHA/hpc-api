@@ -1,13 +1,8 @@
-FROM unocha/nodejs:12.20.1
+# TODO: Amend for production 
 
-WORKDIR /srv/www
+FROM unocha/nodejs:12
 
-ADD package.json /srv/www
+RUN apk add -U build-base python3 py-pip
 
-RUN yarn install
-
-ADD . /srv/www
-
-EXPOSE 4000
-
-CMD yarn run start
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
+RUN chmod +x /wait
