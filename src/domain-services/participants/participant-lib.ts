@@ -4,7 +4,7 @@ import { participantModel } from '../../data-providers/postgres/models/participa
 
 const ParticipantLib = {
   async getAll(db: Knex) {
-    return participantModel.getAll(db);
+    return participantModel(db).getAll();
   },
 
   async findByEmail() {},

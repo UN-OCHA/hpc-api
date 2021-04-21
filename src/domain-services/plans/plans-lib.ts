@@ -8,8 +8,8 @@ import {
 const PlansLib = {
   async getAll(db: Knex) {
     const [plans, planVersions] = await Promise.all([
-      planModel.getAll(db),
-      planVersionModel.getAll(db),
+      planModel(db).getAll(),
+      planVersionModel(db).getAll(),
     ]);
     return plans.map((plan) => ({
       ...plan,

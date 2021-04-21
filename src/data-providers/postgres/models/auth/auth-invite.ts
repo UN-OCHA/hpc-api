@@ -1,27 +1,10 @@
-import { ModelBase, TableBase } from '../common/base';
+import { createModel, TableBaseWithTimeStamps } from '../common/base';
 
-export interface AuthInviteTable extends TableBase {
+export interface AuthInviteTable extends TableBaseWithTimeStamps {
   email: string;
   target: number;
   actor: number;
   roles: string[];
 }
 
-type AuthInviteModel = ModelBase<AuthInviteTable>;
-
-export const authInviteModel: AuthInviteModel = {
-  tableName: 'authInvite',
-  table: (db) => db(authInviteModel.tableName),
-  getOne: (db, id) => db(authInviteModel.tableName).select({ where: { id } }),
-  getAll: (db) => db(authInviteModel.tableName).select('*'),
-  create: (db, authInvite) => db(authInviteModel.tableName).insert(authInvite),
-  update: async (db, id, changes) => {
-    await db(authInviteModel.tableName).update(changes).where({ id });
-    return authInviteModel.getOne(db, id);
-  },
-  deleteOne: async (db, id) => {
-    await db(authInviteModel.tableName)
-      .update({ deletedAt: new Date() })
-      .where({ id });
-  },
-};
+export const authInviteModel = createModel<AuthInviteTable>('authInvite');

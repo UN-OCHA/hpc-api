@@ -8,12 +8,23 @@ export interface TableBaseWithTimeStamps extends TableBase {
   updatedAt: Date;
 }
 
-export interface ModelBase<T> {
-  tableName: string;
-  table: (db: Knex) => Knex.QueryBuilder<any, T>;
-  getOne: (db: Knex, id: number) => Promise<T>;
-  getAll: (db: Knex) => Promise<T[]>;
-  create?: (db: Knex, type: T) => Promise<T>;
-  update?: (db: Knex, id: number, type: Partial<T>) => Promise<T>;
-  deleteOne?: (db: Knex, id: number) => Promise<void>;
-}
+export const createModel = <T extends TableBaseWithTimeStamps>(
+  tableName: string
+) => (db: Knex) => {
+  const table: Knex.QueryBuilder<any, T> = db(tableName);
+  const model = {
+    tableName,
+    table: () => table,
+    getOne: (id: number) => table.select({ where: { id } }) as Promise<T>,
+    getAll: () => table.select('*') as Promise<T[]>,
+    create: (data: T) => table.insert(data),
+    update: async (id: number, changes: Partial<T>) => {
+      await table.update(changes).where({ id });
+      return model.getOne(id);
+    },
+    deleteOne: async (id: number) => {
+      await table.update({ deletedAt: new Date() }).where({ id });
+    },
+  };
+  return model;
+};
