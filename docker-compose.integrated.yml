@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./env/api/Dockerfile
     expose:
-      - "5100"
+      - '5100'
     volumes:
       - .:/srv/www
       - ./env/api/node.sh:/etc/services.d/node/run
