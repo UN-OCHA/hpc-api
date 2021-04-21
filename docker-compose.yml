@@ -13,34 +13,30 @@ services:
     env_file:
       - .env
     environment:
-      - DEV_DB_HOST=host.docker.internal
-      - DNSDOCK_NAME=node
-      - DNSDOCK_IMAGE=hpc
+      - POSTGRES_SERVER=postgres://demo:demo@host.docker.internal:5432/demo
       - PORT=5100
       - NODE_ENV=development
       - NAME=${NAME}
       - POSTGRES_LOGGING=${POSTGRES_LOGGING}
       - ROOT_URL=${ROOT_URL}
       - AUTHBASE_URL=${AUTHBASE_URL}
-      - WAIT_HOSTS=pgsql:5432
+      - WAIT_HOSTS=host.docker.internal:5432
       - WAIT_HOSTS_TIMEOUT=120
-      # - nodemodules:/svr/www/node_modules
-    # links:
-    #   - db
-    # depends_on:
-    #   - db
-  # db:
-  #   image: postgres:12.4-alpine
-  #   container_name: hpc_postgres_db
-  #   environment:
-  #     - POSTGRES_PASSWORD=demo
-  #     - POSTGRES_USER=demo
-  #     - POSTGRES_DB=demo
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - hpc_postgres_db:/var/lib/postgresql/data
-  #     - ./backups:/backups
+    links:
+      - db
+    depends_on:
+      - db
+  db:
+    image: postgres:12.4-alpine
+    container_name: hpc_postgres_db
+    environment:
+      - POSTGRES_PASSWORD=demo
+      - POSTGRES_USER=demo
+      - POSTGRES_DB=demo
+    ports:
+      - 5432:5432
+    volumes:
+      - hpc_postgres_db:/var/lib/postgresql/data
+      - ./backups:/backups
 volumes:
-  # nodemodules: {}
   hpc_postgres_db:
