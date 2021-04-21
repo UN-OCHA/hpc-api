@@ -40,8 +40,8 @@
   },
   "lint-staged": {
     "*.{ts,md,json}": [
-      "prettier --write",
-      "eslint --fix"
+      "prettier --check",
+      "eslint"
     ]
   }
 }
