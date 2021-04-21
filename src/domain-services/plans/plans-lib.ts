@@ -1,15 +1,10 @@
-import { Knex } from 'knex';
-
-import {
-  planModel,
-  planVersionModel,
-} from '../../data-providers/postgres/models/plans/plan';
+import { DbModels } from '../../data-providers/postgres/models';
 
 const PlansLib = {
-  async getAll(db: Knex) {
+  async getAll(models: DbModels) {
     const [plans, planVersions] = await Promise.all([
-      planModel(db).getAll(),
-      planVersionModel(db).getAll(),
+      models.plans.plan.getAll(),
+      models.plans.planVersion.getAll(),
     ]);
     return plans.map((plan) => ({
       ...plan,
