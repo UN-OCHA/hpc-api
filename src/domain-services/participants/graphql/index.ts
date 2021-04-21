@@ -154,7 +154,7 @@ export const ParticipantQuery = extendType({
       type: Participant,
       description: 'Get all the participants',
       async resolve(_root, _args, ctx) {
-        const res = await ParticipantLib.getAll(ctx.knex);
+        const res = await ParticipantLib.getAll(ctx.models);
         console.log(res);
         return res;
       },

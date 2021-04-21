@@ -6,6 +6,7 @@ import { join } from 'path';
 
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres';
+import dbModels from './data-providers/postgres/models';
 import * as types from './graphql-types';
 
 declare module '@hapi/hapi' {
@@ -39,7 +40,10 @@ async function StartServer() {
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req }) => ({ knex: dbConnection }),
+    context: ({ req }) => ({
+      knex: dbConnection,
+      models: dbModels(dbConnection),
+    }),
   });
 
   const server = Hapi.server({

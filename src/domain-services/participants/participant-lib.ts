@@ -1,10 +1,8 @@
-import { Knex } from 'knex';
-
-import { participantModel } from '../../data-providers/postgres/models/participant';
+import { DbModels } from '../../data-providers/postgres/models';
 
 const ParticipantLib = {
-  async getAll(db: Knex) {
-    return participantModel(db).getAll();
+  async getAll(models: DbModels) {
+    return models.participant.getAll();
   },
 
   async findByEmail() {},

@@ -75,7 +75,7 @@ export const PlanQuery = extendType({
         year: floatArg({ description: 'plan years interested in' }),
       },
       async resolve(_root, _args, ctx) {
-        const res = await PlansLib.getAll(ctx.knex);
+        const res = await PlansLib.getAll(ctx.models);
         return res;
       },
     });
