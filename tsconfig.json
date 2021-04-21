@@ -13,6 +13,7 @@
     "experimentalDecorators": true,
     "typeRoots": ["node_modules/@types"],
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "strict": true
   },
   "include": ["src/**/*.ts"],
