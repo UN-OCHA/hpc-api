@@ -11,7 +11,8 @@
     "outDir": "./dist",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "esModuleInterop": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
