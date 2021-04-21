@@ -13,6 +13,13 @@ declare module '@hapi/hapi' {
     config: typeof config;
     knex: Knex;
   }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface ServerOptionsApp extends ServerApplicationState {
+    /**
+     * This needs to be an interface rather than a type to successfully
+     * overwrite / extend the Hapi type definitions.
+     */
+  }
 }
 
 async function StartServer() {
@@ -37,6 +44,10 @@ async function StartServer() {
 
   const server = Hapi.server({
     port: config.httpPort,
+    app: {
+      config,
+      knex: dbConnection,
+    },
   });
 
   await apolloServer.applyMiddleware({
@@ -44,9 +55,6 @@ async function StartServer() {
   });
 
   await apolloServer.installSubscriptionHandlers(server.listener);
-
-  server.app.config = config;
-  server.app.knex = dbConnection;
 
   await server.start();
   console.log(`🚀 Server ready at http://localhost:4000`);
