@@ -6,6 +6,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "check-types": "tsc --noEmit",
     "start": "ts-node src/server.ts",
     "dev": "ts-node-dev --transpile-only --no-notify src/server.ts",
     "prepare": "husky install",
