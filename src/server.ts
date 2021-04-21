@@ -1,11 +1,19 @@
 import * as Hapi from '@hapi/hapi';
 import { ApolloServer } from 'apollo-server-hapi';
+import { Knex } from 'knex';
 import { makeSchema } from 'nexus';
 import { join } from 'path';
 
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import * as types from './graphql-types';
+
+declare module '@hapi/hapi' {
+  interface ServerApplicationState {
+    config: typeof config;
+    knex: Knex;
+  }
+}
 
 async function StartServer() {
   const schema = makeSchema({
