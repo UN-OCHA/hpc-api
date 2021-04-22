@@ -18,9 +18,6 @@ This repository can be run as a standalone application or as part of hpc-suite
 
 ### Standalone
 
-Create local enviroment variables file:
-`cp .env.EXAMPLE .env`
-
 To run this projects docker containers:
 `docker-compose up -d`
 

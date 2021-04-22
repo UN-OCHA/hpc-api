@@ -10,16 +10,14 @@ services:
     volumes:
       - .:/srv/www
       - ./env/api/node.sh:/etc/services.d/node/run
-    env_file:
-      - .env
     environment:
       - POSTGRES_SERVER=postgres://demo:demo@host.docker.internal:5432/demo
       - PORT=5100
       - NODE_ENV=development
-      - NAME=${NAME}
-      - POSTGRES_LOGGING=${POSTGRES_LOGGING}
-      - ROOT_URL=${ROOT_URL}
-      - AUTHBASE_URL=${AUTHBASE_URL}
+      - NAME=hpc-api-standalone-development
+      - POSTGRES_LOGGING=0
+      - ROOT_URL=http://api.hpc.vm/v4
+      - AUTHBASE_URL=http://api.hid.vm
       - WAIT_HOSTS=host.docker.internal:5432
       - WAIT_HOSTS_TIMEOUT=120
     links:
