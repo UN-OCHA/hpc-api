@@ -19,7 +19,6 @@
     "class-validator": "^0.13.1",
     "graphql": "^15.5.0",
     "knex": "^0.95.6",
-    "nexus": "^1.0.0",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.0.0",
