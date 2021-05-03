@@ -1,4 +1,3 @@
-import { Knex } from 'knex';
 import { createModel, TableBaseWithTimeStamps } from '../common/base';
 
 export interface PlanTable extends TableBaseWithTimeStamps {

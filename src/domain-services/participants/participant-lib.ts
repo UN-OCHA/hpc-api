@@ -5,7 +5,9 @@ const ParticipantLib = {
     return models.participant.getAll();
   },
 
-  async findByEmail() {},
+  async findByEmail() {
+    return;
+  },
 };
 
 export default ParticipantLib;

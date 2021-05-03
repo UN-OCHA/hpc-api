@@ -23,7 +23,7 @@ declare module '@hapi/hapi' {
   }
 }
 
-async function StartServer() {
+async function startServer() {
   const schema = makeSchema({
     types,
     outputs: {
@@ -40,7 +40,7 @@ async function StartServer() {
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req }) => ({
+    context: () => ({
       knex: dbConnection,
       models: dbModels(dbConnection),
     }),
@@ -57,7 +57,7 @@ async function StartServer() {
   server.route({
     method: 'GET',
     path: '/v4',
-    handler: (request, h) => {
+    handler: () => {
       return 'Hello World!';
     },
   });
@@ -73,4 +73,4 @@ async function StartServer() {
   console.log(`🚀 Server ready at http://localhost:4000`);
 }
 
-StartServer().catch((error) => console.log(error));
+startServer().catch((error) => console.log(error));
