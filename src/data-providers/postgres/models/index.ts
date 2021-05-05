@@ -4,6 +4,7 @@ import * as auth from './auth';
 import * as location from './location';
 import * as participant from './participant';
 import * as plans from './plans/plan';
+import * as year from './year';
 
 export const models = (db: Knex) => {
   return {
@@ -19,8 +20,10 @@ export const models = (db: Knex) => {
     plans: {
       plan: plans.planModel(db),
       planVersion: plans.planVersionModel(db),
+      planYear: plans.planYearModel(db),
     },
     location: location.locationModel(db),
+    usageYear: year.yearModel(db),
   };
 };
 
