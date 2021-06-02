@@ -19,7 +19,7 @@ Directory Structure
 |- docs
 |- src
 |  |- common-libs        - shared libs that do not relate to a specific domain area
-|  |- common-utils       - shared generic utility funtions
+|  |- common-utils       - shared generic utility functions
 |  |- data-providers     - data sources with their models, connections and migrations
 |  |  |- postgres
 |  |  |  |- models
