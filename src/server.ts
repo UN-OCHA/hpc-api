@@ -30,10 +30,6 @@ async function startServer() {
       typegen: join(__dirname, '..', 'nexus-typegen.ts'),
       schema: join(__dirname, '..', 'schema.graphql'),
     },
-    // contextType: {
-    //   module: join(__dirname, "./context.ts"),
-    //   export: "Context",
-    // },
   });
 
   const dbConnection = await createDbConnetion();
@@ -70,7 +66,7 @@ async function startServer() {
   await apolloServer.installSubscriptionHandlers(server.listener);
 
   await server.start();
-  console.log(`🚀 Server ready at http://localhost:4000`);
+  console.log(`🚀 Server ready at http://localhost:${config.httpPort}`);
 }
 
 startServer().catch((error) => console.log(error));
