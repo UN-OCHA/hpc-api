@@ -30,10 +30,6 @@ async function startServer() {
       typegen: join(__dirname, '..', 'nexus-typegen.ts'),
       schema: join(__dirname, '..', 'schema.graphql'),
     },
-    // contextType: {
-    //   module: join(__dirname, "./context.ts"),
-    //   export: "Context",
-    // },
   });
 
   const dbConnection = await createDbConnetion();
