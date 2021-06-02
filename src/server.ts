@@ -66,7 +66,7 @@ async function startServer() {
   await apolloServer.installSubscriptionHandlers(server.listener);
 
   await server.start();
-  console.log(`🚀 Server ready at http://localhost:4000`);
+  console.log(`🚀 Server ready at http://localhost:${config.httpPort}`);
 }
 
 startServer().catch((error) => console.log(error));
