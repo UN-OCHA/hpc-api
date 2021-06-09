@@ -4,6 +4,7 @@ import { ApolloServer } from 'apollo-server-hapi';
 import { Knex } from 'knex';
 import { join } from 'path';
 import { buildSchema } from 'type-graphql';
+import { Container } from 'typedi';
 
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres';
@@ -26,6 +27,7 @@ declare module '@hapi/hapi' {
 async function startServer() {
   const schema = await buildSchema({
     resolvers: [join(__dirname, 'domain-services/**/resolver.{ts,js}')],
+    container: Container, // Register the 3rd party IOC container
   });
 
   const dbConnection = await createDbConnetion();
