@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as Hapi from '@hapi/hapi';
 import { ApolloServer } from 'apollo-server-hapi';
 import { Knex } from 'knex';
