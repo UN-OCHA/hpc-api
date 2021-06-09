@@ -33,11 +33,6 @@ You will need an LDAP account to populate the local db with data.
 
 `bin/sync-db.sh -e prod -u <username>`
 
-## Making Changes
-
-NOTE: You must have the development server running whilst you are working on this project as nexus
-generates type definitions from the GraphQL schema.
-
 ## GraphQL Playground
 
 GraphQL Playground is a UI to interact with GraphQL schemas that is bundled with Apollo. It can be accessed on:
