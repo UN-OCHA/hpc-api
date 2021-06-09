@@ -15,7 +15,7 @@ export const createModel =
     const model = {
       tableName,
       table: () => table,
-      getOne: (id: number) => table.select({ where: { id } }) as Promise<T>,
+      getOne: (id: number) => table.where({ id }) as Promise<[T?]>,
       getAll: () => table.select('*') as Promise<T[]>,
       create: (data: T) => table.insert(data),
       update: async (id: number, changes: Partial<T>) => {
