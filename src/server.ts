@@ -7,7 +7,6 @@ import { join } from 'path';
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import dbModels from './data-providers/postgres/models';
-import * as types from './graphql-types';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
