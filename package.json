@@ -12,17 +12,18 @@
     "prepare": "husky install",
     "lint-prettier": "prettier -c .",
     "lint-eslint": "eslint --quiet .",
-    "lint": "npm run lint-prettier && npm run lint-eslint"
+    "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
     "apollo-server-hapi": "^2.25.0",
     "class-validator": "^0.13.1",
     "graphql": "^15.5.0",
     "knex": "^0.95.6",
-    "nexus": "^1.0.0",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.0.0",
+    "type-graphql": "^1.1.1",
+    "typedi": "^0.10.0",
     "typescript": "^4.3.2"
   },
   "devDependencies": {

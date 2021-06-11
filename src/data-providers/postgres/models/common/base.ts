@@ -15,8 +15,10 @@ export const createModel =
     const model = {
       tableName,
       table: () => table,
-      getOne: (id: number) => table.select({ where: { id } }) as Promise<T>,
+      getOne: (id: number) => table.where({ id }) as Promise<[T?]>,
       getAll: () => table.select('*') as Promise<T[]>,
+      getAllILike: <K extends keyof T>(k: K, v: T[K]) =>
+        table.where(k as string, 'ilike', `%${v}%`) as Promise<T[]>,
       create: (data: T) => table.insert(data),
       update: async (id: number, changes: Partial<T>) => {
         await table.update(changes).where({ id });

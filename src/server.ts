@@ -1,13 +1,14 @@
+import 'reflect-metadata';
 import * as Hapi from '@hapi/hapi';
 import { ApolloServer } from 'apollo-server-hapi';
 import { Knex } from 'knex';
-import { makeSchema } from 'nexus';
 import { join } from 'path';
+import { buildSchema } from 'type-graphql';
+import { Container } from 'typedi';
 
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import dbModels from './data-providers/postgres/models';
-import * as types from './graphql-types';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
@@ -24,12 +25,9 @@ declare module '@hapi/hapi' {
 }
 
 async function startServer() {
-  const schema = makeSchema({
-    types,
-    outputs: {
-      typegen: join(__dirname, '..', 'nexus-typegen.ts'),
-      schema: join(__dirname, '..', 'schema.graphql'),
-    },
+  const schema = await buildSchema({
+    resolvers: [join(__dirname, 'domain-services/**/resolver.{ts,js}')],
+    container: Container, // Register the 3rd party IOC container
   });
 
   const dbConnection = await createDbConnetion();

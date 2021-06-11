@@ -26,3 +26,14 @@ export interface PlanVersionTable extends TableBaseWithTimeStamps {
 }
 
 export const planVersionModel = createModel<PlanVersionTable>('planVersion');
+
+export interface PlanYearTable extends TableBaseWithTimeStamps {
+  planId: number;
+  usageYearId: number;
+  currentVersion: boolean;
+  latestVersion: boolean;
+  latestTaggedVersion: boolean;
+  versionTags: string[];
+}
+
+export const planYearModel = createModel<PlanYearTable>('planYear');
