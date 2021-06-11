@@ -10,7 +10,7 @@ export class BaseType {
 }
 
 @ObjectType()
-export class ParanoidType extends BaseType {
+export class BaseTypeWithSoftDelete extends BaseType {
   @Field()
   deletedAt: Date;
 }
