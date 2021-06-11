@@ -12,7 +12,7 @@
     "prepare": "husky install",
     "lint-prettier": "prettier -c .",
     "lint-eslint": "eslint --quiet .",
-    "lint": "npm run lint-prettier && npm run lint-eslint"
+    "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
     "apollo-server-hapi": "^2.25.0",
