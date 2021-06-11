@@ -1,4 +1,5 @@
 import { BaseType } from '../../base-types';
+import { Brand } from '../../../common-utils/branding';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType, registerEnumType } from 'type-graphql';
 
@@ -14,7 +15,7 @@ registerEnumType(LocationStatus, {
 @ObjectType()
 export default class Location extends BaseType {
   @Field(() => ID)
-  id: string;
+  id: Brand<number, { readonly s: unique symbol }, 'Location ID'>;
 
   @Field({ nullable: true })
   @MaxLength(255)
