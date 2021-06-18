@@ -10,7 +10,7 @@ import { join } from 'path';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
 
-import config from '../config';
+import { config } from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import v4Models from '@unocha/hpc-api-core/src/db';
 

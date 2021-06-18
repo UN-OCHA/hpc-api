@@ -1,4 +1,4 @@
-const config = {
+export const config = {
   httpPort: process.env.PORT,
   storageProviders: {
     aws: {
@@ -37,5 +37,3 @@ const config = {
   },
   rootURL: process.env.ROOT_URL,
 };
-
-export default config;
