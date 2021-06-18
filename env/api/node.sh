@@ -7,6 +7,9 @@ if [ ! -d "node_modules" ]; then
   npm install
 fi
 
+echo "==> Starting port forwarding for debugger"
+node bin/port-forward.js &
+
 echo "==> Waiting for postgres to start"
 /wait
 
