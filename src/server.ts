@@ -48,14 +48,6 @@ async function startServer() {
     },
   });
 
-  server.route({
-    method: 'GET',
-    path: '/v4',
-    handler: () => {
-      return 'Hello World!';
-    },
-  });
-
   await apolloServer.applyMiddleware({
     app: server,
     path: '/v4/graphql',
