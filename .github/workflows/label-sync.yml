@@ -3,7 +3,7 @@ name: Sync Labels
 on:
   workflow_dispatch: {}
   schedule:
-    - cron:  '30 16 * * *'
+    - cron: '30 16 * * *'
 
 jobs:
   workflow:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-    - name: Clone UN-OCHA/hpc-repo-tools
-      run: git clone https://github.com/UN-OCHA/hpc-repo-tools.git
-    - name: Run github-label-sync
-      run: npx github-label-sync --labels hpc-repo-tools/.github/labels.yml --access-token ${{ secrets.GITHUB_TOKEN }} $GITHUB_REPOSITORY
+      - name: Clone UN-OCHA/hpc-repo-tools
+        run: git clone https://github.com/UN-OCHA/hpc-repo-tools.git
+      - name: Run github-label-sync
+        run: npx github-label-sync --labels hpc-repo-tools/.github/labels.yml --access-token ${{ secrets.GITHUB_TOKEN }} $GITHUB_REPOSITORY

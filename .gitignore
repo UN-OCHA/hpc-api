@@ -1,6 +1,7 @@
 .env
 media
 node_modules
+package-lock.json
 *.log
 
 # IDE artifacts
