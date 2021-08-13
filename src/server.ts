@@ -13,6 +13,7 @@ import { Container } from 'typedi';
 import { CONFIG } from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import v4Models from '@unocha/hpc-api-core/src/db';
+import { getTokenFromRequest } from './common-libs/auth';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
@@ -46,10 +47,11 @@ async function startServer() {
 
   const apolloServer = new ApolloServer({
     schema,
-    context: () => ({
+    context: ({ request }: { request: Hapi.Request }) => ({
       connection: dbConnection,
       models: v4Models(dbConnection),
       config: CONFIG,
+      token: getTokenFromRequest(request),
     }),
     plugins: [
       ApolloServerPluginStopHapiServer({ hapiServer }),
