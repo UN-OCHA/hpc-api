@@ -7,6 +7,7 @@
   "private": false,
   "scripts": {
     "check-types": "tsc --noEmit",
+    "install-and-link": "sh ./bin/install.sh",
     "start": "ts-node src/server.ts",
     "dev": "ts-node-dev --transpile-only --no-notify src/server.ts",
     "prepare": "husky install",

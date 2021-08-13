@@ -9,6 +9,7 @@ services:
       - '5100'
     volumes:
       - .:/srv/www
+      - ../hpc-api-core:/srv/hpc-api-core
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
       - POSTGRES_SERVER=postgres://postgres:@pgsql:5432/hpc
