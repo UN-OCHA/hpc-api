@@ -1,4 +1,4 @@
-import { Knex } from 'knex';
+import Knex = require('knex');
 
 import * as auth from './auth';
 import * as location from './location';

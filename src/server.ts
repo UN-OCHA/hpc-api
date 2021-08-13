@@ -5,7 +5,7 @@ import {
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
-import { Knex } from 'knex';
+import Knex = require('knex');
 import { join } from 'path';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
@@ -17,7 +17,7 @@ import dbModels from './data-providers/postgres/models';
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
     config: typeof config;
-    knex: Knex;
+    connection: Knex;
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface ServerOptionsApp extends ServerApplicationState {
@@ -40,14 +40,14 @@ async function startServer() {
     port: CONFIG.httpPort,
     app: {
       config: CONFIG,
-      knex: dbConnection,
+      connection: dbConnection,
     },
   });
 
   const apolloServer = new ApolloServer({
     schema,
     context: () => ({
-      knex: dbConnection,
+      connection: dbConnection,
       models: dbModels(dbConnection),
     }),
     plugins: [
