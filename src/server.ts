@@ -10,13 +10,13 @@ import { join } from 'path';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
 
-import { config } from '../config';
+import { CONFIG } from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import v4Models from '@unocha/hpc-api-core/src/db';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
-    config: typeof config;
+    config: typeof CONFIG;
     connection: Knex;
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -49,6 +49,7 @@ async function startServer() {
     context: () => ({
       connection: dbConnection,
       models: v4Models(dbConnection),
+      config: CONFIG,
     }),
     plugins: [
       ApolloServerPluginStopHapiServer({ hapiServer }),
@@ -69,7 +70,7 @@ async function startServer() {
   });
 
   await hapiServer.start();
-  console.log(`🚀 Server ready at http://localhost:${config.httpPort}`);
+  console.log(`🚀 Server ready at http://localhost:${CONFIG.httpPort}`);
 }
 
 startServer().catch((error) => console.log(error));

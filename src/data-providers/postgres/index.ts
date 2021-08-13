@@ -1,5 +1,5 @@
 import Knex from 'knex';
-import { config } from '../../../config';
+import { CONFIG } from '../../../config';
 
 /**
  * Initialize a new Postgres provider
@@ -7,11 +7,11 @@ import { config } from '../../../config';
 export async function createDbConnetion() {
   const knex = Knex({
     client: 'pg',
-    connection: config.db.connection,
+    connection: CONFIG.db.connection,
     pool: {
-      min: config.db.poolMin,
-      max: config.db.poolMax,
-      idleTimeoutMillis: config.db.poolIdle,
+      min: CONFIG.db.poolMin,
+      max: CONFIG.db.poolMax,
+      idleTimeoutMillis: CONFIG.db.poolIdle,
     },
     acquireConnectionTimeout: 2000,
   });

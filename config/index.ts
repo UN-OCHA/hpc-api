@@ -1,4 +1,4 @@
-export const config = {
+export const CONFIG = {
   httpPort: process.env.PORT,
   storageProviders: {
     aws: {
