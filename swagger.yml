@@ -111,8 +111,7 @@ components:
         - id
         - hidId
         - email
-        - name_given
-        - name_family
+        - name
       properties:
         id:
           type: string
@@ -122,12 +121,9 @@ components:
         email:
           type: string
           description: The email of the user
-        name_given:
+        name:
           type: string
-          description: The Name given to the user
-        name_family:
-          type: string
-          description: The name of the family of users to which the user belongs to
+          description: The name of the user
         participantOrganizations:
           type: array
           items:
