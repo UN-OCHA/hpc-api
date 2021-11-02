@@ -1,6 +1,10 @@
 import 'reflect-metadata';
 import * as Hapi from '@hapi/hapi';
-import { ApolloServer } from 'apollo-server-hapi';
+import {
+  ApolloServer,
+  ApolloServerPluginStopHapiServer,
+} from 'apollo-server-hapi';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { Knex } from 'knex';
 import { join } from 'path';
 import { buildSchema } from 'type-graphql';
@@ -32,30 +36,39 @@ async function startServer() {
 
   const dbConnection = await createDbConnetion();
 
+  const hapiServer = Hapi.server({
+    port: CONFIG.httpPort,
+    app: {
+      config: CONFIG,
+      knex: dbConnection,
+    },
+  });
+
   const apolloServer = new ApolloServer({
     schema,
     context: () => ({
       knex: dbConnection,
       models: dbModels(dbConnection),
     }),
+    plugins: [
+      ApolloServerPluginStopHapiServer({ hapiServer }),
+      /**
+       * Don't use sandbox explorer hosted on https://studio.apollographql.com
+       * but use local sandbox instead. Even though GraphQL playground is
+       * retired, it is much more useful for local development
+       * https://github.com/graphql/graphql-playground/issues/1143
+       */
+      ApolloServerPluginLandingPageGraphQLPlayground(),
+    ],
   });
 
-  const server = Hapi.server({
-    port: config.httpPort,
-    app: {
-      config,
-      knex: dbConnection,
-    },
-  });
-
+  await apolloServer.start();
   await apolloServer.applyMiddleware({
-    app: server,
+    app: hapiServer,
     path: '/v4/graphql',
   });
 
-  await apolloServer.installSubscriptionHandlers(server.listener);
-
-  await server.start();
+  await hapiServer.start();
   console.log(`🚀 Server ready at http://localhost:${config.httpPort}`);
 }
 
