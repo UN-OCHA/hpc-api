@@ -1,6 +1,7 @@
 import Context from '../../Context';
 import Location from './types';
-import { LocationTable } from '../../../data-providers/postgres/models/location';
+import { Database } from '@unocha/hpc-api-core/src/db/type';
+import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { LocationService } from '../location-service';
 import { MinLength } from 'class-validator';
 import { Service } from 'typedi';
@@ -22,7 +23,7 @@ export default class LocationResolver {
   async location(
     @Arg('id') id: number,
     @Ctx() context: Context
-  ): Promise<LocationTable | undefined> {
+  ): Promise<InstanceDataOfModel<Database['location']>> {
     return await this.locationService.findById(context.models, id);
   }
 
@@ -30,7 +31,7 @@ export default class LocationResolver {
   async searchLocation(
     @Args() { search }: SearchLocationsArgs,
     @Ctx() context: Context
-  ): Promise<LocationTable[]> {
+  ): Promise<InstanceDataOfModel<Database['location']>[]> {
     return await this.locationService.search(context.models, search);
   }
 }

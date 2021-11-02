@@ -12,7 +12,7 @@ import { Container } from 'typedi';
 
 import config from '../config';
 import { createDbConnetion } from './data-providers/postgres';
-import dbModels from './data-providers/postgres/models';
+import v4Models from '@unocha/hpc-api-core/src/db';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
@@ -48,7 +48,7 @@ async function startServer() {
     schema,
     context: () => ({
       connection: dbConnection,
-      models: dbModels(dbConnection),
+      models: v4Models(dbConnection),
     }),
     plugins: [
       ApolloServerPluginStopHapiServer({ hapiServer }),

@@ -1,5 +1,5 @@
-import { DbModels } from '../data-providers/postgres/models';
+import { Database } from '@unocha/hpc-api-core/src/db/type';
 
 export default interface Context {
-  models: DbModels;
+  models: Database;
 }
