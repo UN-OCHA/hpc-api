@@ -20,7 +20,7 @@
     "apollo-server-hapi": "^3.5.0",
     "class-validator": "^0.13.1",
     "graphql": "^15.7.2",
-    "knex": "^0.95.6",
+    "knex": "0.21.1",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.4.0",
