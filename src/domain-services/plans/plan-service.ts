@@ -1,5 +1,6 @@
 import { PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { Database } from '@unocha/hpc-api-core/src/db/type';
+import { NotFoundError } from '@unocha/hpc-api-core/src/util/error';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 
@@ -17,17 +18,15 @@ export class PlanService {
 
     const planId = plan.id;
 
-    const latestPlanVersion = await models.planVersion.findOne({
-      where: {
-        planId,
-        latestVersion: true,
-      },
+    const currentPlanVersion = await models.planVersion.findOne({
+      where: { planId, currentVersion: true },
     });
 
-    return {
-      id: planId,
-      name: latestPlanVersion?.name,
-    };
+    if (!currentPlanVersion) {
+      throw new NotFoundError(`Plan with ID ${planId} does not exist`);
+    }
+
+    return { id: planId, name: currentPlanVersion.name };
   }
 
   async findPlanYears(models: Database, planId: number): Promise<string[]> {
