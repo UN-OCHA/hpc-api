@@ -1,6 +1,6 @@
 {
   "name": "hpc-api",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "api for HPC applications",
   "main": "src/server.ts",
   "license": "MIT",
