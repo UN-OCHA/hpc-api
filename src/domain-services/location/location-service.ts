@@ -1,23 +1,29 @@
+import { Database } from '@unocha/hpc-api-core/src/db/type';
 import { Service } from 'typedi';
-import { DbModels } from '../../data-providers/postgres/models';
-import { LocationTable } from '../../data-providers/postgres/models/location';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 
 @Service()
 export class LocationService {
   async findById(
-    models: DbModels,
+    models: Database,
     id: number
-  ): Promise<LocationTable | undefined> {
-    const location = await models.location.getOne(id);
+  ): Promise<InstanceDataOfModel<Database['location']>> {
+    const location = await models.location.get(createBrandedValue(id));
 
-    if (location[0] === undefined) {
+    if (!location) {
       throw new Error(`Location with ID ${id} does not exist`);
     }
 
-    return location[0];
+    return location;
   }
 
-  async search(models: DbModels, name: string): Promise<LocationTable[]> {
-    return await models.location.getAllILike('name', name);
+  async search(
+    models: Database,
+    name: string
+  ): Promise<InstanceDataOfModel<Database['location']>[]> {
+    return await models.location.find({
+      where: (builder) => builder.where('name', 'ilike', `%${name}%`),
+    });
   }
 }

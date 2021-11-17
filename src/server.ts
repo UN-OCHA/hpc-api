@@ -1,19 +1,24 @@
 import 'reflect-metadata';
 import * as Hapi from '@hapi/hapi';
-import { ApolloServer } from 'apollo-server-hapi';
-import { Knex } from 'knex';
+import {
+  ApolloServer,
+  ApolloServerPluginStopHapiServer,
+} from 'apollo-server-hapi';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
+import Knex = require('knex');
 import { join } from 'path';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
 
-import config from '../config';
+import { CONFIG } from '../config';
 import { createDbConnetion } from './data-providers/postgres';
-import dbModels from './data-providers/postgres/models';
+import v4Models from '@unocha/hpc-api-core/src/db';
+import { getTokenFromRequest } from './common-libs/auth';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
-    config: typeof config;
-    knex: Knex;
+    config: typeof CONFIG;
+    connection: Knex;
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface ServerOptionsApp extends ServerApplicationState {
@@ -32,39 +37,42 @@ async function startServer() {
 
   const dbConnection = await createDbConnetion();
 
+  const hapiServer = Hapi.server({
+    port: CONFIG.httpPort,
+    app: {
+      config: CONFIG,
+      connection: dbConnection,
+    },
+  });
+
   const apolloServer = new ApolloServer({
     schema,
-    context: () => ({
-      knex: dbConnection,
-      models: dbModels(dbConnection),
+    context: ({ request }: { request: Hapi.Request }) => ({
+      connection: dbConnection,
+      models: v4Models(dbConnection),
+      config: CONFIG,
+      token: getTokenFromRequest(request),
     }),
+    plugins: [
+      ApolloServerPluginStopHapiServer({ hapiServer }),
+      /**
+       * Don't use sandbox explorer hosted on https://studio.apollographql.com
+       * but use local sandbox instead. Even though GraphQL playground is
+       * retired, it is much more useful for local development
+       * https://github.com/graphql/graphql-playground/issues/1143
+       */
+      ApolloServerPluginLandingPageGraphQLPlayground(),
+    ],
   });
 
-  const server = Hapi.server({
-    port: config.httpPort,
-    app: {
-      config,
-      knex: dbConnection,
-    },
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/v4',
-    handler: () => {
-      return 'Hello World!';
-    },
-  });
-
+  await apolloServer.start();
   await apolloServer.applyMiddleware({
-    app: server,
+    app: hapiServer,
     path: '/v4/graphql',
   });
 
-  await apolloServer.installSubscriptionHandlers(server.listener);
-
-  await server.start();
-  console.log(`🚀 Server ready at http://localhost:${config.httpPort}`);
+  await hapiServer.start();
+  console.log(`🚀 Server ready at http://localhost:${CONFIG.httpPort}`);
 }
 
 startServer().catch((error) => console.log(error));

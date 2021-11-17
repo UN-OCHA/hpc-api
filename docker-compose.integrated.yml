@@ -7,8 +7,12 @@ services:
       dockerfile: ./env/api/Dockerfile
     expose:
       - '5100'
+      - '9393'
+    ports:
+      - '9339:9393'
     volumes:
       - .:/srv/www
+      - ../hpc-api-core:/srv/hpc-api-core
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
       - POSTGRES_SERVER=postgres://postgres:@pgsql:5432/hpc
