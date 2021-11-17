@@ -1,0 +1,39 @@
+{
+  "stagingEnvironmentBranch": "env/stage",
+  "repoType": "node",
+  "developmentEnvironmentBranches": ["env/red.dev", "env/blue.dev"],
+  "docker": {
+    "path": ".",
+    "args": {
+      "commitSha": "COMMIT_SHA",
+      "treeSha": "TREE_SHA"
+    },
+    "environmentVariables": {
+      "commitSha": "HPC_ACTIONS_COMMIT_SHA",
+      "treeSha": "HPC_ACTIONS_TREE_SHA"
+    },
+    "repository": "public.ecr.aws/unocha/hpc-api",
+    "skipLogin": true
+  },
+  "mergebackLabels": ["mergeback"],
+  "deployments": {
+    "environments": [
+      {
+        "branch": "env/prod",
+        "environment": "prod"
+      },
+      {
+        "branch": "env/stage",
+        "environment": "stage"
+      },
+      {
+        "branch": "env/red.dev",
+        "environment": "reddev"
+      },
+      {
+        "branch": "env/blue.dev",
+        "environment": "bluedev"
+      }
+    ]
+  }
+}
