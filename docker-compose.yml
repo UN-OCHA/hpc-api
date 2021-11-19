@@ -20,8 +20,6 @@ services:
       - AUTHBASE_URL=http://api.hid.vm
       - WAIT_HOSTS=host.docker.internal:5432
       - WAIT_HOSTS_TIMEOUT=120
-    links:
-      - db
     depends_on:
       - db
   db:
