@@ -1,6 +1,6 @@
-# TODO: Amend for production 
+# TODO: Amend for production
 
-FROM unocha/nodejs:12
+FROM public.ecr.aws/unocha/nodejs:12-alpine
 
 RUN apk add -U build-base python3 py-pip
 
