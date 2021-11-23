@@ -17,6 +17,6 @@
     "strictPropertyInitialization": false,
     "strict": true
   },
-  "include": ["src/**/*.ts", "bin"],
+  "include": ["src/**/*.ts", "src/**/*.js", "start.js", "bin"],
   "exclude": ["node_modules"]
 }

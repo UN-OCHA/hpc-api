@@ -1,2 +1,4 @@
+# JSON files
+*.json
 # build artifacts
 schema.graphql
