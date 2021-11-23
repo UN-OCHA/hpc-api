@@ -37,7 +37,11 @@ fi
 DIR_TO_GO_BACK=$(pwd -P)
 
 echo "Installing dependencies for hpc-api"
-yarn install
+if [ "$MODE" = "prod" ]; then
+  yarn install --production
+else
+  yarn install
+fi
 
 if [ "$MODE" = "dev" ]; then
   echo "Linking @unocha/hpc-api-core to ../hpc-api-core"

@@ -1,8 +1,14 @@
-# TODO: Amend for production 
+FROM public.ecr.aws/unocha/nodejs:12-alpine
 
-FROM unocha/nodejs:12
+ARG COMMIT_SHA
+ARG TREE_SHA
+ENV HPC_ACTIONS_COMMIT_SHA $COMMIT_SHA
+ENV HPC_ACTIONS_TREE_SHA $TREE_SHA
 
-RUN apk add -U build-base python3 py-pip
+ENV NODE_APP_DIR=/var/www/html
+WORKDIR /var/www/html
 
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.2.1/wait /wait
-RUN chmod +x /wait
+COPY . .
+
+RUN npm run install-and-link prod && \
+  mv start_node /etc/services.d/node/run
