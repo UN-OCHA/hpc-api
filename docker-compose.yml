@@ -16,7 +16,7 @@ services:
       - NODE_ENV=development
       - NAME=hpc-api-standalone-development
       - POSTGRES_LOGGING=0
-      - ROOT_URL=http://api.hpc.vm/v4
+      - ROOT_URL=http://service.hpc.vm/
       - AUTHBASE_URL=http://api.hid.vm
       - WAIT_HOSTS=host.docker.internal:5432
       - WAIT_HOSTS_TIMEOUT=120
