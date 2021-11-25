@@ -793,10 +793,10 @@
     node-fetch "^2.6.5"
     pg "^8.5.1"
 
-"@unocha/hpc-repo-tools@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-repo-tools/-/hpc-repo-tools-0.2.1.tgz#9940a6cac7a9456f02d7b7bd3d064be5353eded0"
-  integrity sha512-aEqo/bUv6EIH6bxAEINIL4g5OdJL+5bCQnIg1IZVGe2xJZrBkCl5T5wVzZazM3J5rMQI992Nlw70MFrw3IFsTA==
+"@unocha/hpc-repo-tools@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-repo-tools/-/hpc-repo-tools-0.2.2.tgz#7726a173e5fd6e36d99acff12de52dff7f50b7ef"
+  integrity sha512-QoWp5I99AMdqVanurVULPQMuG+iYI2rWw+qR90q7SA2kj9VKQf2YRCHAsQm6lv6Dbae4hmDtRkTISteBF58YnQ==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^5.3.0"
     "@typescript-eslint/parser" "^5.3.0"
