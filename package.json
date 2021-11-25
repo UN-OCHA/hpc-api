@@ -16,9 +16,9 @@
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^0.6.0",
+    "@unocha/hpc-api-core": "^0.7.3",
     "apollo-server-hapi": "^3.5.0",
-    "class-validator": "^0.13.1",
+    "class-validator": "^0.13.2",
     "graphql": "^15.7.2",
     "knex": "0.21.1",
     "pg": "^8.7.1",
@@ -32,10 +32,10 @@
   "devDependencies": {
     "@hapi/hapi": "^20.2.1",
     "@types/hapi__hapi": "^20.0.9",
-    "@unocha/hpc-repo-tools": "^0.2.1",
-    "eslint": "^8.2.0",
+    "@unocha/hpc-repo-tools": "^0.2.2",
+    "eslint": "^8.3.0",
     "husky": "^7.0.4",
-    "lint-staged": "^12.0.2",
+    "lint-staged": "^12.1.2",
     "prettier": "2.4.1",
     "ts-node-dev": "^1.1.8"
   },
