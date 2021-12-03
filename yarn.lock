@@ -753,10 +753,10 @@
     "@typescript-eslint/types" "5.3.1"
     eslint-visitor-keys "^3.0.0"
 
-"@unocha/hpc-api-core@^0.7.3":
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-0.7.3.tgz#a59191d81bab9d3270f3a24e5c0c29dcbda14a7e"
-  integrity sha512-UW0Wkrsj5zduUR2BBpTYiQraxXjgRodC8VLzYufyMgWCv1sDkwVtEsHFOAxoecoJbFf/n/7RDj2rXEXRaL5tIA==
+"@unocha/hpc-api-core@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-1.1.0.tgz#7cbcdc1c77579879d13091b213d2213e0f1c38d4"
+  integrity sha512-gJltQoePrWKByShjyfweRwqRjSJ+QJStaXWFP+WHe7dJJjZZmQBmxNJxUutF6y5nHHC29Hvbi1K57jk+Po2mkA==
   dependencies:
     "@types/lodash" "^4.14.170"
     "@types/node-fetch" "^2.5.12"
