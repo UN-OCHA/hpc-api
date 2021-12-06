@@ -49,8 +49,6 @@ const LOGGING_CONFIGS: { [key in LoggingMode]: LoggingConfig } = {
   },
 };
 
-let rootContext: LogContext | null = null;
-
 // Logging Listeners (this is mostly used to unit-test logging)
 export type LoggingListener = (log: LogDataAfterBunyanProcessing) => void;
 
@@ -75,9 +73,10 @@ const determineLoggingConfig = () => {
 };
 
 /**
- * Called once before the server starts to initialize the logging system.
+ * Called once before the server starts to initialize the logging system,
+ * and return the root context.
  */
-export const initializeLogging = (): void => {
+export const initializeLogging = (): LogContext => {
   const logConfig: LoggingConfig = determineLoggingConfig();
 
   if (process.env.JEST_WORKER_ID === undefined) {
@@ -126,17 +125,16 @@ export const initializeLogging = (): void => {
     streams,
   });
 
-  rootContext = new LogContext(logger, null, {});
-  const log = rootContext;
+  const rootContext = new LogContext(logger, null, {});
 
   const consoleLoggingHandler =
     (call: string) =>
     (...args: any[]) => {
-      log.debug(`${call}: ${format(args[0], ...args.slice(1))}`);
+      rootContext.debug(`${call}: ${format(args[0], ...args.slice(1))}`);
       const error = new Error(
         `Unsupported use of ${call}(), please use a LogContext instead`
       );
-      log.error(error.message, { error });
+      rootContext.error(error.message, { error });
     };
 
   // Overwrite default console log behaviour to output to bunyan using json
@@ -148,7 +146,7 @@ export const initializeLogging = (): void => {
 
   // Handle uncaught rejections by logging an error
   process.on('unhandledRejection', (reason, promise) => {
-    log.error(`Unhandled Rejection: ${reason}`, {
+    rootContext.error(`Unhandled Rejection: ${reason}`, {
       data: {
         unhandledRejection: {
           promise: format(promise),
@@ -157,4 +155,6 @@ export const initializeLogging = (): void => {
       },
     });
   });
+
+  return rootContext;
 };
