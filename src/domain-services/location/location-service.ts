@@ -23,7 +23,7 @@ export class LocationService {
     name: string
   ): Promise<InstanceDataOfModel<Database['location']>[]> {
     return await models.location.find({
-      where: (builder) => builder.where('name', 'ilike', `%${name}%`),
+      where: { name: { [models.Op.ILIKE]: `%${name}%` } },
     });
   }
 }
