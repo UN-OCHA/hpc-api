@@ -30,7 +30,7 @@ declare module '@hapi/hapi' {
   }
 }
 
-initializeLogging();
+const rootLogContext = initializeLogging();
 
 async function startServer() {
   const schema = await buildSchema({
@@ -75,7 +75,7 @@ async function startServer() {
   });
 
   await hapiServer.start();
-  console.log(`🚀 Server ready at http://localhost:${CONFIG.httpPort}`);
+  rootLogContext.warn(`🚀 Server ready at http://localhost:${CONFIG.httpPort}`);
 }
 
 startServer().catch((error) => console.log(error));
