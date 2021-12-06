@@ -1,0 +1,160 @@
+import bunyan from 'bunyan';
+import { format } from 'util';
+
+import { CONFIG } from '../../../config';
+import { LogContext } from './context';
+import { LogDataAfterBunyanProcessing } from './data';
+import { printLog } from './printing';
+
+interface LoggingConfig {
+  writeToFile: bunyan.LogLevel | false;
+  writeToStdout:
+    | {
+        level: bunyan.LogLevel;
+        color: boolean;
+      }
+    | false;
+}
+
+const LOGGING_MODES = ['live', 'liveDetailed', 'devServer', 'test'] as const;
+
+type LoggingMode = typeof LOGGING_MODES[number];
+
+const isLoggingMode = (mode: string): mode is LoggingMode =>
+  LOGGING_MODES.indexOf(mode as LoggingMode) > -1;
+
+/**
+ * Standard logging configurations
+ */
+const LOGGING_CONFIGS: { [key in LoggingMode]: LoggingConfig } = {
+  live: {
+    writeToFile: 'warn',
+    writeToStdout: false,
+  },
+  liveDetailed: {
+    writeToFile: 'debug',
+    writeToStdout: false,
+  },
+  devServer: {
+    writeToFile: false,
+    writeToStdout: {
+      level: 'debug',
+      color: true,
+    },
+  },
+  test: {
+    // Console can be independently activated for each test
+    writeToFile: false,
+    writeToStdout: false,
+  },
+};
+
+let rootContext: LogContext | null = null;
+
+// Logging Listeners (this is mostly used to unit-test logging)
+export type LoggingListener = (log: LogDataAfterBunyanProcessing) => void;
+
+const listeners = new Set<LoggingListener>();
+
+export const addLoggingListener = (l: LoggingListener) => {
+  listeners.add(l);
+};
+
+export const removeLoggingListener = (l: LoggingListener) => {
+  listeners.delete(l);
+};
+
+const determineLoggingConfig = () => {
+  if (CONFIG.logging.mode) {
+    if (isLoggingMode(CONFIG.logging.mode)) {
+      return LOGGING_CONFIGS[CONFIG.logging.mode];
+    }
+    console.error('Unrecognized logging mode:', CONFIG.logging.mode);
+  }
+  return LOGGING_CONFIGS.live;
+};
+
+/**
+ * Called once before the server starts to initialize the logging system.
+ */
+export const initializeLogging = (): void => {
+  const logConfig: LoggingConfig = determineLoggingConfig();
+
+  if (process.env.JEST_WORKER_ID === undefined) {
+    console.log('Logging mode set to:', logConfig);
+  }
+
+  const loggingListenerStream: bunyan.Stream = {
+    type: 'raw',
+    level: 0,
+    stream: {
+      write: (obj: LogDataAfterBunyanProcessing) => {
+        listeners.forEach((l) => l(obj));
+      },
+    } as any,
+  };
+
+  const streams: bunyan.Stream[] = [loggingListenerStream];
+
+  if (logConfig.writeToFile) {
+    if (CONFIG.logging.path) {
+      streams.push({
+        level: logConfig.writeToFile,
+        path: CONFIG.logging.path,
+      });
+    } else {
+      console.error(
+        'Unable to enable file logging as LOG_PATH is not specified'
+      );
+    }
+  }
+
+  if (logConfig.writeToStdout) {
+    const shouldUseColor = logConfig.writeToStdout.color;
+    streams.push({
+      type: 'raw',
+      level: logConfig.writeToStdout.level,
+      stream: {
+        write: (obj: LogDataAfterBunyanProcessing) =>
+          printLog(obj, shouldUseColor),
+      } as any,
+    });
+  }
+
+  const logger = bunyan.createLogger({
+    name: CONFIG.name || 'hpc-api',
+    streams,
+  });
+
+  rootContext = new LogContext(logger, null, {});
+  const log = rootContext;
+
+  const consoleLoggingHandler =
+    (call: string) =>
+    (...args: any[]) => {
+      log.debug(`${call}: ${format(args[0], ...args.slice(1))}`);
+      const error = new Error(
+        `Unsupported use of ${call}(), please use a LogContext instead`
+      );
+      log.error(error.message, { error });
+    };
+
+  // Overwrite default console log behaviour to output to bunyan using json
+  console.log = consoleLoggingHandler('console.log');
+  console.info = consoleLoggingHandler('console.info');
+  console.warn = consoleLoggingHandler('console.warn');
+  console.error = consoleLoggingHandler('console.error');
+  console.debug = consoleLoggingHandler('console.debug');
+
+  // Handle uncaught rejections by logging an error
+  process.on('unhandledRejection', (reason, promise) => {
+    log.error(`Unhandled Rejection: ${reason}`, {
+      data: {
+        unhandledRejection: {
+          promise: format(promise),
+          reason: format(reason),
+        },
+      },
+    });
+  });
+};

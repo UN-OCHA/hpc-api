@@ -30,6 +30,7 @@ export const CONFIG = {
   },
   logging: {
     mode: process.env.LOG_MODE,
+    path: process.env.LOG_PATH,
     color:
       process.env.LOG_COLOR === undefined
         ? undefined

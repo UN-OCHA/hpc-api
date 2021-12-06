@@ -14,6 +14,7 @@ import { CONFIG } from '../config';
 import { createDbConnetion } from './data-providers/postgres';
 import v4Models from '@unocha/hpc-api-core/src/db';
 import { getTokenFromRequest } from './common-libs/auth';
+import { initializeLogging } from './common-libs/logging';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
@@ -28,6 +29,8 @@ declare module '@hapi/hapi' {
      */
   }
 }
+
+initializeLogging();
 
 async function startServer() {
   const schema = await buildSchema({
