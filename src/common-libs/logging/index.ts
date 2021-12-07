@@ -1,5 +1,7 @@
 import bunyan from 'bunyan';
 import { format } from 'util';
+import { promises as fs } from 'fs';
+import * as path from 'path';
 
 import { CONFIG } from '../../../config';
 import { LogContext } from './context';
@@ -70,11 +72,35 @@ const determineLoggingConfig = () => {
   return LOGGING_CONFIGS.live;
 };
 
+const isNodeError = (value: unknown): value is NodeJS.ErrnoException =>
+  value instanceof Error;
+
+const isLogDirectoryReady = async () => {
+  const directory = path.dirname(CONFIG.logging.path);
+  try {
+    const dirStat = await fs.stat(directory);
+    if (!dirStat.isDirectory()) {
+      console.error(
+        `Unable to write log file at ${CONFIG.logging.path}, ${directory} is not a directory`
+      );
+    } else {
+      return true;
+    }
+  } catch (e) {
+    if (isNodeError(e) && e.code === 'ENOENT') {
+      console.error(
+        `Unable to write log file at ${CONFIG.logging.path}, directory doesn't exist`
+      );
+      return false;
+    }
+  }
+};
+
 /**
  * Called once before the server starts to initialize the logging system,
  * and return the root context.
  */
-export const initializeLogging = (): LogContext => {
+export const initializeLogging = async (): Promise<LogContext> => {
   const logConfig: LoggingConfig = determineLoggingConfig();
 
   if (process.env.JEST_WORKER_ID === undefined) {
@@ -94,10 +120,12 @@ export const initializeLogging = (): LogContext => {
   const streams: bunyan.Stream[] = [loggingListenerStream];
 
   if (logConfig.writeToFile) {
-    streams.push({
-      level: logConfig.writeToFile,
-      path: CONFIG.logging.path,
-    });
+    if (await isLogDirectoryReady()) {
+      streams.push({
+        level: logConfig.writeToFile,
+        path: CONFIG.logging.path,
+      });
+    }
   }
 
   if (logConfig.writeToStdout) {

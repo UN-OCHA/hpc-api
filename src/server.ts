@@ -30,9 +30,9 @@ declare module '@hapi/hapi' {
   }
 }
 
-const rootLogContext = initializeLogging();
-
 async function startServer() {
+  const rootLogContext = await initializeLogging();
+
   const schema = await buildSchema({
     resolvers: [join(__dirname, 'domain-services/**/resolver.{ts,js}')],
     container: Container, // Register the 3rd party IOC container
