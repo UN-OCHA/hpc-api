@@ -29,8 +29,8 @@ export const CONFIG = {
     poolIdle: 10000,
   },
   logging: {
-    mode: process.env.LOG_MODE,
-    path: process.env.LOG_PATH,
+    mode: process.env.LOG_MODE || 'live',
+    path: process.env.LOG_PATH || '/var/log/api/api.log',
     color:
       process.env.LOG_COLOR === undefined
         ? undefined

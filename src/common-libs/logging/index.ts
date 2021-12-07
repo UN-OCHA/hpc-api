@@ -63,12 +63,10 @@ export const removeLoggingListener = (l: LoggingListener) => {
 };
 
 const determineLoggingConfig = () => {
-  if (CONFIG.logging.mode) {
-    if (isLoggingMode(CONFIG.logging.mode)) {
-      return LOGGING_CONFIGS[CONFIG.logging.mode];
-    }
-    console.error('Unrecognized logging mode:', CONFIG.logging.mode);
+  if (isLoggingMode(CONFIG.logging.mode)) {
+    return LOGGING_CONFIGS[CONFIG.logging.mode];
   }
+  console.error('Unrecognized logging mode:', CONFIG.logging.mode);
   return LOGGING_CONFIGS.live;
 };
 
@@ -96,16 +94,10 @@ export const initializeLogging = (): LogContext => {
   const streams: bunyan.Stream[] = [loggingListenerStream];
 
   if (logConfig.writeToFile) {
-    if (CONFIG.logging.path) {
-      streams.push({
-        level: logConfig.writeToFile,
-        path: CONFIG.logging.path,
-      });
-    } else {
-      console.error(
-        'Unable to enable file logging as LOG_PATH is not specified'
-      );
-    }
+    streams.push({
+      level: logConfig.writeToFile,
+      path: CONFIG.logging.path,
+    });
   }
 
   if (logConfig.writeToStdout) {
