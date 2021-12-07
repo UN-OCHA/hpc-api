@@ -170,9 +170,9 @@ export const initializeLogging = async (): Promise<LogContext> => {
       data: {
         unhandledRejection: {
           promise: format(promise),
-          reason: format(reason),
         },
       },
+      ...(reason instanceof Error ? { error: reason } : {}),
     });
   });
 

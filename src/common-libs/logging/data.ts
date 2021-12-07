@@ -13,7 +13,6 @@ export interface LogData extends SharedLogData {
    */
   unhandledRejection?: {
     promise: string;
-    reason: string;
   };
 }
 
