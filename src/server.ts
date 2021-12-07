@@ -78,4 +78,4 @@ async function startServer() {
   rootLogContext.warn(`🚀 Server ready at http://localhost:${CONFIG.httpPort}`);
 }
 
-startServer().catch((error) => console.log(error));
+startServer().catch((error) => console.error(error));
