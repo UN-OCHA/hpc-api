@@ -37,11 +37,9 @@ export class PlanService {
     });
 
     const years = await models.usageYear.find({
-      where: (builder) =>
-        builder.whereIn(
-          'id',
-          planYears.map((py) => py.usageYearId)
-        ),
+      where: {
+        id: { [models.Op.IN]: planYears.map((py) => py.usageYearId) },
+      },
     });
 
     return years.map((y) => y.year);
