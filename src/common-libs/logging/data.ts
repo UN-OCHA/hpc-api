@@ -9,10 +9,19 @@ import { SharedLogData } from '@unocha/hpc-api-core/src/lib/logging';
  */
 export interface LogData extends SharedLogData {
   /**
-   * Set when an unhandled rejection caused the error
+   * To ensure that our logs to not create any properties that conflict with
+   * the old API, we prefix / namespace all logging under this property.
+   *
+   * Anything that should be shared and consistent between this and the old
+   * API should be added to SharedLogData.
    */
-  unhandledRejection?: {
-    promise: string;
+  v4?: {
+    /**
+     * Set when an unhandled rejection caused the error
+     */
+    unhandledRejection?: {
+      promise: string;
+    };
   };
 }
 
