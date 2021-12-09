@@ -11,6 +11,7 @@ services:
       - .:/srv/www
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
+      - LOG_MODE=devServer
       - POSTGRES_SERVER=postgres://demo:demo@host.docker.internal:5432/demo
       - PORT=5100
       - NODE_ENV=development

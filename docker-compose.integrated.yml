@@ -15,6 +15,7 @@ services:
       - ../hpc-api-core:/srv/hpc-api-core
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
+      - LOG_MODE=devServer
       - POSTGRES_SERVER=postgres://postgres:@pgsql:5432/hpc
       - PORT=5100
       - NODE_ENV=development
