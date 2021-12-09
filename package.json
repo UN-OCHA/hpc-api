@@ -1,6 +1,6 @@
 {
   "name": "hpc-api",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "api for HPC applications",
   "main": "src/server.ts",
   "license": "MIT",
@@ -9,16 +9,17 @@
     "check-types": "tsc --noEmit",
     "install-and-link": "sh ./bin/install.sh",
     "start": "pm2 start start.js --no-daemon",
-    "dev": "ts-node-dev --inspect=127.0.0.1:9339 --transpile-only --no-notify -- src/server.ts",
+    "dev": "ts-node-dev --inspect=127.0.0.1:9339 --transpile-only --no-notify -- start.js",
     "prepare": "husky install",
     "lint-prettier": "prettier -c .",
     "lint-eslint": "eslint --quiet .",
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^0.6.0",
+    "@unocha/hpc-api-core": "^1.1.0",
     "apollo-server-hapi": "^3.5.0",
-    "class-validator": "^0.13.1",
+    "bunyan": "^1.8.15",
+    "class-validator": "^0.13.2",
     "graphql": "^15.7.2",
     "knex": "0.21.1",
     "pg": "^8.7.1",
@@ -27,16 +28,17 @@
     "ts-node": "^10.4.0",
     "type-graphql": "^1.1.1",
     "typedi": "^0.10.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.2"
   },
   "devDependencies": {
     "@hapi/hapi": "^20.2.1",
+    "@types/bunyan": "^1.8.8",
     "@types/hapi__hapi": "^20.0.9",
-    "@unocha/hpc-repo-tools": "^0.2.1",
-    "eslint": "^8.2.0",
+    "@unocha/hpc-repo-tools": "^0.3.0",
+    "eslint": "^8.3.0",
     "husky": "^7.0.4",
-    "lint-staged": "^12.0.2",
-    "prettier": "2.4.1",
+    "lint-staged": "^12.1.2",
+    "prettier": "2.5.0",
     "ts-node-dev": "^1.1.8"
   },
   "engines": {
