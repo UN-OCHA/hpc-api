@@ -1,4 +1,5 @@
 export const CONFIG = {
+  commitSha: process.env.HPC_ACTIONS_COMMIT_SHA,
   httpPort: process.env.PORT,
   storageProviders: {
     aws: {
