@@ -157,7 +157,17 @@ export const initializeLogging = async (): Promise<LogContext> => {
       const error = new Error(
         `Unsupported use of ${call}(), please use a LogContext instead`
       );
-      rootContext.error(error.message, { error });
+      rootContext.error(error.message, {
+        error,
+        data: {
+          v4: {
+            unexpectedConsoleCall: {
+              call,
+              args: format(args[0], ...args.slice(1)),
+            },
+          },
+        },
+      });
     };
 
   // Overwrite default console log behaviour to output to bunyan using json

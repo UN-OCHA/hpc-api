@@ -22,6 +22,12 @@ export interface LogData extends SharedLogData {
     unhandledRejection?: {
       promise: string;
     };
+    unexpectedConsoleCall?: {
+      /** Which console function / method was called */
+      call: string;
+      /** What were the arguments (formatted in a single string) */
+      args: string;
+    };
   };
 }
 
