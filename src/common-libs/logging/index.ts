@@ -145,7 +145,10 @@ export const initializeLogging = async (): Promise<LogContext> => {
     streams,
   });
 
-  const rootContext = new LogContext(logger, null, {});
+  const rootContext = new LogContext(logger, null, {
+    version: 'hpc-api-v4',
+    commitSha: CONFIG.commitSha,
+  });
 
   const consoleLoggingHandler =
     (call: string) =>
