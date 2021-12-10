@@ -1,4 +1,4 @@
-FROM unocha/nodejs:12
+FROM public.ecr.aws/unocha/nodejs:16
 
 RUN apk add -U build-base python3 py-pip
 
