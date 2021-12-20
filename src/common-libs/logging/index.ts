@@ -145,7 +145,10 @@ export const initializeLogging = async (): Promise<LogContext> => {
     streams,
   });
 
-  const rootContext = new LogContext(logger, null, {});
+  const rootContext = new LogContext(logger, null, {
+    version: 'hpc-api-v4',
+    commitSha: CONFIG.commitSha,
+  });
 
   const consoleLoggingHandler =
     (call: string) =>
@@ -154,7 +157,17 @@ export const initializeLogging = async (): Promise<LogContext> => {
       const error = new Error(
         `Unsupported use of ${call}(), please use a LogContext instead`
       );
-      rootContext.error(error.message, { error });
+      rootContext.error(error.message, {
+        error,
+        data: {
+          v4: {
+            unexpectedConsoleCall: {
+              call,
+              args: format(args[0], ...args.slice(1)),
+            },
+          },
+        },
+      });
     };
 
   // Overwrite default console log behaviour to output to bunyan using json
@@ -168,8 +181,10 @@ export const initializeLogging = async (): Promise<LogContext> => {
   process.on('unhandledRejection', (reason, promise) => {
     rootContext.error(`Unhandled Rejection: ${reason}`, {
       data: {
-        unhandledRejection: {
-          promise: format(promise),
+        v4: {
+          unhandledRejection: {
+            promise: format(promise),
+          },
         },
       },
       ...(reason instanceof Error ? { error: reason } : {}),

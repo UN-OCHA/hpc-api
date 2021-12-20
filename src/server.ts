@@ -16,6 +16,16 @@ import v4Models from '@unocha/hpc-api-core/src/db';
 import { getTokenFromRequest } from './common-libs/auth';
 import { initializeLogging } from './common-libs/logging';
 
+if (process.env.NEW_RELIC_LICENSE_KEY) {
+  /**
+   * `newrelic` is a global dependency in the nodejs image we use, and is
+   * maintained by the ops team, rather than being a project-level dependency.
+   *
+   * This is why it does not appear in package.json
+   */
+  require('newrelic');
+}
+
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
     config: typeof CONFIG;

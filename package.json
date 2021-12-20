@@ -1,6 +1,6 @@
 {
   "name": "hpc-api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "api for HPC applications",
   "main": "src/server.ts",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^1.1.0",
+    "@unocha/hpc-api-core": "^1.2.1",
     "apollo-server-hapi": "^3.5.0",
     "bunyan": "^1.8.15",
     "class-validator": "^0.13.2",
