@@ -770,10 +770,10 @@
     "@typescript-eslint/types" "5.10.1"
     eslint-visitor-keys "^3.0.0"
 
-"@unocha/hpc-api-core@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-1.2.1.tgz#4b0b75f5efb92d1cc9e8b0a82ef39310069c4895"
-  integrity sha512-KwTyDFQVdmcAd/x+TkbNTk8IAx2QnWrGn093gVbwO6UTmgYM70f0aXGx3Y1Vr7dF0mO2aRn8sqzqjnzHQjRRHw==
+"@unocha/hpc-api-core@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-3.1.0.tgz#2198a6f9d10183558db17723dea507c8a463f790"
+  integrity sha512-VYu6bz3+mO/icb5dTG5IIYnSbkwb0j7r4TXv81R2Ne3Cupspm/XcuOoG9XHmwbcpG09LNR13mBtoaaZw7+OQiw==
   dependencies:
     "@types/lodash" "^4.14.170"
     "@types/node-fetch" "^2.5.12"
