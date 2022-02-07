@@ -23,6 +23,7 @@ services:
       - POSTGRES_LOGGING=0
       - ROOT_URL=http://service.hpc.vm/
       - AUTHBASE_URL=http://api.hid.vm
+      - NEW_RELIC_LICENSE_KEY=
       - WAIT_HOSTS=pgsql:5432
       - WAIT_HOSTS_TIMEOUT=120
     networks:
