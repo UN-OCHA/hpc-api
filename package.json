@@ -16,7 +16,7 @@
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^3.1.0",
+    "@unocha/hpc-api-core": "^4.0.0",
     "apollo-server-hapi": "^3.5.0",
     "bunyan": "^1.8.15",
     "class-validator": "^0.13.2",
