@@ -1,5 +1,5 @@
 import { BaseType } from '../../base-types';
-import { Brand } from '../../../common-utils/branding';
+import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType, registerEnumType } from 'type-graphql';
 
