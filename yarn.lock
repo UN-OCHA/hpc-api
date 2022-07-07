@@ -748,10 +748,10 @@
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.4.tgz#f0ec25dbf2f0e4b18647313ac031134ca5b24b21"
   integrity sha512-1z8k4wzFnNjVK/tlxvrWuK5WMt6mydWWP7+zvH5eFep4oj+UkrfiJTRtjCeBXNpwaA/FYqqtb4/QS4ianFpIRA==
 
-"@types/node-fetch@^2.5.12":
-  version "2.5.12"
-  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.12.tgz#8a6f779b1d4e60b7a57fb6fd48d84fb545b9cc66"
-  integrity sha512-MKgC4dlq4kKNa/mYrwpKfzQMB5X3ee5U6fSprkKpToBqBmX4nFZL9cW5jl6sWn+xpRJ7ypWh2yyqqr8UUCstSw==
+"@types/node-fetch@2.6.1":
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.1.tgz#8f127c50481db65886800ef496f20bbf15518975"
+  integrity sha512-oMqjURCaxoSIsHSr1E47QHzbmzNR5rK8McHuNb11BOM9cHcIK3Avy0s/b2JlXHoQGTYS3NsvWzV1M0iK7l0wbA==
   dependencies:
     "@types/node" "*"
     form-data "^3.0.0"
@@ -866,18 +866,18 @@
     "@typescript-eslint/types" "5.30.5"
     eslint-visitor-keys "^3.3.0"
 
-"@unocha/hpc-api-core@^4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-4.1.2.tgz#f61189eb5690fd7e0aff168481ea36fbc98d9d94"
-  integrity sha512-ww7Q9ta1KPPM92mWFfYGA7mftMkfYGpe7oRhM5p6Yoy1gWlszyUzjr8kHUQ3J1dz0lLlmTaKnFTnzIyYzT//VQ==
+"@unocha/hpc-api-core@^4.4.2":
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-4.4.2.tgz#633f3cacb8200294f67345fa8dadf7fd82848ee1"
+  integrity sha512-4TM0Eb9fNsd8kp9/7x//tH6/W4HosTNN5iAjbHzjlc70FBXdc26KNxg9tfKhs7S3GXC0MmvZ+VZ+pjsCMmLE8g==
   dependencies:
     "@types/lodash" "^4.14.170"
-    "@types/node-fetch" "^2.5.12"
+    "@types/node-fetch" "2.6.1"
     fp-ts "^2.6.6"
     io-ts "2.2.9"
     knex "0.21.1"
     lodash "^4.17.21"
-    node-fetch "^2.6.5"
+    node-fetch "2.6.7"
     pg "^8.5.1"
 
 "@unocha/hpc-repo-tools@^1.2.0":
@@ -3035,7 +3035,7 @@ netmask@^2.0.1:
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-2.0.2.tgz#8b01a07644065d536383835823bc52004ebac5e7"
   integrity sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==
 
-node-fetch@^2.6.5, node-fetch@^2.6.7:
+node-fetch@2.6.7, node-fetch@^2.6.7:
   version "2.6.7"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
   integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
