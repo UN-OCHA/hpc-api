@@ -22,7 +22,7 @@
     "class-validator": "^0.13.2",
     "graphql": "^15.7.2",
     "knex": "0.21.1",
-    "pg": "^8.7.1",
+    "pg": "^8.7.3",
     "pm2": "^5.2.0",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.9.1",
