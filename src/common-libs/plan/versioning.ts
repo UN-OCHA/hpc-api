@@ -34,6 +34,7 @@
 import type { Database } from '@unocha/hpc-api-core/src/db';
 import type { PlanReportingPeriodId } from '@unocha/hpc-api-core/src/db/models/planReportingPeriod';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { groupObjectsByProperty } from '@unocha/hpc-api-core/src/util';
 import { Brand, createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 
@@ -52,9 +53,7 @@ type BaseAndVersionModels = typeof baseAndVersionModels[number] | 'measurement';
 
 type IdType<T extends BaseAndVersionModels> = `${T}Id`;
 
-const noLongerParanoidTables = new Set();
-// TODO: Uncomment for HPC-8305
-// const noLongerParanoidTables = new Set(['planYear']);
+const noLongerParanoidTables = new Set(['planYear']);
 
 export const updateVersionStates = async (
   models: Database,
@@ -65,7 +64,7 @@ export const updateVersionStates = async (
   for (const tableName of baseOnlyModels) {
     await updateBaseModelTags(models, tableName, planTag);
   }
-  
+
   for (const tableName of baseAndVersionModels) {
     const baseRows = await models[tableName].find({
       where: {
@@ -234,14 +233,17 @@ const updateBaseModelTags = async (
 
   const inactiveRows: AnyModelId[] = [];
   for (const baseRow of baseRows) {
+    const strictBaseRow = baseRow as InstanceOfModel<
+      Database[Exclude<BaseOnlyModels, 'planYear'>]
+    >;
     const isActive =
       /**
        * If table is no longer paranoid (i.e. `deletedAt` column is
        * dropped from DB schema), just simply treat all records as active.
        */
       noLongerParanoidTables.has(tableName) ||
-      baseRow.deletedAt === null ||
-      baseRow.deletedAt > tag.createdAt;
+      strictBaseRow.deletedAt === null ||
+      strictBaseRow.deletedAt > tag.createdAt;
 
     if (isActive) {
       await model.update({
