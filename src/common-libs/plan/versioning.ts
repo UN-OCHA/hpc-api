@@ -116,23 +116,34 @@ const updateBaseAndVersionModelTags = async (
   const versionModel = models[`${tableName}Version`];
   const idField = `${tableName}Id` as IdType<BaseAndVersionModels>;
 
+  const activeRows: Map<string, Set<AnyModelId>> = new Map();
   const inactiveRows: AnyModelId[] = [];
+
   for (const baseRow of baseRows) {
     const isActive =
       baseRow.deletedAt === null || baseRow.deletedAt > tag.createdAt;
 
     if (isActive) {
-      await model.update({
-        values: {
-          latestTaggedVersion: true,
-          versionTags: [...baseRow.versionTags, tag.name],
-          ...(tag.public ? { currentVersion: true } : {}),
-        },
-        where: { id: createBrandedValue(baseRow.id) },
-      });
+      const rowKey = baseRow.versionTags.join(',');
+      let idSet = activeRows.get(rowKey);
+      if (!idSet) {
+        activeRows.set(rowKey, (idSet = new Set()));
+      }
+      idSet.add(baseRow.id);
     } else {
       inactiveRows.push(createBrandedValue(baseRow.id));
     }
+  }
+
+  for (const [versionTagsString, rowIds] of activeRows.entries()) {
+    await model.update({
+      values: {
+        latestTaggedVersion: true,
+        versionTags: [...versionTagsString.split(','), tag.name],
+        ...(tag.public ? { currentVersion: true } : {}),
+      },
+      where: { id: { [models.Op.IN]: rowIds } },
+    });
   }
 
   await model.update({
@@ -180,17 +191,30 @@ const updateBaseAndVersionModelTags = async (
     },
   });
 
+  const versionTagsMap: Map<string, Set<AnyModelId>> = new Map();
+
   for (const latestVersion of latestVersions) {
+    const rowKey = latestVersion.versionTags.join(',');
+    let idSet = versionTagsMap.get(rowKey);
+    if (!idSet) {
+      versionTagsMap.set(rowKey, (idSet = new Set()));
+    }
+    idSet.add(latestVersion.id);
+  }
+
+  for (const [versionTagsString, rowIds] of versionTagsMap.entries()) {
+    const versionTags = versionTagsString.split(',');
+
     await versionModel.update({
       values: {
         latestTaggedVersion: true,
         versionTags: [
-          ...latestVersion.versionTags,
-          ...(latestVersion.versionTags.includes(tag.name) ? [] : [tag.name]),
+          ...versionTags,
+          ...(versionTags.includes(tag.name) ? [] : [tag.name]),
         ],
         ...(tag.public ? { currentVersion: true } : {}),
       },
-      where: { id: createBrandedValue(latestVersion.id) },
+      where: { id: { [models.Op.IN]: rowIds } },
     });
   }
 
