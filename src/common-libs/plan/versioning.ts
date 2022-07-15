@@ -55,6 +55,16 @@ type IdType<T extends BaseAndVersionModels> = `${T}Id`;
 
 const noLongerParanoidTables = new Set(['planYear']);
 
+const skipAttachmentsAndMeasurementsValidation = (
+  tableName: BaseAndVersionModels
+) => {
+  return tableName === 'attachment' || tableName === 'measurement';
+};
+
+const skipMeasurementsValidation = (tableName: BaseAndVersionModels) => {
+  return tableName === 'measurement';
+};
+
 export const updateVersionStates = async (
   models: Database,
   planTag: InstanceDataOfModel<Database['planTag']>,
@@ -163,6 +173,7 @@ const updateBaseAndVersionModelTags = async (
       },
       createdAt: { [models.Op.LTE]: tag.createdAt },
     },
+    skipValidation: skipAttachmentsAndMeasurementsValidation(tableName),
   });
 
   const versionRowsByBaseId = new Map<
@@ -189,6 +200,7 @@ const updateBaseAndVersionModelTags = async (
         [models.Op.IN]: latestVersionIds.map(createBrandedValue),
       },
     },
+    skipValidation: skipMeasurementsValidation(tableName),
   });
 
   const versionTagsMap: Map<string, Set<AnyModelId>> = new Map();
@@ -215,6 +227,7 @@ const updateBaseAndVersionModelTags = async (
         ...(tag.public ? { currentVersion: true } : {}),
       },
       where: { id: { [models.Op.IN]: rowIds } },
+      skipValidation: skipMeasurementsValidation(tableName),
     });
   }
 
@@ -225,6 +238,7 @@ const updateBaseAndVersionModelTags = async (
       },
       [idField]: { [models.Op.IN]: baseRows.map((a) => a.id) },
     },
+    skipValidation: skipAttachmentsAndMeasurementsValidation(tableName),
   });
   await versionModel.update({
     values: {
@@ -236,6 +250,7 @@ const updateBaseAndVersionModelTags = async (
         [models.Op.IN]: oldVersions.map((v) => v.id as AnyModelId),
       },
     },
+    skipValidation: skipAttachmentsAndMeasurementsValidation(tableName),
   });
 };
 
