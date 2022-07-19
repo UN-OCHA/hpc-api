@@ -79,6 +79,9 @@ export const updateVersionStates = async (
     const baseRows = await models[tableName].find({
       where: {
         planId: planTag.planId,
+        ...(tableName === 'attachment'
+          ? { type: { [models.Op.NOT_IN]: ['cost'] } }
+          : {}),
       },
     });
 
