@@ -11,6 +11,6 @@ export class BaseType {
 
 @ObjectType()
 export class BaseTypeWithSoftDelete extends BaseType {
-  @Field()
+  @Field({ nullable: true })
   deletedAt: Date;
 }
