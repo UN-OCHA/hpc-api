@@ -54,4 +54,10 @@ export class Flow extends BaseTypeWithSoftDelete {
 
   @Field({ nullable: true })
   versionEndDate: Date;
+
+  @Field({ nullable: true })
+  createdBy: string;
+
+  @Field({ nullable: true })
+  lastUpdatedBy: string;
 }
