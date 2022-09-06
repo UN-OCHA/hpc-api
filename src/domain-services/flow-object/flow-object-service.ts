@@ -5,10 +5,14 @@ import { groupBy } from 'lodash';
 import { Service } from 'typedi';
 import Context from '../Context';
 import { LocationService } from '../location/location-service';
+import { OrganizationService } from '../organization/organization-service';
 
 @Service()
 export class FlowObjectService {
-  constructor(private locationService: LocationService) {}
+  constructor(
+    private locationService: LocationService,
+    private organizationService: OrganizationService
+  ) {}
 
   async findByFlowId(
     models: Database,
@@ -32,6 +36,15 @@ export class FlowObjectService {
             return [
               'locations',
               await this.locationService.findByIds(
+                context.models,
+                flowObjects.map((fo) => fo.objectID)
+              ),
+            ];
+          }
+          if (type === 'organization' || type === 'anonymizedOrganization') {
+            return [
+              `${type}s`,
+              await this.organizationService.findByIds(
                 context.models,
                 flowObjects.map((fo) => fo.objectID)
               ),
