@@ -1,12 +1,12 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseTypeWithSoftDelete } from '../../base-types';
-import FlowObject from '../../flow-object/graphql/types';
+import Location from '../../location/graphql/types';
 
 @ObjectType()
 export class FlowObjectsGroupedByType {
-  @Field(() => [FlowObject])
-  location: FlowObject[];
+  @Field(() => [Location], { nullable: true })
+  locations: Location[];
 }
 
 @ObjectType()

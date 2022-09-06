@@ -3,7 +3,10 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { groupBy } from 'lodash';
 import { Service } from 'typedi';
+import Context from '../Context';
+import { LocationService } from '../location/location-service';
 
 @Service()
 export class FlowObjectService {
@@ -27,6 +30,7 @@ export class FlowObjectService {
       },
     });
   }
+  constructor(private locationService: LocationService) {}
 
   async findByFlowId(
     models: Database,
@@ -39,4 +43,27 @@ export class FlowObjectService {
     });
   }
 
+  async groupByObjectType(
+    context: Context,
+    flowObjects: InstanceDataOfModel<Database['flowObject']>[]
+  ) {
+    const typedObjects = await Promise.all(
+      Object.entries(groupBy(flowObjects, 'objectType')).map(
+        async ([type, flowObjects]) => {
+          if (type === 'location') {
+            return [
+              'locations',
+              await this.locationService.findByIds(
+                context.models,
+                flowObjects.map((fo) => fo.objectID)
+              ),
+            ];
+          }
+
+          return [];
+        }
+      )
+    );
+    return Object.fromEntries(typedObjects);
+  }
 }
