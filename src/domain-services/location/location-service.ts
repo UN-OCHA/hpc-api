@@ -18,6 +18,19 @@ export class LocationService {
     return location;
   }
 
+  async findByIds(
+    models: Database,
+    ids: number[]
+  ): Promise<InstanceDataOfModel<Database['location']>[]> {
+    return await models.location.find({
+      where: {
+        id: {
+          [models.Op.IN]: ids.map((id) => createBrandedValue(id)),
+        },
+      },
+    });
+  }
+
   async search(
     models: Database,
     name: string

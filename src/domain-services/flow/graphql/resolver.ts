@@ -44,8 +44,11 @@ export default class FlowResolver {
     );
     const { source, destination } = groupBy(flowObjects, 'refDirection');
     return {
-      source: groupBy(source, 'objectType'),
-      destination: groupBy(destination, 'objectType'),
+      source: this.flowObjectService.groupByObjectType(context, source),
+      destination: this.flowObjectService.groupByObjectType(
+        context,
+        destination
+      ),
     };
   }
 }
