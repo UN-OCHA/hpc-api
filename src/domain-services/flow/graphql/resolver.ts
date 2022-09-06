@@ -1,3 +1,4 @@
+import { groupBy } from 'lodash';
 import { Arg, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 import { Service } from 'typedi';
 import Context from '../../Context';
@@ -37,6 +38,14 @@ export default class FlowResolver {
 
   @FieldResolver()
   async flowObjects(@Root() flow: Flow, @Ctx() context: Context) {
-    return await this.flowObjectService.findByFlowId(context.models, flow.id);
+    const flowObjects = await this.flowObjectService.findByFlowId(
+      context.models,
+      flow.id
+    );
+    const { source, destination } = groupBy(flowObjects, 'refDirection');
+    return {
+      source: groupBy(source, 'objectType'),
+      destination: groupBy(destination, 'objectType'),
+    };
   }
 }
