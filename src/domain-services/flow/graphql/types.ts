@@ -4,6 +4,7 @@ import { BaseTypeWithSoftDelete } from '../../base-types';
 import Location from '../../location/graphql/types';
 import Organization from '../../organization/graphql/types';
 import Plan from '../../plans/graphql/types';
+import Project from '../../project/graphql/types';
 import UsageYear from '../../usage-year/graphql/types';
 
 @ObjectType()
@@ -22,6 +23,9 @@ export class FlowObjectsGroupedByType {
 
   @Field(() => [Plan], { nullable: true })
   plans: Plan[];
+
+  @Field(() => [Project], { nullable: true })
+  projects: Project[];
 }
 
 @ObjectType()
