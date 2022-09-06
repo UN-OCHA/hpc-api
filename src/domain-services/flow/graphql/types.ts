@@ -3,6 +3,7 @@ import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseTypeWithSoftDelete } from '../../base-types';
 import Location from '../../location/graphql/types';
 import Organization from '../../organization/graphql/types';
+import UsageYear from '../../usage-year/graphql/types';
 
 @ObjectType()
 export class FlowObjectsGroupedByType {
@@ -14,6 +15,9 @@ export class FlowObjectsGroupedByType {
 
   @Field(() => [Organization], { nullable: true })
   anonymizedOrganizations: Organization[];
+
+  @Field(() => [UsageYear], { nullable: true })
+  usageYears: UsageYear[];
 }
 
 @ObjectType()

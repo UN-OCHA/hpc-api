@@ -8,12 +8,14 @@ import { Service } from 'typedi';
 import Context from '../Context';
 import { LocationService } from '../location/location-service';
 import { OrganizationService } from '../organization/organization-service';
+import { UsageYearService } from '../usage-year/usage-year-service';
 
 @Service()
 export class FlowObjectService {
   constructor(
     private locationService: LocationService,
-    private organizationService: OrganizationService
+    private organizationService: OrganizationService,
+    private usageYearService: UsageYearService
   ) {}
 
   async getFlowIdsFromFlowObjects(
@@ -68,6 +70,15 @@ export class FlowObjectService {
             return [
               `${type}s`,
               await this.organizationService.findByIds(
+                context.models,
+                flowObjects.map((fo) => fo.objectID)
+              ),
+            ];
+          }
+          if (type === 'usageYear') {
+            return [
+              'usageYears',
+              await this.usageYearService.findByIds(
                 context.models,
                 flowObjects.map((fo) => fo.objectID)
               ),
