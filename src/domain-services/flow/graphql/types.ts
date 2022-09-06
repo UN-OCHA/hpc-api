@@ -4,6 +4,21 @@ import { BaseTypeWithSoftDelete } from '../../base-types';
 import FlowObject from '../../flow-object/graphql/types';
 
 @ObjectType()
+export class FlowObjectsGroupedByType {
+  @Field(() => [FlowObject])
+  location: FlowObject[];
+}
+
+@ObjectType()
+export class FlowObjectsGroupedByRefDirection {
+  @Field()
+  source: FlowObjectsGroupedByType;
+
+  @Field()
+  destination: FlowObjectsGroupedByType;
+}
+
+@ObjectType()
 export class Flow extends BaseTypeWithSoftDelete {
   @Field(() => ID)
   id: Brand<number, { readonly s: unique symbol }, 'Flow ID'>;
@@ -62,6 +77,6 @@ export class Flow extends BaseTypeWithSoftDelete {
   @Field({ nullable: true })
   lastUpdatedBy: string;
 
-  @Field(() => [FlowObject])
-  flowObjects: FlowObject[];
+  @Field()
+  flowObjects: FlowObjectsGroupedByRefDirection;
 }
