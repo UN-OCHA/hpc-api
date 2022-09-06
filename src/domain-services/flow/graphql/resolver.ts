@@ -1,13 +1,17 @@
 import { Arg, Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql';
 import { Service } from 'typedi';
 import Context from '../../Context';
+import { FlowObjectService } from '../../flow-object/flow-object-service';
 import { FlowService } from '../flow-service';
 import { Flow } from './types';
 
 @Service()
 @Resolver(Flow)
 export default class FlowResolver {
-  constructor(private flowService: FlowService) {}
+  constructor(
+    private flowService: FlowService,
+    private flowObjectService: FlowObjectService
+  ) {}
 
   @Query(() => Flow)
   async flow(@Arg('id') id: number, @Ctx() context: Context) {
@@ -29,5 +33,10 @@ export default class FlowResolver {
       flow.id,
       'updatedAt'
     );
+  }
+
+  @FieldResolver()
+  async flowObjects(@Root() flow: Flow, @Ctx() context: Context) {
+    return await this.flowObjectService.findByFlowId(context.models, flow.id);
   }
 }

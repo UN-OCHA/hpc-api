@@ -1,6 +1,7 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseTypeWithSoftDelete } from '../../base-types';
+import FlowObject from '../../flow-object/graphql/types';
 
 @ObjectType()
 export class Flow extends BaseTypeWithSoftDelete {
@@ -60,4 +61,7 @@ export class Flow extends BaseTypeWithSoftDelete {
 
   @Field({ nullable: true })
   lastUpdatedBy: string;
+
+  @Field(() => [FlowObject])
+  flowObjects: FlowObject[];
 }
