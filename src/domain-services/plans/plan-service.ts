@@ -29,6 +29,33 @@ export class PlanService {
     return { id: planId, name: currentPlanVersion.name };
   }
 
+  async findByIds(
+    models: Database,
+    ids: number[]
+  ): Promise<{ id: PlanId; name?: string | null }[]> {
+    const plans = await models.plan.find({
+      where: {
+        id: {
+          [models.Op.IN]: ids.map((id) => createBrandedValue(id)),
+        },
+      },
+    });
+
+    const currentPlanVersions = await models.planVersion.find({
+      where: {
+        planId: {
+          [models.Op.IN]: plans.map((p) => p.id),
+        },
+        currentVersion: true,
+      },
+    });
+
+    return currentPlanVersions.map((pv) => ({
+      id: pv.planId,
+      name: pv.name,
+    }));
+  }
+
   async findPlanYears(models: Database, planId: number): Promise<string[]> {
     const planYears = await models.planYear.find({
       where: {
