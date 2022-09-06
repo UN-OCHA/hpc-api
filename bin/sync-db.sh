@@ -3,10 +3,10 @@
 usage="$(basename "$0") [-h] [-u username] [-e env] [-k]
 where:
     -h  show this help text
-    -u  username to connect through LDAP
+    -u  username to connect through Sesame
     -l  skip scp connection and use local dump instead
     -e  set the env (stage or prod, default: stage)
-    -p  LDAP password"
+    -p  Sesame password"
 
 
 #set default vars
@@ -14,7 +14,6 @@ BACKUP=0
 DISTANT_DUMP_NAME='latest.pg_restore'
 DISTANT_ENV='prod'
 KEEP_DB=0
-LDAP=0
 PASSWORD=''
 TIMESTAMP=`date +%Y-%m-%d.%H:%M:%S`
 USE_LOCAL_DUMP=0
@@ -65,11 +64,27 @@ echo "$PG_DB_NAME"
 
 if [ $USE_LOCAL_DUMP -eq 0 ]; then
   if [ "${#PASSWORD}" -eq 0 ]; then
-    echo -n "Type in your LDAP password and press enter to continue: ";
+    echo -n "Type in your Sesame password and press enter to continue: ";
     read -s PASSWORD;
   fi
-  echo "Copying HPC $DISTANT_ENV $DISTANT_DUMP_NAME database to local using wget with username $USERNAME"
-  wget --http-user=$USERNAME --http-password=$PASSWORD https://snapshots.aws.ahconu.org/hpc/$DISTANT_ENV/$DISTANT_DUMP_NAME -O "$BACKUP_DIR/$DB_DUMP" || { echo 'Copying database from source failed' ; exit 1; }
+  echo "Obtaining an authentication token for snapshot access"
+  # `--quiet` is used to avoid wget being verbose while fetching the token, because we only need JSON response
+  # `–output-document`` (-O) option is used to redirect the content to a file of our choice.
+  # As a particular use case, if we use – as the file, so that output is directed to stdout
+  # JSON response is fed to `jq` to extract access token, which is then stripped of quotes with `tr`
+  TOKEN=$(wget --post-data "grant_type=password&client_id=token&username=${USERNAME}&password=${PASSWORD}" --quiet -O - https://auth.ahconu.org/oauth2/token | jq '.access_token' | tr -d '"')
+
+  if [ -z "${TOKEN}" ]; then
+    echo -e "Unable to obtain an authentication token\n"
+    echo "Please check that your credentials are correct. When running the script, wrap your password in single quotes, i.e. ./sync-db.sh -p 'P@\$\$w0rd'"
+    if [ "$USER" == "$USERNAME" ]; then
+      echo "Note that username for Sesame authentication defaults to your local machine username $USER, if you don't provide it with -u flag."
+    fi
+    exit 1
+  fi
+
+  echo "Copying $DISTANT_ENV HPC DB snapsnot to local, using wget with token authentication"
+  wget --header="Authorization: Bearer ${TOKEN}" https://snapshots.aws.ahconu.org/hpc-sync/$DISTANT_ENV/$DISTANT_DUMP_NAME -O "$BACKUP_DIR/$DB_DUMP" || { echo 'Copying database from source failed' ; exit 1; }
   ln -sf "$BACKUP_DIR/$DB_DUMP" "$BACKUP_DIR/latest.pg_restore"
 else
   echo "Using previous backup of local database"
