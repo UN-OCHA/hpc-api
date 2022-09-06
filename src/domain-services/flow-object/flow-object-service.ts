@@ -7,12 +7,14 @@ import Context from '../Context';
 import { LocationService } from '../location/location-service';
 import { OrganizationService } from '../organization/organization-service';
 import { PlanService } from '../plans/plan-service';
+import { ProjectService } from '../project/project-service';
 import { UsageYearService } from '../usage-year/usage-year-service';
 
 @Service()
 export class FlowObjectService {
   constructor(
     private locationService: LocationService,
+    private projectService: ProjectService,
     private planService: PlanService,
     private organizationService: OrganizationService,
     private usageYearService: UsageYearService
@@ -67,6 +69,15 @@ export class FlowObjectService {
             return [
               'plans',
               await this.planService.findByIds(
+                context.models,
+                flowObjects.map((fo) => fo.objectID)
+              ),
+            ];
+          }
+          if (type === 'project') {
+            return [
+              'projects',
+              await this.projectService.findByIds(
                 context.models,
                 flowObjects.map((fo) => fo.objectID)
               ),
