@@ -1,6 +1,7 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseTypeWithSoftDelete } from '../../base-types';
+import Emergency from '../../emergency/graphql/types';
 import GlobalCluster from '../../global-cluster/graphql/types';
 import GoverningEntity from '../../governing-entity/graphql/types';
 import Location from '../../location/graphql/types';
@@ -11,6 +12,9 @@ import UsageYear from '../../usage-year/graphql/types';
 
 @ObjectType()
 export class FlowObjectsGroupedByType {
+  @Field(() => [Emergency], { nullable: true })
+  emergencies: Emergency[];
+
   @Field(() => [GlobalCluster], { nullable: true })
   globalClusters: GlobalCluster[];
 
