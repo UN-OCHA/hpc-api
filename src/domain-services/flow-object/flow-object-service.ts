@@ -6,6 +6,7 @@ import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { groupBy } from 'lodash';
 import { Service } from 'typedi';
 import Context from '../Context';
+import { EmergencyService } from '../emergency/emergency-service';
 import { GlobalClusterService } from '../global-cluster/global-cluster-service';
 import { GoverningEntityService } from '../governing-entity/governing-entity-service';
 import { LocationService } from '../location/location-service';
@@ -17,6 +18,7 @@ import { UsageYearService } from '../usage-year/usage-year-service';
 @Service()
 export class FlowObjectService {
   constructor(
+    private emergencyService: EmergencyService,
     private globalClusterService: GlobalClusterService,
     private governingEntityService: GoverningEntityService,
     private locationService: LocationService,
@@ -65,6 +67,15 @@ export class FlowObjectService {
     const typedObjects = await Promise.all(
       Object.entries(groupBy(flowObjects, 'objectType')).map(
         async ([type, flowObjects]) => {
+          if (type === 'emergency') {
+            return [
+              'emergencies',
+              await this.emergencyService.findByIds(
+                context.models,
+                flowObjects.map((fo) => fo.objectID)
+              ),
+            ];
+          }
           if (type === 'globalCluster') {
             return [
               'globalClusters',
