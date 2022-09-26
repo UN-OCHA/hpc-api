@@ -117,6 +117,14 @@ DROP SCHEMA public CASCADE; \
   GRANT USAGE ON SCHEMA public to postgres; \
 GRANT CREATE ON SCHEMA public to postgres;" $PG_DB_NAME
 
+# Because we are using Postgre container specified elsewhere,
+# outside of docker-compose.yaml in this repo, we must manually
+# move the downloaded dumps into postgre container.
+# Ideally, local dumps directory should be mounted in PG container's `volumes`
+echo "Copy DB snapshot file to Postgre container"
+docker cp $BACKUP_DIR/$DB_DUMP $PG_CONTAINER:/backups/$DISTANT_ENV/$DB_DUMP
+docker exec -it $PG_CONTAINER ln -sf "/backups/$DISTANT_ENV/$DB_DUMP" "/backups/$DISTANT_ENV/latest.pg_restore"
+
 echo "Restore DB $DB_DUMP to $PG_DB_NAME"
 pwd
 docker exec -i $PG_CONTAINER pg_restore -v -j 4 -U postgres -O -d $PG_DB_NAME /backups/$DISTANT_ENV/$DB_DUMP
