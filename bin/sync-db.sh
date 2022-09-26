@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
 
-usage="$(basename "$0") [-h] [-u username] [-e env] [-k]
+# Wrap your Sesame password in single quotes, which is required
+# when it contains special characters like dollar signs.
+# e.g. ./sync-db.sh -p 'P@$$w0rd' -u developer
+# Alternatively, you can URL-encode it first and use without singe quotes
+
+usage="$(basename "$0") [-h] [-l] -u <username> -p '<password>' [-e env]
 where:
     -h  show this help text
     -u  username to connect through Sesame
-    -l  skip scp connection and use local dump instead
-    -e  set the env (stage or prod, default: stage)
-    -p  Sesame password"
+    -p  Sesame password (wrap in single quotes)
+    -l  skip downloading the dump and use local dump instead
+    -e  set the env (currently, only 'prod' dumps are created)"
 
-
-#set default vars
+# Set default vars
 BACKUP=0
 DISTANT_DUMP_NAME='latest.pg_restore'
 DISTANT_ENV='prod'
@@ -21,7 +25,6 @@ USERNAME=$USER
 
 DB_DUMP="hpc-$DISTANT_ENV-$TIMESTAMP.sql"
 
-#typical usage: ./bin/sync-db.sh -u vincenth -e prod
 while [ "$1" != "" ]; do
   case $1 in
     -u | --username )     shift
@@ -59,8 +62,6 @@ BACKUP_PATH="backups/$DISTANT_ENV"
 BACKUP_DIR="$SCRIPT_DIR/../$BACKUP_PATH"
 
 PG_DB_NAME=$(docker exec $PG_CONTAINER printenv POSTGRES_DB)
-
-echo "$PG_DB_NAME"
 
 if [ $USE_LOCAL_DUMP -eq 0 ]; then
   # Check that jq is installed
@@ -102,7 +103,7 @@ if [ $USE_LOCAL_DUMP -eq 0 ]; then
   ln -sf "$BACKUP_DIR/$DB_DUMP" "$BACKUP_DIR/latest.pg_restore"
 else
   echo "Using previous backup of local database"
-  DB_DUMP="latest.pg_restore"  
+  DB_DUMP="latest.pg_restore"
 fi
 
 echo "Ensure database $PG_DB_NAME exists"
@@ -110,7 +111,6 @@ docker exec -i $PG_CONTAINER psql -U postgres -c "SELECT 1 FROM pg_database WHER
   grep -q 1 || docker exec -i $PG_CONTAINER psql -U postgres -c "CREATE DATABASE $PG_DB_NAME"
 
 echo "Remove and recreate DB"
-echo "$PG_CONTAINER"
 docker exec -i $PG_CONTAINER psql -U postgres -c "\
 DROP SCHEMA public CASCADE; \
   CREATE SCHEMA public; \
@@ -126,7 +126,6 @@ docker cp $BACKUP_DIR/$DB_DUMP $PG_CONTAINER:/backups/$DISTANT_ENV/$DB_DUMP
 docker exec -it $PG_CONTAINER ln -sf "/backups/$DISTANT_ENV/$DB_DUMP" "/backups/$DISTANT_ENV/latest.pg_restore"
 
 echo "Restore DB $DB_DUMP to $PG_DB_NAME"
-pwd
 docker exec -i $PG_CONTAINER pg_restore -v -j 4 -U postgres -O -d $PG_DB_NAME /backups/$DISTANT_ENV/$DB_DUMP
 if [[ $(docker inspect -f {{.State.Running}} $PG_CONTAINER) == 'true' ]]; then
   # Keep only the 5 most recent database backups.
