@@ -63,10 +63,11 @@ PG_DB_NAME=$(docker exec $PG_CONTAINER printenv POSTGRES_DB)
 echo "$PG_DB_NAME"
 
 if [ $USE_LOCAL_DUMP -eq 0 ]; then
-  if [ "${#PASSWORD}" -eq 0 ]; then
-    echo -n "Type in your Sesame password and press enter to continue: ";
-    read -s PASSWORD;
+  if [ -z "${USERNAME}" ] || [ -z "${PASSWORD}" ]; then
+    echo "If not using -l flag, you must provide Sesame username and password to download the file, using -u and -p flags, respectively";
+    exit 1
   fi
+
   echo "Obtaining an authentication token for snapshot access"
   # `--quiet` is used to avoid wget being verbose while fetching the token, because we only need JSON response
   # `–output-document`` (-O) option is used to redirect the content to a file of our choice.
