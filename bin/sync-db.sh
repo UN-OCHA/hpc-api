@@ -63,6 +63,19 @@ PG_DB_NAME=$(docker exec $PG_CONTAINER printenv POSTGRES_DB)
 echo "$PG_DB_NAME"
 
 if [ $USE_LOCAL_DUMP -eq 0 ]; then
+  # Check that jq is installed
+  if ! [ -x "$(command -v jq)" ]; then
+    echo "jq NOT installed"
+    echo "Please see: https://stedolan.github.io/jq/download/"
+    exit 1
+  fi
+
+  # Check that wget is installed
+  if ! [ -x "$(command -v wget)" ]; then
+    echo "wget NOT installed. Please install wget to download latest DB dump or use -l with local dump"
+    exit 1
+  fi
+
   if [ -z "${USERNAME}" ] || [ -z "${PASSWORD}" ]; then
     echo "If not using -l flag, you must provide Sesame username and password to download the file, using -u and -p flags, respectively";
     exit 1
