@@ -106,24 +106,24 @@ else
 fi
 
 echo "Ensure database $PG_DB_NAME exists"
-docker exec -i $PG_CONTAINER psql -U demo -c "SELECT 1 FROM pg_database WHERE datname = '$PG_DB_NAME'" | \
-  grep -q 1 || docker exec -i $PG_CONTAINER psql -U demo -c "CREATE DATABASE $PG_DB_NAME"
+docker exec -i $PG_CONTAINER psql -U postgres -c "SELECT 1 FROM pg_database WHERE datname = '$PG_DB_NAME'" | \
+  grep -q 1 || docker exec -i $PG_CONTAINER psql -U postgres -c "CREATE DATABASE $PG_DB_NAME"
 
 echo "Remove and recreate DB"
 echo "$PG_CONTAINER"
-docker exec -i $PG_CONTAINER psql -U demo -c "\
+docker exec -i $PG_CONTAINER psql -U postgres -c "\
 DROP SCHEMA public CASCADE; \
   CREATE SCHEMA public; \
-  GRANT USAGE ON SCHEMA public to demo; \
-GRANT CREATE ON SCHEMA public to demo;" $PG_DB_NAME
+  GRANT USAGE ON SCHEMA public to postgres; \
+GRANT CREATE ON SCHEMA public to postgres;" $PG_DB_NAME
 
 echo "Restore DB $DB_DUMP to $PG_DB_NAME"
 pwd
-docker exec -i $PG_CONTAINER pg_restore -v -j 4 -U demo -O -d $PG_DB_NAME backups/$DISTANT_ENV/$DB_DUMP
+docker exec -i $PG_CONTAINER pg_restore -v -j 4 -U postgres -O -d $PG_DB_NAME /backups/$DISTANT_ENV/$DB_DUMP
 if [[ $(docker inspect -f {{.State.Running}} $PG_CONTAINER) == 'true' ]]; then
   # Keep only the 5 most recent database backups.
   docker exec -it $PG_CONTAINER sh -c "cd /backups/$DISTANT_ENV && ls -tr | grep '^hpc-$DISTANT_ENV-.*\.sql$' | head -n -5 | xargs rm -f"
 fi
 
 # Install extension locally.
-docker exec -it $PG_CONTAINER psql -U demo -c 'CREATE EXTENSION IF NOT EXISTS unaccent;' demo
+docker exec -it $PG_CONTAINER psql -U postgres -c 'CREATE EXTENSION IF NOT EXISTS unaccent;' hpc
