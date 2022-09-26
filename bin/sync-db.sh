@@ -48,8 +48,8 @@ while [ "$1" != "" ]; do
   shift
 done
 
-PG_CONTAINER=$(docker-compose ps | grep db | awk '{ print $1 }')
-if [[ $(docker inspect -f {{.State.Running}} $PG_CONTAINER) == 'false' ]]; then
+PG_CONTAINER=$(docker ps | grep pgsql | awk '{ print $1 }')
+if [ -z "${PG_CONTAINER}" ] || [ $(docker inspect -f {{.State.Running}} $PG_CONTAINER) == 'false' ]; then
   echo "Your Docker environment is not running. Please start it before running this script."
   exit 1
 fi
