@@ -6,6 +6,20 @@ import { Service } from 'typedi';
 
 @Service()
 export class FlowService {
+  async search(
+    models: Database,
+    params: {
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<InstanceDataOfModel<Database['flow']>[]> {
+    const { limit, offset } = params;
+    return await models.flow.find({
+      limit: limit || 100,
+      offset: offset || 0,
+    });
+  }
+
   async findLatestVersionById(
     models: Database,
     id: number
