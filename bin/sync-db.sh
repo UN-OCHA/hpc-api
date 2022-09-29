@@ -102,6 +102,8 @@ if [ $USE_LOCAL_DUMP -eq 0 ]; then
   wget --header="Authorization: Bearer ${TOKEN}" https://snapshots.aws.ahconu.org/hpc-sync/$DISTANT_ENV/$DISTANT_DUMP_NAME -O "$BACKUP_DIR/$DB_DUMP" || { echo 'Copying database from source failed' ; exit 1; }
   ln -sf "$BACKUP_DIR/$DB_DUMP" "$BACKUP_DIR/latest.pg_restore"
 else
+  docker exec -it $PG_CONTAINER [ ! -e "/backups/$DISTANT_ENV/latest.pg_restore" ] && echo -e "There is no previous backup named \"latest.pg_restore\".\nPlease provide Sesame username and password to download latest $DISTANT_ENV snapshot." && exit 1
+
   echo "Using previous backup of local database"
   DB_DUMP="latest.pg_restore"
 fi
