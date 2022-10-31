@@ -32,5 +32,5 @@ services:
           - api.hpc.vm
 networks:
   service:
-    external:
-      name: hpcservice_service
+    name: hpcservice_service
+    external: true
