@@ -149,10 +149,17 @@ const updateBaseAndVersionModelTags = async (
   }
 
   for (const [versionTagsString, rowIds] of activeRows.entries()) {
+    const versionTags =
+      versionTagsString === '' ? [] : versionTagsString.split(',');
+
+    if (!versionTags.includes(tag.name)) {
+      versionTags.push(tag.name);
+    }
+
     await model.update({
       values: {
         latestTaggedVersion: true,
-        versionTags: [...versionTagsString.split(','), tag.name],
+        versionTags,
         ...(tag.public ? { currentVersion: true } : {}),
       },
       where: { id: { [models.Op.IN]: rowIds } },
@@ -218,15 +225,17 @@ const updateBaseAndVersionModelTags = async (
   }
 
   for (const [versionTagsString, rowIds] of versionTagsMap.entries()) {
-    const versionTags = versionTagsString.split(',');
+    const versionTags =
+      versionTagsString === '' ? [] : versionTagsString.split(',');
+
+    if (!versionTags.includes(tag.name)) {
+      versionTags.push(tag.name);
+    }
 
     await versionModel.update({
       values: {
         latestTaggedVersion: true,
-        versionTags: [
-          ...versionTags,
-          ...(versionTags.includes(tag.name) ? [] : [tag.name]),
-        ],
+        versionTags,
         ...(tag.public ? { currentVersion: true } : {}),
       },
       where: { id: { [models.Op.IN]: rowIds } },
@@ -291,7 +300,10 @@ const updateBaseModelTags = async (
       await model.update({
         values: {
           latestTaggedVersion: true,
-          versionTags: [...baseRow.versionTags, tag.name],
+          versionTags: [
+            ...baseRow.versionTags,
+            ...(baseRow.versionTags.includes(tag.name) ? [] : [tag.name]),
+          ],
           ...(tag.public ? { currentVersion: true } : {}),
         },
         where: { id: createBrandedValue(baseRow.id) },
