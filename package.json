@@ -19,7 +19,7 @@
     "@unocha/hpc-api-core": "^4.4.4",
     "apollo-server-hapi": "^3.10.0",
     "bunyan": "^1.8.15",
-    "class-validator": "^0.13.2",
+    "class-validator": "^0.14.0",
     "graphql": "^15.7.2",
     "knex": "0.21.1",
     "pg": "^8.7.3",
