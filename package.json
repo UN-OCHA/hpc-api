@@ -38,7 +38,7 @@
     "@unocha/hpc-repo-tools": "^1.2.0",
     "eslint": "^8.31.0",
     "husky": "^8.0.3",
-    "lint-staged": "^13.0.3",
+    "lint-staged": "^13.1.0",
     "prettier": "2.7.1",
     "ts-node-dev": "^2.0.0"
   },
