@@ -10,7 +10,7 @@
     "install-and-link": "sh ./bin/install.sh",
     "start": "pm2 start start.js --no-daemon",
     "dev": "ts-node-dev --inspect=127.0.0.1:9339 --transpile-only --no-notify -- start.js",
-    "prepare": "husky install",
+    "prepare": "[ -d .git ] && git config blame.ignoreRevsFile .git-blame-ignore-revs; husky install",
     "lint-prettier": "prettier -c .",
     "lint-eslint": "eslint --quiet .",
     "lint": "yarn lint-prettier && yarn lint-eslint"
