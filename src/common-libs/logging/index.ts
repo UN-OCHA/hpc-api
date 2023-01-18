@@ -20,7 +20,7 @@ interface LoggingConfig {
 
 const LOGGING_MODES = ['live', 'liveDetailed', 'devServer', 'test'] as const;
 
-type LoggingMode = typeof LOGGING_MODES[number];
+type LoggingMode = (typeof LOGGING_MODES)[number];
 
 const isLoggingMode = (mode: string): mode is LoggingMode =>
   LOGGING_MODES.indexOf(mode as LoggingMode) > -1;
