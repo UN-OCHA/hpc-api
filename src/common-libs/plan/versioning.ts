@@ -48,8 +48,10 @@ const baseAndVersionModels = [
   'planEntity',
 ] as const;
 
-type BaseOnlyModels = typeof baseOnlyModels[number];
-type BaseAndVersionModels = typeof baseAndVersionModels[number] | 'measurement';
+type BaseOnlyModels = (typeof baseOnlyModels)[number];
+type BaseAndVersionModels =
+  | (typeof baseAndVersionModels)[number]
+  | 'measurement';
 
 type IdType<T extends BaseAndVersionModels> = `${T}Id`;
 
