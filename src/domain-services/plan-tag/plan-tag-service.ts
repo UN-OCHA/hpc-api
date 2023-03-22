@@ -60,7 +60,6 @@ export class PlanTagService {
       type: planTag.type,
       reportingPeriods: planTag.reportingPeriodIds,
     });
-    await updateLastPublishedReportingPeriodId(models, createdPlanTag);
 
     const reportingPeriodIds = Array.isArray(planTag.reportingPeriodIds)
       ? planTag.reportingPeriodIds.map(createBrandedValue)
@@ -69,6 +68,11 @@ export class PlanTagService {
       models,
       createdPlanTag,
       planTag.publishMeasurements,
+      reportingPeriodIds
+    );
+    await updateLastPublishedReportingPeriodId(
+      models,
+      createdPlanTag,
       reportingPeriodIds
     );
 
