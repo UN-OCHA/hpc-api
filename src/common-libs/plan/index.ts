@@ -1,4 +1,5 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
+import { PlanReportingPeriodId } from '@unocha/hpc-api-core/src/db/models/planReportingPeriod';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { AddPlanTagInput } from '../../domain-services/plan-tag/graphql/types';
@@ -88,38 +89,62 @@ const getAssociatedPlanVersion = async (
   return associatedPlanVersion;
 };
 
+/**
+ * Finds if any of the newly published reporting periods are higher
+ * (by looking at period number) then what's already stored as
+ * `lastPublishedReportingPeriodId`. Then, updates
+ * `planVersion.lastPublishedReportingPeriodId` if needed.
+ *
+ * Before actually updating the said field, this method checks
+ * whether measurements are already published for determined
+ * highest monitoring period.
+ */
 export const updateLastPublishedReportingPeriodId = async (
   models: Database,
-  planTag: InstanceDataOfModel<Database['planTag']>
+  planTag: InstanceDataOfModel<Database['planTag']>,
+  newlyPublishedReportingPeriodIds: PlanReportingPeriodId[]
 ) => {
+  const associatedPlanVersion = await getAssociatedPlanVersion(models, planTag);
+  const currentPublishedReportingPeriodId =
+    associatedPlanVersion.lastPublishedReportingPeriodId;
   const reportingPeriods = await models.planReportingPeriod.find({
     where: {
+      id: {
+        [models.Op.IN]: [
+          ...newlyPublishedReportingPeriodIds,
+          ...(currentPublishedReportingPeriodId
+            ? [createBrandedValue(currentPublishedReportingPeriodId)]
+            : []),
+        ],
+      },
       planId: planTag.planId,
       measurementsGenerated: true,
     },
-    orderBy: { column: 'periodNumber', order: 'desc' },
   });
 
   if (!reportingPeriods.length) {
     return;
   }
 
-  const latestReportingPeriodId = reportingPeriods[0].id;
+  const latestPublishedReportingPeriod = reportingPeriods.reduce((acc, curr) =>
+    (curr.periodNumber ?? -1) > (acc.periodNumber ?? -1) ? curr : acc
+  );
+
+  if (latestPublishedReportingPeriod.id === currentPublishedReportingPeriodId) {
+    return;
+  }
+
   const publishedMeasurements = await models.measurement.find({
     where: {
-      planReportingPeriodId: latestReportingPeriodId,
+      planReportingPeriodId: latestPublishedReportingPeriod.id,
       versionTags: { [models.Op.NOT_IN]: [['{}']] },
     },
   });
 
   if (publishedMeasurements.length) {
-    const associatedPlanVersion = await getAssociatedPlanVersion(
-      models,
-      planTag
-    );
     await models.planVersion.update({
       values: {
-        lastPublishedReportingPeriodId: latestReportingPeriodId,
+        lastPublishedReportingPeriodId: latestPublishedReportingPeriod.id,
       },
       where: {
         id: associatedPlanVersion.id,
