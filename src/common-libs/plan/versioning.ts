@@ -308,7 +308,9 @@ const updateBaseModelTags = async (
           ],
           ...(tag.public ? { currentVersion: true } : {}),
         },
-        where: { id: createBrandedValue(baseRow.id) },
+        where: {
+          [models.Cond.OR]: [{ id: createBrandedValue(baseRow.id) }],
+        },
       });
     } else {
       inactiveRows.push(createBrandedValue(baseRow.id));
