@@ -1,4 +1,4 @@
-FROM public.ecr.aws/unocha/nodejs:16-alpine
+FROM public.ecr.aws/unocha/nodejs:18-alpine
 
 RUN apk add -U build-base python3 py-pip
 
