@@ -1,6 +1,6 @@
 {
   "name": "hpc-api",
-  "version": "4.3.11",
+  "version": "4.4.0",
   "description": "api for HPC applications",
   "main": "src/server.ts",
   "license": "MIT",
@@ -16,7 +16,7 @@
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^5.0.0",
+    "@unocha/hpc-api-core": "^6.0.0",
     "apollo-server-hapi": "^3.12.0",
     "bunyan": "^1.8.15",
     "class-validator": "^0.14.0",
@@ -28,22 +28,22 @@
     "ts-node": "^10.9.1",
     "type-graphql": "^1.1.1",
     "typedi": "^0.10.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "@hapi/hapi": "^20.2.1",
     "@types/bunyan": "^1.8.8",
     "@types/hapi__hapi": "^20.0.9",
-    "@types/node": "^18.16.2",
-    "@unocha/hpc-repo-tools": "^2.0.0",
-    "eslint": "^8.39.0",
+    "@types/node": "^18.16.19",
+    "@unocha/hpc-repo-tools": "^3.0.1",
+    "eslint": "^8.44.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.2",
     "prettier": "2.8.8",
     "ts-node-dev": "^2.0.0"
   },
   "engines": {
-    "node": ">=16.13.0",
+    "node": ">=18.16.1",
     "yarn": ">=1.22.10"
   },
   "lint-staged": {
