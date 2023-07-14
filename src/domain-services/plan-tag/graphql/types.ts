@@ -1,5 +1,5 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
-import { MaxLength } from 'class-validator';
+import { IsEnum, MaxLength } from 'class-validator';
 import {
   Field,
   ID,
@@ -51,7 +51,7 @@ export default class PlanTag {
   comments: string;
 
   @Field({ nullable: true })
-  @MaxLength(255)
+  @IsEnum(RevisionState)
   revisionState: RevisionState;
 }
 
@@ -72,7 +72,7 @@ export class AddPlanTagInput implements Partial<PlanTag> {
   comments: string;
 
   @Field({ nullable: true })
-  @MaxLength(255)
+  @IsEnum(RevisionState)
   revisionState: RevisionState;
 
   @Field(() => [ID], { nullable: true })
