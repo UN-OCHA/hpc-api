@@ -15,8 +15,18 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strictPropertyInitialization": false,
-    "strict": true
+    "strict": true,
+    "baseUrl": "external/hpc_cdm",
+    "paths": {
+      "@unocha/hpc-core": ["libs/hpc-core/src/"],
+      "@unocha/hpc-data": ["libs/hpc-data/src/"],
+      "@unocha/hpc-live/lib/model": ["libs/hpc-live/src/lib/model"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "start.js", "bin"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts", "src/**/*.js", "start.js", "bin", "external"],
+  "exclude": [
+    "node_modules",
+    "external/hpc_cdm/node_modules",
+    "external/hpc_cdm/tmp"
+  ]
 }
