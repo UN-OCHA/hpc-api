@@ -9,20 +9,24 @@ import {
   Query,
   Resolver,
   Root,
+  Int,
 } from 'type-graphql';
 import { Service } from 'typedi';
 import Context from '../../Context';
 import { FlowObjectService } from '../../flow-object/flow-object-service';
 import { FlowService } from '../flow-service';
-import { Flow } from './types';
+import { Flow, FlowFilters } from './types';
 
 @ArgsType()
 class SearchFlowsArgs {
-  @Field()
+  @Field(() => Int, { nullable: true })
   limit?: number;
 
-  @Field()
+  @Field(() => Int, { nullable: true })
   offset?: number;
+
+  @Field({ nullable: true })
+  filters?: FlowFilters;
 }
 
 @Service()

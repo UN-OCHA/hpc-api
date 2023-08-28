@@ -3,6 +3,7 @@ import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model'
 import { NotFoundError } from '@unocha/hpc-api-core/src/util/error';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
+import { FlowFilters } from './graphql/types';
 
 @Service()
 export class FlowService {
@@ -11,13 +12,22 @@ export class FlowService {
     params: {
       limit?: number;
       offset?: number;
+      filters?: FlowFilters;
     }
   ): Promise<InstanceDataOfModel<Database['flow']>[]> {
-    const { limit, offset } = params;
-    return await models.flow.find({
+    const { limit, offset, filters } = params;
+    const findParams: {
+      limit?: number;
+      offset?: number;
+      where?: any;
+    } = {
       limit: limit || 100,
       offset: offset || 0,
-    });
+    };
+    if (filters) {
+      findParams.where = filters;
+    }
+    return await models.flow.find({ ...findParams });
   }
 
   async findLatestVersionById(

@@ -1,5 +1,5 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, InputType, Int, ObjectType } from 'type-graphql';
 import { BaseTypeWithSoftDelete } from '../../base-types';
 import Emergency from '../../emergency/graphql/types';
 import GlobalCluster from '../../global-cluster/graphql/types';
@@ -110,4 +110,31 @@ export class Flow extends BaseTypeWithSoftDelete {
 
   @Field()
   flowObjects: FlowObjectsGroupedByRefDirection;
+}
+
+@InputType()
+export class FlowFilters {
+  @Field(() => [String], { nullable: true })
+  destinationDetailsCountry?: string[];
+
+  @Field(() => [String], { nullable: true })
+  destinationOrganizations?: string[];
+
+  @Field(() => [String], { nullable: true })
+  destinationUsageYears?: string[];
+
+  @Field(() => [String], { nullable: true })
+  sourceCountry?: string[];
+
+  @Field(() => [String], { nullable: true })
+  sourceOrganizations?: string[];
+
+  @Field(() => [String], { nullable: true })
+  sourceUsageYears?: string[];
+
+  @Field(() => Int, { nullable: true })
+  amountUSD?: number;
+
+  @Field(() => String, { nullable: true })
+  id?: string;
 }
