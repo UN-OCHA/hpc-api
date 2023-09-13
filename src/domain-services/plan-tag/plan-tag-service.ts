@@ -9,7 +9,7 @@ import {
   updateLastPublishedReportingPeriodId,
 } from '../../common-libs/plan';
 import { updateVersionStates } from '../../common-libs/plan/versioning';
-import { AddPlanTagInput } from './graphql/types';
+import { AddPlanTagInput, RevisionState } from './graphql/types';
 
 @Service()
 export class PlanTagService {
@@ -51,11 +51,15 @@ export class PlanTagService {
       },
     });
 
+    // if revision state is not set, default to planDataOnly
+    // this will mainly happen when is the first tag for a plan
+    const revisionState = planTag.revisionState || RevisionState.planDataOnly;
+
     const createdPlanTag = await models.planTag.create({
       name: await getNextTag(models, planTag),
       public: true,
       planId: createBrandedValue(planTag.planId),
-      revisionState: planTag.revisionState,
+      revisionState: revisionState,
       comment: planTag.comments,
       type: planTag.type,
       reportingPeriods: planTag.reportingPeriodIds,
