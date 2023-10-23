@@ -44,7 +44,7 @@ export default class ContextProvider implements IContext {
   private async createDbTestConnection(): Promise<Knex<any, unknown[]>> {
     return await createDbConnection({
       host: 'localhost',
-      port: 6432,
+      port: 5432,
       user: 'postgres',
       database: 'hpc-test',
     });
