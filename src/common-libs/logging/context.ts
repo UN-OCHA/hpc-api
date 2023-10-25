@@ -35,10 +35,10 @@ export class LogContext implements LogContextInterface<LogData> {
     const data: LogDataAfterContextProcessing = merge(
       {},
       this.context,
-      opts?.data || {},
+      opts?.data ?? {},
       opts?.error
         ? {
-            stackTrace: opts.error.stack || format(opts.error),
+            stackTrace: opts.error.stack ?? format(opts.error),
           }
         : {}
     );

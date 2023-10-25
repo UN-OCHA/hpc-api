@@ -141,7 +141,7 @@ export const initializeLogging = async (): Promise<LogContext> => {
   }
 
   const logger = bunyan.createLogger({
-    name: CONFIG.name || 'hpc-api',
+    name: CONFIG.name ?? 'hpc-api',
     streams,
   });
 

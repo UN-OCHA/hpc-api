@@ -15,23 +15,23 @@ export const CONFIG = {
       },
     },
     local: {
-      uploadDirectory: process.env.UPLOAD_DIRECTORY || 'media',
+      uploadDirectory: process.env.UPLOAD_DIRECTORY ?? 'media',
     },
   },
-  mediaURI: process.env.MEDIA_PATH || 'media',
+  mediaURI: process.env.MEDIA_PATH ?? 'media',
   uploadTo: 'aws',
   name: process.env.NODE_ENV,
   authBaseUrl: process.env.AUTHBASE_URL,
   db: {
     connection: process.env.POSTGRES_SERVER,
-    logging: !!parseInt(process.env.POSTGRES_LOGGING || ''),
+    logging: !!parseInt(process.env.POSTGRES_LOGGING ?? ''),
     poolMin: 2,
     poolMax: 10,
     poolIdle: 10_000,
   },
   logging: {
-    mode: process.env.LOG_MODE || 'live',
-    path: process.env.LOG_PATH || '/var/log/api/api.log',
+    mode: process.env.LOG_MODE ?? 'live',
+    path: process.env.LOG_PATH ?? '/var/log/api/api.log',
     color:
       process.env.LOG_COLOR === undefined
         ? undefined
