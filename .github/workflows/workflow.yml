@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
@@ -23,7 +23,7 @@ jobs:
 
       - name: Login to Public ECR
         if: ${{ github.actor != 'dependabot[bot]' }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: public.ecr.aws
           username: ${{ secrets.HPC_ECR_AWS_ACCESS_KEY_ID }}
