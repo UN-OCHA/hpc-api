@@ -27,7 +27,7 @@ export const CONFIG = {
     logging: !!parseInt(process.env.POSTGRES_LOGGING || ''),
     poolMin: 2,
     poolMax: 10,
-    poolIdle: 10000,
+    poolIdle: 10_000,
   },
   logging: {
     mode: process.env.LOG_MODE || 'live',

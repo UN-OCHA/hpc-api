@@ -1,6 +1,6 @@
-import { PlanTagId } from '@unocha/hpc-api-core/src/db/models/planTag';
-import { Database } from '@unocha/hpc-api-core/src/db/type';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type PlanTagId } from '@unocha/hpc-api-core/src/db/models/planTag';
+import { type Database } from '@unocha/hpc-api-core/src/db/type';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import {
@@ -9,7 +9,7 @@ import {
   updateLastPublishedReportingPeriodId,
 } from '../../common-libs/plan';
 import { updateVersionStates } from '../../common-libs/plan/versioning';
-import { AddPlanTagInput } from './graphql/types';
+import { type AddPlanTagInput } from './graphql/types';
 
 @Service()
 export class PlanTagService {
@@ -29,7 +29,7 @@ export class PlanTagService {
   async findByPlanId(
     models: Database,
     planId: number
-  ): Promise<InstanceDataOfModel<Database['planTag']>[]> {
+  ): Promise<Array<InstanceDataOfModel<Database['planTag']>>> {
     return await models.planTag.find({
       where: {
         planId: createBrandedValue(planId),

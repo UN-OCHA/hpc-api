@@ -33,10 +33,13 @@
 
 import type { Database } from '@unocha/hpc-api-core/src/db';
 import type { PlanReportingPeriodId } from '@unocha/hpc-api-core/src/db/models/planReportingPeriod';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
-import { InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { groupObjectsByProperty } from '@unocha/hpc-api-core/src/util';
-import { Brand, createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import {
+  createBrandedValue,
+  type Brand,
+} from '@unocha/hpc-api-core/src/util/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyModelId = Brand<number, any, any>;
@@ -121,7 +124,7 @@ export const updateVersionStates = async (
 const updateBaseAndVersionModelTags = async (
   models: Database,
   tableName: BaseAndVersionModels,
-  baseRows: InstanceDataOfModel<Database[BaseAndVersionModels]>[],
+  baseRows: Array<InstanceDataOfModel<Database[BaseAndVersionModels]>>,
   tag: Pick<
     InstanceDataOfModel<Database['planTag']>,
     'createdAt' | 'planId' | 'public' | 'name'
@@ -131,7 +134,7 @@ const updateBaseAndVersionModelTags = async (
   const versionModel = models[`${tableName}Version`];
   const idField = `${tableName}Id` as IdType<BaseAndVersionModels>;
 
-  const activeRows: Map<string, Set<AnyModelId>> = new Map();
+  const activeRows = new Map<string, Set<AnyModelId>>();
   const inactiveRows: AnyModelId[] = [];
 
   for (const baseRow of baseRows) {
@@ -215,7 +218,7 @@ const updateBaseAndVersionModelTags = async (
     skipValidation: skipMeasurementsValidation(tableName),
   });
 
-  const versionTagsMap: Map<string, Set<AnyModelId>> = new Map();
+  const versionTagsMap = new Map<string, Set<AnyModelId>>();
 
   for (const latestVersion of latestVersions) {
     const rowKey = latestVersion.versionTags.join(',');

@@ -1,8 +1,8 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
-import { PlanReportingPeriodId } from '@unocha/hpc-api-core/src/db/models/planReportingPeriod';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type Database } from '@unocha/hpc-api-core/src/db';
+import { type PlanReportingPeriodId } from '@unocha/hpc-api-core/src/db/models/planReportingPeriod';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import { AddPlanTagInput } from '../../domain-services/plan-tag/graphql/types';
+import { type AddPlanTagInput } from '../../domain-services/plan-tag/graphql/types';
 
 export const getNextTag = async (
   models: Database,

@@ -21,7 +21,7 @@ export async function createDbConnetion() {
     await knex.raw('SELECT now()');
 
     return knex;
-  } catch (error) {
+  } catch {
     throw new Error(
       'Unable to connect to Postgres via Knex. Ensure a valid connection.'
     );

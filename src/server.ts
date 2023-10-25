@@ -4,7 +4,7 @@ import {
   ApolloServer,
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
-import { join } from 'path';
+import { join } from 'node:path';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';

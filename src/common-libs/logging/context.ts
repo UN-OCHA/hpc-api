@@ -1,9 +1,9 @@
-import bunyan from 'bunyan';
-import { format } from 'util';
-import { LogData, LogDataAfterContextProcessing } from './data';
+import type bunyan from 'bunyan';
+import { format } from 'node:util';
+import type { LogData, LogDataAfterContextProcessing } from './data';
 import merge = require('lodash/merge');
 
-import {
+import type {
   LogContext as LogContextInterface,
   LogMethod,
 } from '@unocha/hpc-api-core/src/lib/logging';

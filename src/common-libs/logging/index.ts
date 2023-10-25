@@ -1,11 +1,11 @@
 import bunyan from 'bunyan';
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { format } from 'util';
+import { promises as fs } from 'node:fs';
+import * as path from 'node:path';
+import { format } from 'node:util';
 
 import { CONFIG } from '../../../config';
 import { LogContext } from './context';
-import { LogDataAfterBunyanProcessing } from './data';
+import { type LogDataAfterBunyanProcessing } from './data';
 import { printLog } from './printing';
 
 interface LoggingConfig {
@@ -23,7 +23,7 @@ const LOGGING_MODES = ['live', 'liveDetailed', 'devServer', 'test'] as const;
 type LoggingMode = (typeof LOGGING_MODES)[number];
 
 const isLoggingMode = (mode: string): mode is LoggingMode =>
-  LOGGING_MODES.indexOf(mode as LoggingMode) > -1;
+  LOGGING_MODES.includes(mode as LoggingMode);
 
 /**
  * Standard logging configurations
@@ -86,8 +86,8 @@ const isLogDirectoryReady = async () => {
     } else {
       return true;
     }
-  } catch (e) {
-    if (isNodeError(e) && e.code === 'ENOENT') {
+  } catch (error) {
+    if (isNodeError(error) && error.code === 'ENOENT') {
       console.error(
         `Unable to write log file at ${CONFIG.logging.path}, directory doesn't exist`
       );
@@ -112,20 +112,20 @@ export const initializeLogging = async (): Promise<LogContext> => {
     level: 0,
     stream: {
       write: (obj: LogDataAfterBunyanProcessing) => {
-        listeners.forEach((l) => l(obj));
+        for (const l of listeners) {
+          l(obj);
+        }
       },
     } as any,
   };
 
   const streams: bunyan.Stream[] = [loggingListenerStream];
 
-  if (logConfig.writeToFile) {
-    if (await isLogDirectoryReady()) {
-      streams.push({
-        level: logConfig.writeToFile,
-        path: CONFIG.logging.path,
-      });
-    }
+  if (logConfig.writeToFile && (await isLogDirectoryReady())) {
+    streams.push({
+      level: logConfig.writeToFile,
+      path: CONFIG.logging.path,
+    });
   }
 
   if (logConfig.writeToStdout) {
