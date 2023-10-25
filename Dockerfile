@@ -1,4 +1,4 @@
-FROM public.ecr.aws/unocha/nodejs:18-alpine
+FROM public.ecr.aws/unocha/nodejs:20-alpine
 
 ARG COMMIT_SHA
 ARG TREE_SHA
