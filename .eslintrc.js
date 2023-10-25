@@ -11,6 +11,7 @@ module.exports = {
     {
       files: ['*.{ts,tsx}'],
       rules: {
+        '@typescript-eslint/no-explicit-any': 'warn',
         'unicorn/prefer-module': 'off',
       },
     },
