@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres:14.8-alpine3.18
+    ports:
+      - 6432:5432
+    environment:
+      - POSTGRES_DB=hpc-test
+      - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - ./migration/schema-2024-03-13.sql:/docker-entrypoint-initdb.d/init.sql
