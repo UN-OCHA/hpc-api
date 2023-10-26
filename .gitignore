@@ -17,6 +17,5 @@ package-lock.json
 test-data/*
 data/*
 .env
-.vscode
 *.sublime-project
 *.sublime-workspace

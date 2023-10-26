@@ -1,12 +1,12 @@
 root=$(pwd)
 
 #Global variables
-USAGE='this is the usage'
-DEBUG_USAGE='this is the debug usage'
+USAGE='Usage: test.sh [options] [-- [options]].\n Options:\n   -oc, --only-containers: only start docker containers\n    -sc, --stop-containers: stop docker containers\n    -k, --keep: keep jest runing after the completion of the tests suites\n    -c: run tests with coverage\n   -h, --help: show this help message\n    --: pass extra options'
 KEEP=0
+FORCE_STOP_JEST='--forceExit'
 ONLY_CONTAINERS=0
 STOP_CONTAINERSq=0
-COMMAND_ARGS='--'
+COMMAND_ARGS=''
 
 function moveToTestDir {
     echo 'Moving to tests dir'
@@ -21,22 +21,21 @@ function moveToRootDir {
 ## obtain options
 while [ "$1" != "" ]; do
   case $1 in
-    -d | --debug )        echo "Debug usage"
-                          echo "$DEBUG_USAGE"
-                          exit 0
-                          ;;
     -oc | --only-containers )  ONLY_CONTAINERS=1
                           ;;
     -sc | --stop-containers )  STOP_CONTAINERS=1
                           ;;
     -k | --keep )     KEEP=1
                           ;;
+    -c)                   shift
+                          COMMAND_ARGS="${COMMAND_ARGS} --coverage"
+                          ;;
     -h | --help )         echo "$USAGE"
                           exit
                           ;;
     --)                   shift
                           while [ "$1" != "" ]; do
-                            COMMAND_ARGS="${COMMAND_ARGS} $1"
+                            COMMAND_ARGS="${COMMAND_ARGS} -- $1"
                             shift
                           done
                           ;;
@@ -73,7 +72,12 @@ fi
 ## run tests
 echo 'Running tests'
 moveToRootDir
-yarn jest
+
+if [ $KEEP -eq 0 ]; then
+    FORCE_STOP_JEST=''
+fi
+
+yarn jest $COMMAND_ARGS $FORCE_STOP_JEST
 
 if [ $KEEP -eq 0 ]; then
     ## stop docker containers
