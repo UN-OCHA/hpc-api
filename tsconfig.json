@@ -17,6 +17,12 @@
     "strictPropertyInitialization": false,
     "strict": true
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "start.js", "bin"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "start.js",
+    "bin",
+    "jest.config.ts"
+  ],
   "exclude": ["node_modules"]
 }
