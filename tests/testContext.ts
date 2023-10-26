@@ -52,10 +52,10 @@ export default class ContextProvider implements IContext {
         poolIdle: 1,
         connection: {
           host: 'localhost',
-          port: 6432,
+          port: 5432,
           user: 'postgres',
-          password: 'test',
-          database: 'test',
+          password: '',
+          database: 'hpc',
         },
       },
     });

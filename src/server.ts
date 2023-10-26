@@ -30,6 +30,8 @@ declare module '@hapi/hapi' {
   }
 }
 
+let dbConnection: Knex;
+
 async function startServer() {
   const rootLogContext = await initializeLogging();
 
@@ -38,7 +40,7 @@ async function startServer() {
     container: Container, // Register the 3rd party IOC container
   });
 
-  const dbConnection = await createDbConnetion();
+  dbConnection = await createDbConnetion();
 
   const hapiServer = Hapi.server({
     port: CONFIG.httpPort,
@@ -79,3 +81,5 @@ async function startServer() {
 }
 
 startServer().catch((error) => console.error(error));
+
+export { dbConnection };

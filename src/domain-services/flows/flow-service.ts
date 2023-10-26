@@ -4,6 +4,8 @@ import { Database } from '@unocha/hpc-api-core/src/db/type';
 import { Brand, createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+
+import { dbConnection } from '../../server';
 @Service()
 export class FlowService {
   async search(
@@ -22,8 +24,9 @@ export class FlowService {
 
     let flows = await models.flow.find({
       orderBy: sortCondition,
+      limit: first,
     });
-    const count = flows.length;
+    const count = await dbConnection.raw('SELECT COUNT(*) FROM flow');
 
     if (afterCursor) {
       const after = flows.findIndex(
@@ -75,7 +78,10 @@ export class FlowService {
     });
   }
 
-  private async getFlowCategories(flow: any, models: Database): Promise<string[]> {
+  private async getFlowCategories(
+    flow: any,
+    models: Database
+  ): Promise<string[]> {
     const flowIdBranded = createBrandedValue(flow.id);
     const flowLinks = await models.flowLink.find({
       where: {
