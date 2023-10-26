@@ -16,6 +16,5 @@ package-lock.json
 .smbdelete*
 test-data/*
 .env
-.vscode
 *.sublime-project
 *.sublime-workspace
