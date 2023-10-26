@@ -4,8 +4,8 @@ import { LogData, LogDataAfterContextProcessing } from './data';
 import merge = require('lodash/merge');
 
 import {
-  LogMethod,
   LogContext as LogContextInterface,
+  LogMethod,
 } from '@unocha/hpc-api-core/src/lib/logging';
 
 export type LogContextHandler = (

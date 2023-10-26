@@ -1,11 +1,11 @@
-import Context from '../../Context';
-import Location from './types';
 import { Database } from '@unocha/hpc-api-core/src/db/type';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
-import { LocationService } from '../location-service';
 import { MinLength } from 'class-validator';
-import { Service } from 'typedi';
 import { Arg, Args, ArgsType, Ctx, Field, Query, Resolver } from 'type-graphql';
+import { Service } from 'typedi';
+import Context from '../../Context';
+import { LocationService } from '../location-service';
+import Location from './types';
 
 @ArgsType()
 class SearchLocationsArgs {

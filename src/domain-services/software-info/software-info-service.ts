@@ -1,6 +1,6 @@
 import { Service } from 'typedi';
-import SoftwareInfo from './graphql/types';
 import { version } from '../../../package.json';
+import SoftwareInfo from './graphql/types';
 
 @Service()
 export class SoftwareInfoService {

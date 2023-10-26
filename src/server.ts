@@ -1,20 +1,20 @@
-import 'reflect-metadata';
 import * as Hapi from '@hapi/hapi';
+import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import {
   ApolloServer,
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
-import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
-import Knex = require('knex');
 import { join } from 'path';
+import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
+import Knex = require('knex');
 
-import { CONFIG } from '../config';
-import { createDbConnetion } from './data-providers/postgres';
 import v4Models from '@unocha/hpc-api-core/src/db';
+import { CONFIG } from '../config';
 import { getTokenFromRequest } from './common-libs/auth';
 import { initializeLogging } from './common-libs/logging';
+import { createDbConnetion } from './data-providers/postgres';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {

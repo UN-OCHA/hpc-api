@@ -1,7 +1,7 @@
 import bunyan from 'bunyan';
-import { format } from 'util';
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import { format } from 'util';
 
 import { CONFIG } from '../../../config';
 import { LogContext } from './context';

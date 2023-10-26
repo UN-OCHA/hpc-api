@@ -1,7 +1,7 @@
 import { Database } from '@unocha/hpc-api-core/src/db/type';
-import { Service } from 'typedi';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { Service } from 'typedi';
 
 @Service()
 export class LocationService {
