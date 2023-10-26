@@ -22,7 +22,8 @@
     "src/**/*.js",
     "start.js",
     "bin",
-    "jest.config.ts"
+    "jest.config.ts",
+    "tests/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
