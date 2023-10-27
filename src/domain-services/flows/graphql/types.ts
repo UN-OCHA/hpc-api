@@ -1,6 +1,18 @@
 import { Field, ObjectType } from 'type-graphql';
 
 @ObjectType()
+export class FlowCategory {
+  @Field({ nullable: false })
+  id: number;
+
+  @Field({ nullable: false })
+  name: string;
+
+  @Field({ nullable: false })
+  group: string;
+}
+
+@ObjectType()
 export default class Flow {
   @Field({ nullable: false })
   id: number;
@@ -11,17 +23,8 @@ export default class Flow {
   @Field({ nullable: false })
   createdAt: Date;
 
-  @Field({ nullable: true })
-  category: string;
-}
-
-@ObjectType()
-export class FlowCategory {
-  @Field({ nullable: false })
-  id: number;
-
-  @Field({ nullable: false })
-  name: string;
+  @Field(() => [FlowCategory], { nullable: false })
+  categories: FlowCategory[];
 }
 
 @ObjectType()
@@ -32,6 +35,7 @@ export class FlowEdge {
   @Field({ nullable: false })
   cursor: string;
 }
+
 @ObjectType()
 export class PageInfo {
   @Field({ nullable: false })
