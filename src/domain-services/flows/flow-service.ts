@@ -9,12 +9,20 @@ import {
   FlowUsageYear,
 } from './graphql/types';
 import { Database } from '@unocha/hpc-api-core/src/db/type';
-import { Brand, createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { OrganizationService } from '../organizations/organization-service';
+import { LocationService } from '../location/location-service';
+import { PlanService } from '../plans/plan-service';
+import { UsageYearService } from '../usage-years/usage-year-service';
 
 @Service()
 export class FlowService {
+  constructor(private readonly organizationService: OrganizationService,
+    private readonly locationService: LocationService,
+    private readonly planService: PlanService,
+    private readonly usageYearService: UsageYearService) {}
+
   async search(
     models: Database,
     first: number,
@@ -49,18 +57,12 @@ export class FlowService {
     const pagedData = flows.slice(afterIndex, afterIndex + first);
     const edges = await Promise.all(
       pagedData.map(async (flow) => {
-        const flowIdBranded = createBrandedValue(flow.id);
-
         const categories: FlowCategory[] = await this.getFlowCategories(
           flow,
           models
         );
 
-        const flowObjects = await models.flowObject.find({
-          where: {
-            flowID: flowIdBranded,
-          },
-        });
+        const flowObjects = await this.getFlowObjects(flow, models);
 
         const organizationsFO: any[] = [];
         const locationsFO: any[] = [];
@@ -79,19 +81,19 @@ export class FlowService {
           }
         });
 
-        const organizations: FlowOrganization[] = await this.getOrganizations(
+        const organizations: FlowOrganization[] = await this.organizationService.getFlowObjectOrganizations(
           organizationsFO,
           models
         );
 
-        const locations: FlowLocation[] = await this.getLocations(
+        const locations: FlowLocation[] = await this.locationService.getFlowObjectLocations(
           locationsFO,
           models
         );
 
-        const plans = await this.getPlans(plansFO, models);
+        const plans = await this.planService.getFlowObjectPlans(plansFO, models);
 
-        const usageYears = await this.getUsageYears(usageYearsFO, models);
+        const usageYears = await this.usageYearService.getFlowObjectUsageYears(usageYearsFO, models);
 
         return {
           node: {
@@ -165,93 +167,14 @@ export class FlowService {
     }));
   }
 
-  private async getOrganizations(
-    organizationsFO: any[],
-    models: Database
-  ): Promise<FlowOrganization[]> {
-    const organizations = await models.organization.find({
+  private async getFlowObjects(flow: any, models: Database): Promise<any[]> {
+    const flowIdBranded = createBrandedValue(flow.id);
+    const flowObjects = await models.flowObject.find({
       where: {
-        id: {
-          [Op.IN]: organizationsFO.map((orgFO) => orgFO.objectID),
-        },
+        flowID: flowIdBranded,
       },
     });
 
-    return organizations.map((org) => ({
-      id: org.id,
-      refDirection: organizationsFO.find((orgFO) => orgFO.objectID === org.id)
-        .refDirection,
-      name: org.name,
-    }));
+    return flowObjects;
   }
-
-  private async getLocations(
-    locationsFO: any[],
-    models: Database
-  ): Promise<FlowLocation[]> {
-    const locations = await models.location.find({
-      where: {
-        id: {
-          [Op.IN]: locationsFO.map((locFO) => locFO.objectID),
-        },
-      },
-    });
-
-    return locations.map((loc) => ({
-      id: loc.id.valueOf(),
-      name: loc.name!,
-    }));
-  }
-
-  private async getPlans(
-    plansFO: any[],
-    models: Database
-  ): Promise<FlowPlan[]> {
-    const plans = await models.plan.find({
-      where: {
-        id: {
-          [Op.IN]: plansFO.map((planFO) => planFO.objectID),
-        },
-      },
-    });
-
-    const flowPlans: FlowPlan[] = [];
-
-    for (const plan of plans) {
-      const planVersion = await models.planVersion.find({
-        where: {
-          planId: plan.id,
-          currentVersion: true,
-        },
-      });
-
-      flowPlans.push({
-        id: plan.id.valueOf(),
-        name: planVersion[0].name,
-      });
-    }
-
-    return flowPlans;
-  }
-
-  private async getUsageYears(
-    usageYearsFO: any[],
-    models: Database
-  ): Promise<FlowUsageYear[]> {
-    const usageYears = await models.usageYear.find({
-      where: {
-        id: {
-          [Op.IN]: usageYearsFO.map((usageYearFO) => usageYearFO.objectID),
-        },
-      },
-    });
-
-    return usageYears.map((usageYear) => ({
-      year: usageYear.year,
-      direction: usageYearsFO.find(
-        (usageYearFO) => usageYearFO.objectID === usageYear.id
-      ).refDirection,
-    }));
-  }
-    
 }
