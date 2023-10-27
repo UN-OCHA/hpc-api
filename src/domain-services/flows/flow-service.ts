@@ -1,11 +1,10 @@
 import { Service } from 'typedi';
-import { FlowSearchResult, FlowSortField } from './graphql/types';
+import { FlowCategory, FlowSearchResult, FlowSortField } from './graphql/types';
 import { Database } from '@unocha/hpc-api-core/src/db/type';
 import { Brand, createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 
-import { dbConnection } from '../../server';
 @Service()
 export class FlowService {
   async search(
@@ -19,14 +18,15 @@ export class FlowService {
 
     const sortCondition = {
       column: sortField ?? 'id',
-      order: sortOrder ?? 'ASC',
+      order: sortOrder ?? 'DESC',
     };
 
     let flows = await models.flow.find({
       orderBy: sortCondition,
       limit: first,
     });
-    const count = await dbConnection.raw('SELECT COUNT(*) FROM flow');
+    const countRes = await models.flow.count();
+    const count = countRes[0] as { count: number };
 
     if (afterCursor) {
       const after = flows.findIndex(
@@ -41,14 +41,14 @@ export class FlowService {
     const pagedData = flows.slice(afterIndex, afterIndex + first);
     const edges = await Promise.all(
       pagedData.map(async (flow) => {
-        const categories: string[] = await this.getFlowCategories(flow, models);
+        const categories: FlowCategory[] = await this.getFlowCategories(flow, models);
 
         return {
           node: {
             id: flow.id.valueOf(),
             amountUSD: flow.amountUSD.toString(),
             createdAt: flow.createdAt,
-            category: categories[0],
+            categories: categories,
           },
           cursor: flow.id.toString(),
         };
@@ -58,7 +58,7 @@ export class FlowService {
     return {
       edges,
       pageInfo: {
-        hasNextPage: count > first,
+        hasNextPage: count.count > afterIndex,
         hasPreviousPage: afterIndex > 0,
         startCursor: pagedData.length ? pagedData[0].id.toString() : '',
         endCursor: pagedData.length
@@ -68,20 +68,14 @@ export class FlowService {
         sortField: sortCondition.column,
         sortOrder: sortCondition.order,
       },
-      totalCount: count,
+      totalCount: count.count,
     };
-  }
-
-  private async getFlowTypeCategory(models: Database): Promise<any> {
-    return models.category.find({
-      where: { group: 'flowType', name: 'Parked' },
-    });
   }
 
   private async getFlowCategories(
     flow: any,
     models: Database
-  ): Promise<string[]> {
+  ): Promise<FlowCategory[]> {
     const flowIdBranded = createBrandedValue(flow.id);
     const flowLinks = await models.flowLink.find({
       where: {
@@ -89,7 +83,6 @@ export class FlowService {
       },
     });
 
-    //const flowTypeCategory = await this.getFlowTypeCategory(models);
     const flowLinksBrandedIds = flowLinks.map((flowLink) =>
       createBrandedValue(flowLink.parentID)
     );
@@ -100,7 +93,6 @@ export class FlowService {
           [Op.IN]: flowLinksBrandedIds,
         },
         versionID: flow.versionID,
-        categoryID: createBrandedValue(1051),
       },
     });
 
@@ -112,8 +104,10 @@ export class FlowService {
       },
     });
 
-    return categories.map((cat) => {
-      return cat.name;
-    });
+    return categories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      group: cat.group,
+    }));
   }
 }
