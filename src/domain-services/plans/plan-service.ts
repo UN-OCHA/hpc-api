@@ -1,8 +1,10 @@
 import { type PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { NotFoundError } from '@unocha/hpc-api-core/src/util/error';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
+import { FlowPlan } from '../flows/graphql/types';
 
 @Service()
 export class PlanService {
@@ -43,5 +45,36 @@ export class PlanService {
     });
 
     return years.map((y) => y.year);
+  }
+
+  async getFlowObjectPlans(
+    plansFO: any[],
+    models: Database
+  ): Promise<FlowPlan[]> {
+    const plans = await models.plan.find({
+      where: {
+        id: {
+          [Op.IN]: plansFO.map((planFO) => planFO.objectID),
+        },
+      },
+    });
+
+    const flowPlans: FlowPlan[] = [];
+
+    for (const plan of plans) {
+      const planVersion = await models.planVersion.find({
+        where: {
+          planId: plan.id,
+          currentVersion: true,
+        },
+      });
+
+      flowPlans.push({
+        id: plan.id.valueOf(),
+        name: planVersion[0].name,
+      });
+    }
+
+    return flowPlans;
   }
 }
