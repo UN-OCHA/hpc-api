@@ -13,6 +13,45 @@ export class FlowCategory {
 }
 
 @ObjectType()
+export class FlowOrganization {
+  @Field({ nullable: false })
+  id: number;
+
+  @Field({ nullable: false })
+  refDirection: string;
+
+  @Field({ nullable: false })
+  name: string;
+}
+
+@ObjectType()
+export class FlowLocation {
+  @Field({ nullable: false })
+  id: number;
+
+  @Field({ nullable: false })
+  name: string;
+}
+
+@ObjectType()
+export class FlowPlan {
+  @Field({ nullable: false })
+  id: number;
+
+  @Field({ nullable: false })
+  name: string;
+}
+
+@ObjectType()
+export class FlowUsageYear {
+  @Field({ nullable: false })
+  year: string;
+
+  @Field({ nullable: false })
+  direction: string;
+}
+
+@ObjectType()
 export default class Flow {
   @Field({ nullable: false })
   id: number;
@@ -25,6 +64,18 @@ export default class Flow {
 
   @Field(() => [FlowCategory], { nullable: false })
   categories: FlowCategory[];
+
+  @Field(() => [FlowOrganization], { nullable: false })
+  organizations: FlowOrganization[];
+
+  @Field(() => [FlowLocation], { nullable: false })
+  locations: FlowLocation[];
+
+  @Field(() => [FlowPlan], { nullable: false })
+  plans: FlowPlan[];
+
+  @Field(() => [FlowUsageYear], { nullable: false })
+  usageYears: FlowUsageYear[];
 }
 
 @ObjectType()
