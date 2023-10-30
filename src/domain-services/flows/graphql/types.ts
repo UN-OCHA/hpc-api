@@ -1,4 +1,5 @@
 import { Field, ObjectType } from 'type-graphql';
+import { ItemPaged, PageInfo } from '../../../utils/graphql/pagination';
 
 @ObjectType()
 export class FlowCategory {
@@ -52,7 +53,7 @@ export class FlowUsageYear {
 }
 
 @ObjectType()
-export default class Flow {
+export default class Flow implements ItemPaged {
   @Field({ nullable: false })
   id: number;
 
@@ -76,70 +77,15 @@ export default class Flow {
 
   @Field(() => [FlowUsageYear], { nullable: false })
   usageYears: FlowUsageYear[];
+
+  @Field({ nullable: false })
+  cursor: number;
 }
 
 @ObjectType()
-export class FlowEdge {
-  @Field({ nullable: false })
-  node: Flow;
-
-  @Field({ nullable: false })
-  cursor: string;
-}
-
-@ObjectType()
-export class PageInfo {
-  @Field({ nullable: false })
-  hasNextPage: boolean;
-
-  @Field({ nullable: false })
-  hasPreviousPage: boolean;
-
-  @Field({ nullable: false })
-  startCursor: string;
-
-  @Field({ nullable: false })
-  endCursor: string;
-
-  @Field({ nullable: false })
-  pageSize: number;
-
-  @Field({ nullable: false })
-  sortField:
-    | 'id'
-    | 'amountUSD'
-    | 'versionID'
-    | 'activeStatus'
-    | 'restricted'
-    | 'newMoney'
-    | 'flowDate'
-    | 'decisionDate'
-    | 'firstReportedDate'
-    | 'budgetYear'
-    | 'origAmount'
-    | 'origCurrency'
-    | 'exchangeRate'
-    | 'description'
-    | 'notes'
-    | 'versionStartDate'
-    | 'versionEndDate'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'deletedAt';
-
-  @Field({ nullable: false })
-  sortOrder: string;
-}
-@ObjectType()
-export class FlowSearchResult {
-  @Field(() => [FlowEdge], { nullable: false })
-  edges: FlowEdge[];
-
-  @Field(() => PageInfo, { nullable: false })
-  pageInfo: PageInfo;
-
-  @Field({ nullable: false })
-  totalCount: number;
+export class FlowSearchResult extends PageInfo<FlowSortField> {
+  @Field(() => [Flow], { nullable: false })
+  items: Flow[];
 }
 
 export type FlowSortField =

@@ -1,19 +1,20 @@
-import Flow, { FlowSearchResult, FlowSortField } from './types';
+import Flow, { FlowSearchResult } from './types';
 import { Service } from 'typedi';
-import { Arg, Args, Ctx, Query, Resolver } from 'type-graphql';
-import { FlowService } from '../flow-service';
+import { Arg, Ctx, Query, Resolver } from 'type-graphql';
+import { FlowSearchService } from '../flow-search-service';
 import Context from '../../Context';
 
 @Service()
 @Resolver(Flow)
 export default class FlowResolver {
-  constructor(private flowService: FlowService) {}
+  constructor(private flowSearchService: FlowSearchService) {}
 
   @Query(() => FlowSearchResult)
   async searchFlows(
     @Ctx() context: Context,
     @Arg('first', { nullable: false }) first: number,
-    @Arg('afterCursor', { nullable: true }) afterCursor: string,
+    @Arg('afterCursor', { nullable: true }) afterCursor: number,
+    @Arg('beforeCursor', { nullable: true }) beforeCursor: number,
     @Arg('sortField', { nullable: true })
     sortField:
       | 'id'
@@ -38,10 +39,11 @@ export default class FlowResolver {
       | 'deletedAt',
     @Arg('sortOrder', { nullable: true }) sortOrder: 'asc' | 'desc'
   ): Promise<FlowSearchResult> {
-    return await this.flowService.search(
+    return await this.flowSearchService.search(
       context.models,
       first,
       afterCursor,
+      beforeCursor,
       sortField,
       sortOrder
     );
