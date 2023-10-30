@@ -1,56 +1,74 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
 import { Service } from 'typedi';
 import Project, { Pdf, mapPdfModelToType } from './graphql/types';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 
 @Service()
 export class ProjectService {
-  public async getProjects(models: Database): Promise<Project[]> {
-    const projects = await models.project.find();
+  public async getProjects(
+    models: Database,
+    autocomplete?: string
+  ): Promise<Project[]> {
+    let whereClause = {};
+    let limitClause;
+    if (autocomplete) {
+      whereClause = {
+        name: {
+          [Op.LIKE]: `%${autocomplete}%`,
+        },
+      };
+    } else {
+      limitClause = 100;
+    }
 
-    return await Promise.all(
-      projects.map(async (project) => {
-        let projectVersion = null;
+    const findOptions = {
+      where: whereClause,
+      order: [['name', 'ASC']],
+      limit: limitClause,
+    };
+    const projectsVersion = await models.projectVersion.find(findOptions);
 
-        if (project.sourceProjectId) {
-          const projectVersionIdBranded = createBrandedValue(
-            project.sourceProjectId?.valueOf()
-          );
+    const projects: Project[] = [];
+    await Promise.all(
+      projectsVersion.map(async (projectVersion) => {
+        console.log(JSON.stringify(projectVersion, null, 2));
+        const projectDB = await models.project.findOne({
+          where: {
+            id: projectVersion.projectId,
+          },
+        });
 
-          projectVersion = await models.projectVersion.findOne({
-            where: {
-              id: projectVersionIdBranded,
-            },
-          });
+        if (projectDB) {
+          const pdf: Pdf | null = mapPdfModelToType(projectDB.pdf);
+
+          const project: Project = {
+            id: projectDB.id.valueOf(),
+            createdAt: projectDB.createdAt.toString(),
+            updatedAt: projectDB.updatedAt.toString(),
+            code: projectDB.code ?? '',
+            currentPublishedVersionId: projectDB.currentPublishedVersionId
+              ? projectDB.currentPublishedVersionId.valueOf()
+              : 0,
+            creatorParticipantId: projectDB.creatorParticipantId
+              ? projectDB.creatorParticipantId.valueOf()
+              : 0,
+            latestVersionId: projectDB.latestVersionId
+              ? projectDB.latestVersionId.valueOf()
+              : 0,
+            implementationStatus: projectDB.implementationStatus,
+            pdf: pdf,
+            sourceProjectId: projectVersion.id.valueOf(),
+            name: projectVersion.name,
+            version: projectVersion.version,
+            projectVersionCode: projectVersion.code,
+            visible: projectDB.currentPublishedVersionId ? true : false,
+          };
+
+          projects.push(project);
         }
-
-        const pdf: Pdf | null = mapPdfModelToType(project.pdf);
-
-        return {
-          id: project.id.valueOf(),
-          createdAt: project.createdAt.toString(),
-          updatedAt: project.updatedAt.toString(),
-          code: project.code ?? '',
-          currentPublishedVersionId: project.currentPublishedVersionId
-            ? project.currentPublishedVersionId.valueOf()
-            : 0,
-          creatorParticipantId: project.creatorParticipantId
-            ? project.creatorParticipantId.valueOf()
-            : 0,
-          latestVersionId: project.latestVersionId
-            ? project.latestVersionId.valueOf()
-            : 0,
-          implementationStatus: project.implementationStatus,
-          pdf: pdf,
-          sourceProjectId: project.sourceProjectId
-            ? project.sourceProjectId.valueOf()
-            : 0,
-          name: projectVersion ? projectVersion.name : 'none',
-          version: projectVersion ? projectVersion.version : 0,
-          projectVersionCode: projectVersion ? projectVersion.code : 'none',
-          visible: project.currentPublishedVersionId ? true : false,
-        };
       })
     );
+
+    return projects;
   }
 }
