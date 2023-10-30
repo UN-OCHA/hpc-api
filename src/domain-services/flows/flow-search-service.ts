@@ -129,7 +129,7 @@ export class FlowSearchService {
     );
 
     return {
-      items,
+      flows: items,
       hasNextPage: first <= flows.length,
       hasPreviousPage: afterCursor !== undefined,
       startCursor: flows.length ? flows[0].id.valueOf() : 0,

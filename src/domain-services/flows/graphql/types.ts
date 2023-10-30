@@ -85,7 +85,7 @@ export default class Flow implements ItemPaged {
 @ObjectType()
 export class FlowSearchResult extends PageInfo<FlowSortField> {
   @Field(() => [Flow], { nullable: false })
-  items: Flow[];
+  flows: Flow[];
 }
 
 export type FlowSortField =
