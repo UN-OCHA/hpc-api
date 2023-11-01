@@ -43,7 +43,7 @@
     "ts-node-dev": "^2.0.0"
   },
   "engines": {
-    "node": ">=18.16.1",
+    "node": ">=18.18.2",
     "yarn": ">=1.22.10"
   },
   "lint-staged": {
