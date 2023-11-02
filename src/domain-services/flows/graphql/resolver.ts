@@ -12,7 +12,7 @@ export default class FlowResolver {
   @Query(() => FlowSearchResult)
   async searchFlows(
     @Ctx() context: Context,
-    @Arg('first', { nullable: false }) first: number,
+    @Arg('limit', { nullable: false }) limit: number,
     @Arg('afterCursor', { nullable: true }) afterCursor: number,
     @Arg('beforeCursor', { nullable: true }) beforeCursor: number,
     @Arg('sortField', { nullable: true })
@@ -41,7 +41,7 @@ export default class FlowResolver {
   ): Promise<FlowSearchResult> {
     return await this.flowSearchService.search(
       context.models,
-      first,
+      limit,
       afterCursor,
       beforeCursor,
       sortField,

@@ -3,14 +3,20 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { FlowCategory } from '../flows/graphql/types';
+import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 
 @Service()
 export class CategoryService {
-  async getFlowCategory(flow: any, models: Database): Promise<FlowCategory[]> {
-    const flowIdBranded = createBrandedValue(flow.id);
+  async getCategoriesForFlows(
+    flowsIds: FlowId[],
+    models: Database
+  ): Promise<Map<number, FlowCategory[]>> {
     const flowLinks = await models.flowLink.find({
       where: {
-        childID: flowIdBranded,
+        childID: {
+          [Op.IN]: flowsIds,
+        },
       },
     });
 
@@ -23,7 +29,6 @@ export class CategoryService {
         objectID: {
           [Op.IN]: flowLinksBrandedIds,
         },
-        versionID: flow.versionID,
       },
     });
 
@@ -35,10 +40,36 @@ export class CategoryService {
       },
     });
 
-    return categories.map((cat) => ({
-      id: cat.id,
-      name: cat.name,
-      group: cat.group,
-    }));
+    // Group categories by flow ID for easy mapping
+    const categoriesMap = new Map<number, FlowCategory[]>();
+
+    // Populate the map with categories for each flow
+    categoriesRef.forEach((catRef) => {
+      const flowId = catRef.objectID.valueOf();
+
+      if (!categoriesMap.has(flowId)) {
+        categoriesMap.set(flowId, []);
+      }
+
+      const categoriesForFlow = categoriesMap.get(flowId)!;
+
+      const category = categories.find((cat) => cat.id === catRef.categoryID);
+
+      if (!category) {
+        throw new Error(`Category with ID ${catRef.categoryID} does not exist`);
+      }
+
+      categoriesForFlow.push(this.mapCategoryToFlowCategory(category));
+    });
+
+    return categoriesMap;
   }
+
+  private mapCategoryToFlowCategory = (
+    category: InstanceDataOfModel<Database['category']>
+  ): FlowCategory => ({
+    id: category.id,
+    name: category.name,
+    group: category.group,
+  });
 }

@@ -5,10 +5,10 @@ import { FlowUsageYear } from '../flows/graphql/types';
 
 @Service()
 export class UsageYearService {
-  async getFlowObjectUsageYears(
+  async getUsageYearsForFlows(
     usageYearsFO: any[],
     models: Database
-  ): Promise<FlowUsageYear[]> {
+  ): Promise<Map<number, FlowUsageYear[]>> {
     const usageYears = await models.usageYear.find({
       where: {
         id: {
@@ -17,11 +17,36 @@ export class UsageYearService {
       },
     });
 
-    return usageYears.map((usageYear) => ({
+    const usageYearsMap = new Map<number, FlowUsageYear[]>();
+
+    usageYearsFO.forEach((usageYearFO) => {
+      const flowId = usageYearFO.flowID;
+      if (!usageYearsMap.has(flowId)) {
+        usageYearsMap.set(flowId, []);
+      }
+      const usageYear = usageYears.find(
+        (usageYear) => usageYear.id === usageYearFO.objectID
+      );
+
+      if (!usageYear) {
+        throw new Error(
+          `Usage year with ID ${usageYearFO.objectID} does not exist`
+        );
+      }
+      const usageYearMapped = this.mapUsageYearsToFlowUsageYears(
+        usageYear,
+        usageYearFO.refDirection
+      );
+      usageYearsMap.get(flowId)!.push(usageYearMapped);
+    });
+
+    return usageYearsMap;
+  }
+
+  private mapUsageYearsToFlowUsageYears(usageYear: any, refDirection: any) {
+    return {
       year: usageYear.year,
-      direction: usageYearsFO.find(
-        (usageYearFO) => usageYearFO.objectID === usageYear.id
-      ).refDirection,
-    }));
+      direction: refDirection,
+    };
   }
 }

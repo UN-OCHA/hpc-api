@@ -1,13 +1,5 @@
 import { Service } from 'typedi';
-import {
-  FlowCategory,
-  FlowLocation,
-  FlowOrganization,
-  FlowPlan,
-  FlowSearchResult,
-  FlowSortField,
-  FlowUsageYear,
-} from './graphql/types';
+import { FlowSearchResult, FlowSortField } from './graphql/types';
 import { Database } from '@unocha/hpc-api-core/src/db/type';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { OrganizationService } from '../organizations/organization-service';
@@ -15,7 +7,8 @@ import { LocationService } from '../location/location-service';
 import { PlanService } from '../plans/plan-service';
 import { UsageYearService } from '../usage-years/usage-year-service';
 import { CategoryService } from '../categories/category-service';
-import { prepareConditionFromCursor } from '../../utils/graphql/pagination';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 
 @Service()
 export class FlowSearchService {
@@ -29,7 +22,7 @@ export class FlowSearchService {
 
   async search(
     models: Database,
-    first: number,
+    limit: number,
     afterCursor?: number,
     beforeCursor?: number,
     sortField?: FlowSortField,
@@ -44,93 +37,107 @@ export class FlowSearchService {
       order: sortOrder ?? 'desc',
     };
 
-    let flows;
-    const countRes = await models.flow.count();
-    const count = countRes[0] as { count: number };
+    const limitComputed = limit + 1; // Fetch one more item to check for hasNextPage
 
-    const hasCursor = afterCursor || beforeCursor;
-
-    if (hasCursor) {
-      const condition = prepareConditionFromCursor(
-        sortCondition,
-        afterCursor,
-        beforeCursor
-      );
-
-      flows = await models.flow.find({
-        orderBy: sortCondition,
-        limit: first,
-        where: {
-          ...condition,
+    let condition;
+    if (afterCursor) {
+      condition = {
+        id: {
+          [Op.GT]: createBrandedValue(afterCursor),
         },
-      });
-    } else {
-      flows = await models.flow.find({
+      };
+    } else if (beforeCursor) {
+      condition = {
+        id: {
+          [Op.GT]: createBrandedValue(beforeCursor),
+        },
+      };
+    }
+    condition = {
+      ...condition,
+      activeStatus: true,
+    };
+
+    const [flowsIds, countRes] = await Promise.all([
+      models.flow.find({
         orderBy: sortCondition,
-        limit: first,
-      });
+        limit: limitComputed,
+        where: condition,
+      }),
+      models.flow.count(),
+    ]);
+
+    const hasNextPage = flowsIds.length > limit;
+    if (hasNextPage) {
+      flowsIds.pop(); // Remove the extra item used to check hasNextPage
     }
 
-    const items = await Promise.all(
-      flows.map(async (flow) => {
-        const categories: FlowCategory[] =
-          await this.categoryService.getFlowCategory(flow, models);
+    const count = countRes[0] as { count: number };
 
-        const organizationsFO: any[] = [];
-        const locationsFO: any[] = [];
-        const plansFO: any[] = [];
-        const usageYearsFO: any[] = [];
+    const flowIdsList = flowsIds.map((flow) => flow.id);
 
-        await this.getFlowObjects(
-          flow,
-          models,
-          organizationsFO,
-          locationsFO,
-          plansFO,
-          usageYearsFO
-        );
+    const organizationsFO: any[] = [];
+    const locationsFO: any[] = [];
+    const plansFO: any[] = [];
+    const usageYearsFO: any[] = [];
 
-        const organizationsPromise: Promise<FlowOrganization[]> =
-          this.organizationService.getFlowObjectOrganizations(
-            organizationsFO,
-            models
-          );
-
-        const locationsPromise: Promise<FlowLocation[]> =
-          this.locationService.getFlowObjectLocations(locationsFO, models);
-
-        const plansPromise: Promise<FlowPlan[]> =
-          this.planService.getFlowObjectPlans(plansFO, models);
-
-        const usageYearsPromise: Promise<FlowUsageYear[]> =
-          this.usageYearService.getFlowObjectUsageYears(usageYearsFO, models);
-
-        const [organizations, locations, plans, usageYears] = await Promise.all(
-          [
-            organizationsPromise,
-            locationsPromise,
-            plansPromise,
-            usageYearsPromise,
-          ]
-        );
-
-        return {
-          id: flow.id.valueOf(),
-          amountUSD: flow.amountUSD.toString(),
-          createdAt: flow.createdAt,
-          categories: categories,
-          organizations: organizations,
-          locations: locations,
-          plans: plans,
-          usageYears: usageYears,
-          cursor: flow.id.valueOf(),
-        };
-      })
+    await this.getFlowObjects(
+      flowIdsList,
+      models,
+      organizationsFO,
+      locationsFO,
+      plansFO,
+      usageYearsFO
     );
+
+    const [
+      flows,
+      categoriesMap,
+      organizationsMap,
+      locationsMap,
+      plansMap,
+      usageYearsMap,
+    ] = await Promise.all([
+      models.flow.find({
+        where: {
+          id: {
+            [Op.IN]: flowIdsList,
+          },
+        },
+      }),
+      this.categoryService.getCategoriesForFlows(flowIdsList, models),
+      this.organizationService.getOrganizationsForFlows(
+        organizationsFO,
+        models
+      ),
+      this.locationService.getLocationsForFlows(locationsFO, models),
+      this.planService.getPlansForFlows(plansFO, models),
+      this.usageYearService.getUsageYearsForFlows(usageYearsFO, models),
+    ]);
+
+    const items = flows.map((flow) => {
+      const categories = categoriesMap.get(flow.id) || [];
+      const organizations = organizationsMap.get(flow.id) || [];
+      const locations = locationsMap.get(flow.id) || [];
+      const plans = plansMap.get(flow.id) || [];
+      const usageYears = usageYearsMap.get(flow.id) || [];
+
+      return {
+        id: flow.id.valueOf(),
+        amountUSD: flow.amountUSD.toString(),
+        createdAt: flow.createdAt,
+        categories,
+        organizations,
+        locations,
+        plans,
+        usageYears,
+        cursor: flow.id.valueOf(),
+      };
+    });
 
     return {
       flows: items,
-      hasNextPage: first <= flows.length,
+      hasNextPage: limit <= flows.length,
       hasPreviousPage: afterCursor !== undefined,
       startCursor: flows.length ? flows[0].id.valueOf() : 0,
       endCursor: flows.length ? flows[flows.length - 1].id.valueOf() : 0,
@@ -142,17 +149,18 @@ export class FlowSearchService {
   }
 
   private async getFlowObjects(
-    flow: any,
+    flowIds: FlowId[],
     models: Database,
     organizationsFO: any[],
     locationsFO: any[],
     plansFO: any[],
     usageYearsFO: any[]
   ): Promise<void> {
-    const flowIdBranded = createBrandedValue(flow.id);
     const flowObjects = await models.flowObject.find({
       where: {
-        flowID: flowIdBranded,
+        flowID: {
+          [Op.IN]: flowIds,
+        },
       },
     });
 
