@@ -47,10 +47,10 @@ export class PlanService {
     return years.map((y) => y.year);
   }
 
-  async getFlowObjectPlans(
+  async getPlansForFlows(
     plansFO: any[],
     models: Database
-  ): Promise<FlowPlan[]> {
+  ): Promise<Map<number, FlowPlan[]>> {
     const plans = await models.plan.find({
       where: {
         id: {
@@ -59,7 +59,7 @@ export class PlanService {
       },
     });
 
-    const flowPlans: FlowPlan[] = [];
+    const plansMap = new Map<number, FlowPlan[]>();
 
     for (const plan of plans) {
       const planVersion = await models.planVersion.find({
@@ -69,12 +69,22 @@ export class PlanService {
         },
       });
 
-      flowPlans.push({
+      const planMapped = {
         id: plan.id.valueOf(),
         name: planVersion[0].name,
-      });
+      };
+
+      const flowId = plansFO.find(
+        (planFO) => planFO.objectID === plan.id
+      ).flowID;
+
+      if (!plansMap.has(flowId)) {
+        plansMap.set(flowId, []);
+      }
+
+      plansMap.get(flowId)!.push(planMapped);
     }
 
-    return flowPlans;
+    return plansMap;
   }
 }

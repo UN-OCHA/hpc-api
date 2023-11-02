@@ -29,10 +29,10 @@ export class LocationService {
     });
   }
 
-  async getFlowObjectLocations(
+  async getLocationsForFlows(
     locationsFO: any[],
     models: Database
-  ): Promise<FlowLocation[]> {
+  ): Promise<Map<number, FlowLocation[]>> {
     const locations = await models.location.find({
       where: {
         id: {
@@ -41,9 +41,28 @@ export class LocationService {
       },
     });
 
-    return locations.map((loc) => ({
-      id: loc.id.valueOf(),
-      name: loc.name!,
-    }));
+    const locationsMap = new Map<number, FlowLocation[]>();
+
+    locationsFO.forEach((locFO) => {
+      const flowId = locFO.flowID;
+      if (!locationsMap.has(flowId)) {
+        locationsMap.set(flowId, []);
+      }
+      const location = locations.find((loc) => loc.id === locFO.objectID);
+
+      if (!location) {
+        throw new Error(`Location with ID ${locFO.objectID} does not exist`);
+      }
+      const locationMapped = this.mapLocationsToFlowLocations(location);
+      locationsMap.get(flowId)!.push(locationMapped);
+    });
+    return locationsMap;
+  }
+
+  private mapLocationsToFlowLocations(location: any) {
+    return {
+      id: location.id,
+      name: location.name,
+    };
   }
 }
