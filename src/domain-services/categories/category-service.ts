@@ -3,26 +3,19 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { FlowCategory } from '../flows/graphql/types';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 
+// TODO: add proper type for flowLinks
 @Service()
 export class CategoryService {
   async getCategoriesForFlows(
-    flowsIds: FlowId[],
+    flowLinks: Map<number, any[]>,
     models: Database
   ): Promise<Map<number, FlowCategory[]>> {
-    const flowLinks = await models.flowLink.find({
-      where: {
-        childID: {
-          [Op.IN]: flowsIds,
-        },
-      },
-    });
-
-    const flowLinksBrandedIds = flowLinks.map((flowLink) =>
-      createBrandedValue(flowLink.parentID)
-    );
+    const flowLinksBrandedIds = [];
+    for (const flowLink of flowLinks.keys()) {
+      flowLinksBrandedIds.push(createBrandedValue(flowLink));
+    }
 
     const categoriesRef = await models.categoryRef.find({
       where: {
@@ -59,17 +52,34 @@ export class CategoryService {
         throw new Error(`Category with ID ${catRef.categoryID} does not exist`);
       }
 
-      categoriesForFlow.push(this.mapCategoryToFlowCategory(category));
+      categoriesForFlow.push(this.mapCategoryToFlowCategory(category, catRef));
     });
 
     return categoriesMap;
   }
 
-  private mapCategoryToFlowCategory = (
-    category: InstanceDataOfModel<Database['category']>
-  ): FlowCategory => ({
-    id: category.id,
-    name: category.name,
-    group: category.group,
-  });
+  private mapCategoryToFlowCategory(
+    category: InstanceDataOfModel<Database['category']>,
+    categoryRef: InstanceDataOfModel<Database['categoryRef']>
+  ): FlowCategory {
+    return {
+      id: category.id,
+      name: category.name,
+      group: category.group,
+      createdAt: category.createdAt.toISOString(),
+      updatedAt: category.updatedAt.toISOString(),
+      description: category.description ?? '',
+      parentID: category.parentID ? category.parentID.valueOf() : 0,
+      code: category.code ?? '',
+      includeTotals: category.includeTotals ?? false,
+      categoryRef: {
+        objectID: categoryRef.objectID.valueOf(),
+        versionID: categoryRef.versionID,
+        objectType: categoryRef.objectType,
+        categoryID: category.id.valueOf(),
+        createdAt: categoryRef.createdAt.toISOString(),
+        updatedAt: categoryRef.updatedAt.toISOString(),
+      },
+    };
+  }
 }

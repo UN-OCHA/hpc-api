@@ -1,8 +1,10 @@
-import Flow, { FlowSearchResult } from './types';
+import Flow, { FlowSearchResult, FlowSortField } from './types';
 import { Service } from 'typedi';
-import { Arg, Ctx, Query, Resolver } from 'type-graphql';
+import { Arg, Args, Ctx, Query, Resolver } from 'type-graphql';
 import { FlowSearchService } from '../flow-search-service';
 import Context from '../../Context';
+import { SearchFlowsFilters } from './args';
+import { PaginationArgs } from '../../../utils/graphql/pagination';
 
 @Service()
 @Resolver(Flow)
@@ -12,40 +14,23 @@ export default class FlowResolver {
   @Query(() => FlowSearchResult)
   async searchFlows(
     @Ctx() context: Context,
-    @Arg('limit', { nullable: false }) limit: number,
-    @Arg('afterCursor', { nullable: true }) afterCursor: number,
-    @Arg('beforeCursor', { nullable: true }) beforeCursor: number,
-    @Arg('sortField', { nullable: true })
-    sortField:
-      | 'id'
-      | 'amountUSD'
-      | 'versionID'
-      | 'activeStatus'
-      | 'restricted'
-      | 'newMoney'
-      | 'flowDate'
-      | 'decisionDate'
-      | 'firstReportedDate'
-      | 'budgetYear'
-      | 'origAmount'
-      | 'origCurrency'
-      | 'exchangeRate'
-      | 'description'
-      | 'notes'
-      | 'versionStartDate'
-      | 'versionEndDate'
-      | 'createdAt'
-      | 'updatedAt'
-      | 'deletedAt',
-    @Arg('sortOrder', { nullable: true }) sortOrder: 'asc' | 'desc'
+    @Args(() => PaginationArgs, { validate: false })
+    pagination: PaginationArgs<FlowSortField>,
+    @Arg('activeStatus', { nullable: true }) activeStatus: boolean
   ): Promise<FlowSearchResult> {
+    const { limit, sortOrder, sortField, afterCursor, beforeCursor } =
+      pagination;
+    const filters: SearchFlowsFilters = {
+      activeStatus,
+    };
     return await this.flowSearchService.search(
       context.models,
       limit,
+      sortOrder,
+      sortField,
       afterCursor,
       beforeCursor,
-      sortField,
-      sortOrder
+      filters
     );
   }
 }
