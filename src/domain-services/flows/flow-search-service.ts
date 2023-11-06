@@ -1,5 +1,9 @@
 import { Service } from 'typedi';
-import { FlowSearchResult, FlowSortField } from './graphql/types';
+import {
+  FlowParkedParentSource,
+  FlowSearchResult,
+  FlowSortField,
+} from './graphql/types';
 import { Database } from '@unocha/hpc-api-core/src/db/type';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { OrganizationService } from '../organizations/organization-service';
@@ -84,7 +88,7 @@ export class FlowSearchService {
 
     const count = countRes[0] as { count: number };
 
-    const flowIds = flows.map((flow) => flow.id);
+    const flowIds: FlowId[] = flows.map((flow) => flow.id);
 
     const organizationsFO: any[] = [];
     const locationsFO: any[] = [];
@@ -131,17 +135,24 @@ export class FlowSearchService {
     ]);
 
     const items = flows.map((flow) => {
+      const flowLink = flowLinksMap.get(flow.id) || [];
       const categories = categoriesMap.get(flow.id) || [];
       const organizations = organizationsMap.get(flow.id) || [];
-      const locations = locationsMap.get(flow.id) || [];
+      const locations = [...locationsMap.get(flow.id) || []] ;
       const plans = plansMap.get(flow.id) || [];
       const usageYears = usageYearsMap.get(flow.id) || [];
       const externalReferences = externalReferencesMap.get(flow.id) || [];
       const reportDetails = reportDetailsMap.get(flow.id) || [];
 
-      const childIDs: number[] = (flowLinksMap.get(flow.id) || []).map(
-        (flowLink) => flowLink.childID.valueOf()
-      ) as number[];
+      const parkedParentSource: FlowParkedParentSource[] = [];
+      if (flow.activeStatus && flowLink.length > 0) {
+        this.getParketParents(flow, flowLink, models, parkedParentSource);
+      }
+
+      // TODO: change and use flow.depth to verify (depth > 0)
+      const childIDs: number[] = flowLinksMap
+        .get(flow.id)
+        ?.map((flowLink) => flowLink.childID.valueOf()) as number[];
 
       const parentIDs: number[] = flowLinksMap
         .get(flow.id)
@@ -152,6 +163,7 @@ export class FlowSearchService {
         id: flow.id.valueOf(),
         versionID: flow.versionID,
         amountUSD: flow.amountUSD.toString(),
+        createdAt: flow.createdAt.toISOString(),
         updatedAt: flow.updatedAt.toISOString(),
         activeStatus: flow.activeStatus,
         restricted: flow.restricted,
@@ -167,7 +179,7 @@ export class FlowSearchService {
         origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
         externalReferences,
         reportDetails,
-        parkedParentSource: 'placeholder',
+        parkedParentSource,
         // Paged item field
         cursor: flow.id.valueOf(),
       };
@@ -212,6 +224,48 @@ export class FlowSearchService {
       } else if (flowObject.objectType === 'usageYear') {
         usageYearsFO.push(flowObject);
       }
+    });
+  }
+
+  private async getParketParents(
+    flow: any,
+    flowLink: any[],
+    models: Database,
+    parkedParentSource: FlowParkedParentSource[]
+  ): Promise<any> {
+    const flowLinksDepth0 = flowLink.filter((flowLink) => flowLink.depth === 0);
+
+    const flowLinksParent = flowLinksDepth0.filter(
+      (flowLink) => flowLink.parentID === flow.id
+    );
+
+    const parentFlowIds = flowLinksParent.map((flowLink) =>
+      flowLink.parentID.valueOf()
+    );
+
+    const categories = await models.category.find({
+      where: {
+        group: 'flowType',
+        name: 'parked',
+      },
+    });
+
+    const categoriesIDs = categories.map((category) => category.id);
+
+    const categoryRef = await models.categoryRef.find({
+      where: {
+        categoryID: {
+          [Op.IN]: categoriesIDs,
+        },
+        versionID: flow.versionID,
+      },
+    });
+
+    const parentFlows = flowLinksParent.filter((flowLink) => {
+      return categoryRef.some(
+        (categoryRef) =>
+          categoryRef.objectID.valueOf() === flowLink.parentID.valueOf()
+      );
     });
   }
 }

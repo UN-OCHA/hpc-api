@@ -9,12 +9,6 @@ export interface IItemPaged {
 }
 
 @ObjectType()
-export class ItemPaged implements IItemPaged {
-  @Field({ nullable: false })
-  cursor: number;
-}
-
-@ObjectType()
 export class PageInfo<TSortFields extends string> {
   @Field({ nullable: false })
   hasNextPage: boolean;

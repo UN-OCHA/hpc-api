@@ -1,7 +1,7 @@
+import { BaseType } from '../../../utils/graphql/base-types';
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType, registerEnumType } from 'type-graphql';
-import { BaseType } from '../../base-types';
 
 export enum LocationStatus {
   active = 'active',
@@ -52,4 +52,16 @@ export default class Location extends BaseType {
 
   @Field({ defaultValue: true })
   itosSync: boolean; // Accidentally optional
+}
+
+@ObjectType()
+export class BaseLocation extends BaseType {
+  @Field({ nullable: false })
+  id: number;
+
+  @Field(() => String, { nullable: false })
+  name: string | null;
+
+  @Field({ nullable: false })
+  direction: string;
 }
