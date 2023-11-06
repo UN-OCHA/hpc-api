@@ -1,6 +1,0 @@
-{
-  "extends": ["./node_modules/@unocha/hpc-repo-tools/eslintrc.base.json"],
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  }
-}

@@ -1,4 +1,4 @@
-import { Request } from '@hapi/hapi';
+import { type Request } from '@hapi/hapi';
 import { BASIC_AUTH_USER } from '@unocha/hpc-api-core/src/auth';
 import { BadRequestError } from '@unocha/hpc-api-core/src/util/error';
 
@@ -8,7 +8,7 @@ interface BasicAuth {
 }
 
 const parseBasic = (credentialsPart: string): BasicAuth => {
-  let pieces: (string | null)[];
+  let pieces: Array<string | null>;
 
   const decoded = Buffer.from(credentialsPart, 'base64').toString('utf8');
 

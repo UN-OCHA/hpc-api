@@ -1,7 +1,7 @@
-import { Database } from '@unocha/hpc-api-core/src/db/type';
-import { Service } from 'typedi';
+import { type Database } from '@unocha/hpc-api-core/src/db/type';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { Service } from 'typedi';
 
 @Service()
 export class LocationService {
@@ -21,7 +21,7 @@ export class LocationService {
   async search(
     models: Database,
     name: string
-  ): Promise<InstanceDataOfModel<Database['location']>[]> {
+  ): Promise<Array<InstanceDataOfModel<Database['location']>>> {
     return await models.location.find({
       where: { name: { [models.Op.ILIKE]: `%${name}%` } },
     });

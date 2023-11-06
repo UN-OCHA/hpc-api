@@ -1,11 +1,11 @@
-import Context from '../../Context';
-import Location from './types';
-import { Database } from '@unocha/hpc-api-core/src/db/type';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
-import { LocationService } from '../location-service';
+import { type Database } from '@unocha/hpc-api-core/src/db/type';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { MinLength } from 'class-validator';
-import { Service } from 'typedi';
 import { Arg, Args, ArgsType, Ctx, Field, Query, Resolver } from 'type-graphql';
+import { Service } from 'typedi';
+import Context from '../../Context';
+import { LocationService } from '../location-service';
+import Location from './types';
 
 @ArgsType()
 class SearchLocationsArgs {
@@ -31,7 +31,7 @@ export default class LocationResolver {
   async searchLocation(
     @Args() { search }: SearchLocationsArgs,
     @Ctx() context: Context
-  ): Promise<InstanceDataOfModel<Database['location']>[]> {
+  ): Promise<Array<InstanceDataOfModel<Database['location']>>> {
     return await this.locationService.search(context.models, search);
   }
 }

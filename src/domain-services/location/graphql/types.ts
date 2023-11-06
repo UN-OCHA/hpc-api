@@ -1,7 +1,7 @@
-import { BaseType } from '../../base-types';
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType, registerEnumType } from 'type-graphql';
+import { BaseType } from '../../base-types';
 
 export enum LocationStatus {
   active = 'active',

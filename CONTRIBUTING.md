@@ -9,7 +9,7 @@ open-source.
 
 ## Prerequisites
 
-- node v18
+- node v20
 - yarn
 
 ## Running Locally
