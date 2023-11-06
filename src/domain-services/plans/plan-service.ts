@@ -4,7 +4,8 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { NotFoundError } from '@unocha/hpc-api-core/src/util/error';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { FlowPlan } from '../flows/graphql/types';
+import { BasePlan } from './graphql/types';
+import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 
 @Service()
 export class PlanService {
@@ -48,18 +49,22 @@ export class PlanService {
   }
 
   async getPlansForFlows(
-    plansFO: any[],
+    plansFO: InstanceDataOfModel<Database['flowObject']>[],
     models: Database
-  ): Promise<Map<number, FlowPlan[]>> {
-    const plans = await models.plan.find({
-      where: {
-        id: {
-          [Op.IN]: plansFO.map((planFO) => planFO.objectID),
+  ): Promise<Map<number, BasePlan[]>> {
+    const planObjectsIDs: PlanId[] = plansFO.map((planFO) =>
+      createBrandedValue(planFO.objectID)
+    );
+    const plans: InstanceDataOfModel<Database['plan']>[] =
+      await models.plan.find({
+        where: {
+          id: {
+            [Op.IN]: planObjectsIDs,
+          },
         },
-      },
-    });
+      });
 
-    const plansMap = new Map<number, FlowPlan[]>();
+    const plansMap = new Map<number, BasePlan[]>();
 
     for (const plan of plans) {
       const planVersion = await models.planVersion.find({
@@ -69,22 +74,37 @@ export class PlanService {
         },
       });
 
-      const planMapped = {
-        id: plan.id.valueOf(),
-        name: planVersion[0].name,
-      };
-
-      const flowId = plansFO.find(
+      
+      const planFlowOobject = plansFO.find(
         (planFO) => planFO.objectID === plan.id
-      ).flowID;
+        );
 
-      if (!plansMap.has(flowId)) {
-        plansMap.set(flowId, []);
+      const flowId = planFlowOobject && planFlowOobject.flowID;
+        
+      const planMapped = this.mapPlansToFlowPlans(plan, planVersion[0], planFlowOobject?.refDirection || null);
+      
+      if (flowId) {
+        if (!plansMap.has(flowId)) {
+          plansMap.set(flowId, []);
+        }
+
+        plansMap.get(flowId)!.push(planMapped);
       }
-
-      plansMap.get(flowId)!.push(planMapped);
     }
 
     return plansMap;
+  }
+
+  private mapPlansToFlowPlans(
+    plan: InstanceDataOfModel<Database['plan']>,
+    planVersion: InstanceDataOfModel<Database['planVersion']>,
+    direction: string | null): BasePlan {
+    return {
+      id: plan.id.valueOf(),
+      name: planVersion.name,
+      createdAt: plan.createdAt.toISOString(),
+      updatedAt: plan.updatedAt.toISOString(),
+      direction: direction ?? '',
+    };
   }
 }

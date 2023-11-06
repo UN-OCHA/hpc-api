@@ -2,6 +2,7 @@ import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType } from 'type-graphql';
 import PlanTag from '../../plan-tag/graphql/types';
+import { BaseType } from '../../../utils/graphql/base-types';
 
 @ObjectType()
 export class PlanCaseload {
@@ -94,4 +95,16 @@ export default class Plan {
 
   @Field(() => [PlanTag])
   tags: PlanTag[];
+}
+
+@ObjectType()
+export class BasePlan extends BaseType {
+  @Field({ nullable: false })
+  id: number;
+
+  @Field({ nullable: false })
+  name: string;
+
+  @Field({ nullable: false })
+  direction: string;
 }

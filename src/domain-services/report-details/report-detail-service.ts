@@ -3,13 +3,13 @@ import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
-import { FlowReportDetail } from '../flows/graphql/types';
+import { ReportDetail } from './graphql/types';
 @Service()
 export class ReportDetailService {
   async getReportDetailsForFlows(
     flowIds: FlowId[],
     models: Database
-  ): Promise<Map<number, any[]>> {
+  ): Promise<Map<number, ReportDetail[]>> {
     const reportDetails: InstanceDataOfModel<Database['reportDetail']>[] =
       await models.reportDetail.find({
         where: {
@@ -20,7 +20,7 @@ export class ReportDetailService {
         skipValidation: true,
       });
 
-    const reportDetailsMap = new Map<number, FlowReportDetail[]>();
+    const reportDetailsMap = new Map<number, ReportDetail[]>();
 
     flowIds.forEach((flowId: FlowId) => {
       if (!reportDetailsMap.has(flowId)) {
@@ -41,21 +41,21 @@ export class ReportDetailService {
   }
 
   private mapReportDetailsToFlowReportDetail(
-    reportDetail: any
-  ): FlowReportDetail {
+    reportDetail: InstanceDataOfModel<Database['reportDetail']>
+  ): ReportDetail {
     return {
       id: reportDetail.id,
-      flowID: reportDetail.flowId,
+      flowID: reportDetail.flowID,
       versionID: reportDetail.versionID,
       contactInfo: reportDetail.contactInfo,
       source: reportDetail.source,
-      date: reportDetail.date.toISOString(),
+      date: reportDetail.date,
       sourceID: reportDetail.sourceID,
       refCode: reportDetail.refCode,
       verified: reportDetail.verified,
       createdAt: reportDetail.createdAt.toISOString(),
       updatedAt: reportDetail.updatedAt.toISOString(),
-      organizationID: reportDetail.organizationId,
+      organizationID: reportDetail.organizationID,
     };
   }
 }

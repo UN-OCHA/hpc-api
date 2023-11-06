@@ -1,40 +1,46 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { FlowCategory } from '../flows/graphql/types';
+import { Category } from './graphql/types';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 
 // TODO: add proper type for flowLinks
 @Service()
 export class CategoryService {
   async getCategoriesForFlows(
-    flowLinks: Map<number, any[]>,
+    flowLinks: Map<number, InstanceDataOfModel<Database['flowLink']>[]>,
     models: Database
-  ): Promise<Map<number, FlowCategory[]>> {
+  ): Promise<Map<number, Category[]>> {
     const flowLinksBrandedIds = [];
     for (const flowLink of flowLinks.keys()) {
       flowLinksBrandedIds.push(createBrandedValue(flowLink));
     }
 
-    const categoriesRef = await models.categoryRef.find({
-      where: {
-        objectID: {
-          [Op.IN]: flowLinksBrandedIds,
-        },
-      },
-    });
-
-    const categories = await models.category.find({
-      where: {
-        id: {
-          [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),
-        },
-      },
-    });
-
     // Group categories by flow ID for easy mapping
-    const categoriesMap = new Map<number, FlowCategory[]>();
+    const categoriesMap = new Map<number, Category[]>();
+
+    if (flowLinksBrandedIds.length === 0) {
+      return categoriesMap;
+    }
+
+    const categoriesRef: InstanceDataOfModel<Database['categoryRef']>[] =
+      await models.categoryRef.find({
+        where: {
+          objectID: {
+            [Op.IN]: flowLinksBrandedIds,
+          },
+        },
+      });
+
+    const categories: InstanceDataOfModel<Database['category']>[] =
+      await models.category.find({
+        where: {
+          id: {
+            [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),
+          },
+        },
+      });
 
     // Populate the map with categories for each flow
     categoriesRef.forEach((catRef) => {
@@ -61,7 +67,7 @@ export class CategoryService {
   private mapCategoryToFlowCategory(
     category: InstanceDataOfModel<Database['category']>,
     categoryRef: InstanceDataOfModel<Database['categoryRef']>
-  ): FlowCategory {
+  ): Category {
     return {
       id: category.id,
       name: category.name,

@@ -1,23 +1,25 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
-import { FlowUsageYear } from '../flows/graphql/types';
+import { UsageYear } from './grpahql/types';
+import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 
 @Service()
 export class UsageYearService {
   async getUsageYearsForFlows(
     usageYearsFO: any[],
     models: Database
-  ): Promise<Map<number, FlowUsageYear[]>> {
-    const usageYears = await models.usageYear.find({
-      where: {
-        id: {
-          [Op.IN]: usageYearsFO.map((usageYearFO) => usageYearFO.objectID),
+  ): Promise<Map<number, UsageYear[]>> {
+    const usageYears: InstanceDataOfModel<Database['usageYear']>[] =
+      await models.usageYear.find({
+        where: {
+          id: {
+            [Op.IN]: usageYearsFO.map((usageYearFO) => usageYearFO.objectID),
+          },
         },
-      },
-    });
+      });
 
-    const usageYearsMap = new Map<number, FlowUsageYear[]>();
+    const usageYearsMap = new Map<number, UsageYear[]>();
 
     usageYearsFO.forEach((usageYearFO) => {
       const flowId = usageYearFO.flowID;
@@ -25,7 +27,7 @@ export class UsageYearService {
         usageYearsMap.set(flowId, []);
       }
       const usageYear = usageYears.find(
-        (usageYear) => usageYear.id === usageYearFO.objectID
+        (uYear) => uYear.id === usageYearFO.objectID
       );
 
       if (!usageYear) {
@@ -47,6 +49,8 @@ export class UsageYearService {
     return {
       year: usageYear.year,
       direction: refDirection,
+      createdAt: usageYear.createdAt,
+      updatedAt: usageYear.updatedAt,
     };
   }
 }

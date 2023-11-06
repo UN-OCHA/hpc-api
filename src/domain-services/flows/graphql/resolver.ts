@@ -1,4 +1,4 @@
-import Flow, { FlowSearchResult, FlowSortField } from './types';
+import { FlowPaged, FlowSearchResult, FlowSortField } from './types';
 import { Service } from 'typedi';
 import { Arg, Args, Ctx, Query, Resolver } from 'type-graphql';
 import { FlowSearchService } from '../flow-search-service';
@@ -7,7 +7,7 @@ import { SearchFlowsFilters } from './args';
 import { PaginationArgs } from '../../../utils/graphql/pagination';
 
 @Service()
-@Resolver(Flow)
+@Resolver(FlowPaged)
 export default class FlowResolver {
   constructor(private flowSearchService: FlowSearchService) {}
 

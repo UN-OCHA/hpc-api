@@ -1,98 +1,12 @@
 import { Field, ObjectType } from 'type-graphql';
-import { ItemPaged, PageInfo } from '../../../utils/graphql/pagination';
-
-@ObjectType()
-export class FlowCategoryRef {
-  @Field({ nullable: false })
-  objectID: number;
-
-  @Field({ nullable: false })
-  versionID: number;
-
-  @Field({ nullable: false })
-  objectType: string;
-
-  @Field({ nullable: false })
-  categoryID: number;
-
-  @Field({ nullable: false })
-  createdAt: string;
-
-  @Field({ nullable: false })
-  updatedAt: string;
-}
-
-@ObjectType()
-export class FlowCategory {
-  @Field({ nullable: true })
-  id: number;
-
-  @Field({ nullable: false })
-  name: string;
-
-  @Field({ nullable: false })
-  group: string;
-
-  @Field({ nullable: true })
-  createdAt: string;
-
-  @Field({ nullable: true })
-  updatedAt: string;
-
-  @Field({ nullable: true })
-  description: string;
-
-  @Field({ nullable: true })
-  parentID: number;
-
-  @Field({ nullable: true })
-  code: string;
-
-  @Field({ nullable: true })
-  includeTotals: boolean;
-
-  @Field(() => FlowCategoryRef, { nullable: true })
-  categoryRef: FlowCategoryRef;
-}
-
-@ObjectType()
-export class FlowOrganization {
-  @Field({ nullable: false })
-  id: number;
-
-  @Field({ nullable: false })
-  refDirection: string;
-
-  @Field({ nullable: false })
-  name: string;
-}
-
-@ObjectType()
-export class FlowLocation {
-  @Field({ nullable: false })
-  id: number;
-
-  @Field({ nullable: false })
-  name: string;
-}
-
-@ObjectType()
-export class FlowPlan {
-  @Field({ nullable: false })
-  id: number;
-
-  @Field({ nullable: false })
-  name: string;
-}
-
-@ObjectType()
-export class FlowUsageYear {
-  @Field({ nullable: false })
-  year: string;
-
-  @Field({ nullable: false })
-  direction: string;
-}
+import { IItemPaged, PageInfo } from '../../../utils/graphql/pagination';
+import { Category } from '../../categories/graphql/types';
+import { BaseLocation } from '../../location/graphql/types';
+import { Organization } from '../../organizations/graphql/types';
+import { BasePlan } from '../../plans/graphql/types';
+import { ReportDetail } from '../../report-details/graphql/types';
+import { UsageYear } from '../../usage-years/grpahql/types';
+import { BaseType } from '../../../utils/graphql/base-types';
 
 @ObjectType()
 export class FlowExternalReference {
@@ -119,47 +33,16 @@ export class FlowExternalReference {
 }
 
 @ObjectType()
-export class FlowReportDetail {
-  @Field({ nullable: false })
-  id: number;
+export class FlowParkedParentSource {
+  @Field(() => [Number], { nullable: false })
+  organization: number[];
 
-  @Field({ nullable: false })
-  flowID: number;
-
-  @Field({ nullable: false })
-  versionID: number;
-
-  @Field({ nullable: false })
-  contactInfo: string;
-
-  @Field({ nullable: false })
-  source: string;
-
-  @Field({ nullable: false })
-  date: string;
-
-  @Field({ nullable: false })
-  sourceID: string;
-
-  @Field({ nullable: false })
-  refCode: string;
-
-  @Field({ nullable: false })
-  verified: boolean;
-
-  @Field({ nullable: false })
-  createdAt: string;
-
-  @Field({ nullable: false })
-  updatedAt: string;
-
-  @Field({ nullable: false })
-  organizationID: number;
+  @Field(() => [String], { nullable: false })
+  orgName: string[];
 }
 
 @ObjectType()
-export default class Flow extends ItemPaged {
-  // Mandatory fields
+export class BaseFlow extends BaseType {
   @Field({ nullable: false })
   id: number;
 
@@ -170,29 +53,28 @@ export default class Flow extends ItemPaged {
   amountUSD: string;
 
   @Field({ nullable: false })
-  updatedAt: string;
-
-  @Field({ nullable: false })
   activeStatus: boolean;
 
   @Field({ nullable: false })
   restricted: boolean;
+}
 
-  // Optional fields
-  @Field(() => [FlowCategory], { nullable: true })
-  categories: FlowCategory[];
+@ObjectType()
+export class Flow extends BaseFlow {
+  @Field(() => [Category], { nullable: true })
+  categories: Category[];
 
-  @Field(() => [FlowOrganization], { nullable: true })
-  organizations: FlowOrganization[];
+  @Field(() => [Organization], { nullable: true })
+  organizations: Organization[];
 
-  @Field(() => [FlowPlan], { nullable: true })
-  plans: FlowPlan[];
+  @Field(() => [BasePlan], { nullable: true })
+  plans: BasePlan[];
 
-  @Field(() => [FlowLocation], { nullable: true })
-  locations: FlowLocation[];
+  @Field(() => [BaseLocation], { nullable: true })
+  locations: BaseLocation[];
 
-  @Field(() => [FlowUsageYear], { nullable: true })
-  usageYears: FlowUsageYear[];
+  @Field(() => [UsageYear], { nullable: true })
+  usageYears: UsageYear[];
 
   @Field(() => [Number], { nullable: true })
   childIDs: number[];
@@ -209,18 +91,23 @@ export default class Flow extends ItemPaged {
   @Field(() => [FlowExternalReference], { nullable: true })
   externalReferences: FlowExternalReference[];
 
-  @Field(() => [FlowReportDetail], { nullable: true })
-  reportDetails: FlowReportDetail[];
+  @Field(() => [ReportDetail], { nullable: true })
+  reportDetails: ReportDetail[];
 
-  // Missing fields & new Types
-  @Field({ nullable: true })
-  parkedParentSource: string;
+  @Field(() => [FlowParkedParentSource], { nullable: true })
+  parkedParentSource: FlowParkedParentSource[];
+}
+
+@ObjectType()
+export class FlowPaged extends Flow implements IItemPaged {
+  @Field({ nullable: false })
+  cursor: number;
 }
 
 @ObjectType()
 export class FlowSearchResult extends PageInfo<FlowSortField> {
-  @Field(() => [Flow], { nullable: false })
-  flows: Flow[];
+  @Field(() => [FlowPaged], { nullable: false })
+  flows: FlowPaged[];
 }
 
 export type FlowSortField =
@@ -230,7 +117,6 @@ export type FlowSortField =
   | 'updatedAt'
   | 'activeStatus'
   | 'restricted'
-  //
   | 'newMoney'
   | 'flowDate'
   | 'decisionDate'
