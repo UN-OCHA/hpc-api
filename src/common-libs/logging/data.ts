@@ -1,4 +1,4 @@
-import { SharedLogData } from '@unocha/hpc-api-core/src/lib/logging';
+import { type SharedLogData } from '@unocha/hpc-api-core/src/lib/logging';
 
 /**
  * Structured json data that can be included along with log messages

@@ -1,7 +1,7 @@
+import { Arg, Ctx, Query, Resolver } from 'type-graphql';
+import { Service } from 'typedi';
 import Context from '../../Context';
 import { PlanTagService } from '../plan-tag-service';
-import { Service } from 'typedi';
-import { Arg, Ctx, Query, Resolver } from 'type-graphql';
 import PlanTag from './types';
 
 @Service()

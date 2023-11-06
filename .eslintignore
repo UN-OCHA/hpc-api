@@ -2,3 +2,4 @@
 *.json
 # build artifacts
 schema.graphql
+.eslintrc.js
