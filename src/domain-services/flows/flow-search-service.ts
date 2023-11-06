@@ -9,6 +9,9 @@ import { UsageYearService } from '../usage-years/usage-year-service';
 import { CategoryService } from '../categories/category-service';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { FlowLinkService } from './flow-link-service';
+import { ExternalReferenceService } from '../external-reference/external-reference-service';
+import { ReportDetailService } from '../report-details/report-detail-service';
 
 @Service()
 export class FlowSearchService {
@@ -17,24 +20,28 @@ export class FlowSearchService {
     private readonly locationService: LocationService,
     private readonly planService: PlanService,
     private readonly usageYearService: UsageYearService,
-    private readonly categoryService: CategoryService
+    private readonly categoryService: CategoryService,
+    private readonly flowLinkService: FlowLinkService,
+    private readonly externalReferenceService: ExternalReferenceService,
+    private readonly reportDetailService: ReportDetailService
   ) {}
 
   async search(
     models: Database,
-    limit: number,
+    limit: number = 50,
+    sortOrder: 'asc' | 'desc' = 'desc',
+    sortField: FlowSortField = 'id',
     afterCursor?: number,
     beforeCursor?: number,
-    sortField?: FlowSortField,
-    sortOrder?: 'asc' | 'desc'
+    filters?: any
   ): Promise<FlowSearchResult> {
     if (beforeCursor && afterCursor) {
       throw new Error('Cannot use before and after cursor at the same time');
     }
 
     const sortCondition = {
-      column: sortField ?? 'id',
-      order: sortOrder ?? 'desc',
+      column: sortField,
+      order: sortOrder,
     };
 
     const limitComputed = limit + 1; // Fetch one more item to check for hasNextPage
@@ -49,63 +56,70 @@ export class FlowSearchService {
     } else if (beforeCursor) {
       condition = {
         id: {
-          [Op.GT]: createBrandedValue(beforeCursor),
+          [Op.LT]: createBrandedValue(beforeCursor),
         },
       };
     }
-    condition = {
-      ...condition,
-      activeStatus: true,
-    };
 
-    const [flowsIds, countRes] = await Promise.all([
+    if (filters?.activeStatus !== undefined) {
+      condition = {
+        ...condition,
+        activeStatus: filters.activeStatus,
+      };
+    }
+
+    const [flows, countRes] = await Promise.all([
       models.flow.find({
         orderBy: sortCondition,
         limit: limitComputed,
         where: condition,
       }),
-      models.flow.count(),
+      models.flow.count({ where: condition }),
     ]);
 
-    const hasNextPage = flowsIds.length > limit;
+    const hasNextPage = flows.length > limit;
     if (hasNextPage) {
-      flowsIds.pop(); // Remove the extra item used to check hasNextPage
+      flows.pop(); // Remove the extra item used to check hasNextPage
     }
 
     const count = countRes[0] as { count: number };
 
-    const flowIdsList = flowsIds.map((flow) => flow.id);
+    const flowIds = flows.map((flow) => flow.id);
 
     const organizationsFO: any[] = [];
     const locationsFO: any[] = [];
     const plansFO: any[] = [];
     const usageYearsFO: any[] = [];
 
-    await this.getFlowObjects(
-      flowIdsList,
-      models,
-      organizationsFO,
-      locationsFO,
-      plansFO,
-      usageYearsFO
+    const [externalReferencesMap] = await Promise.all([
+      this.externalReferenceService.getExternalReferencesForFlows(
+        flowIds,
+        models
+      ),
+      this.getFlowObjects(
+        flowIds,
+        models,
+        organizationsFO,
+        locationsFO,
+        plansFO,
+        usageYearsFO
+      ),
+    ]);
+
+    const flowLinksMap = await this.flowLinkService.getFlowLinksForFlows(
+      flowIds,
+      models
     );
 
     const [
-      flows,
       categoriesMap,
       organizationsMap,
       locationsMap,
       plansMap,
       usageYearsMap,
+      reportDetailsMap,
     ] = await Promise.all([
-      models.flow.find({
-        where: {
-          id: {
-            [Op.IN]: flowIdsList,
-          },
-        },
-      }),
-      this.categoryService.getCategoriesForFlows(flowIdsList, models),
+      this.categoryService.getCategoriesForFlows(flowLinksMap, models),
       this.organizationService.getOrganizationsForFlows(
         organizationsFO,
         models
@@ -113,6 +127,7 @@ export class FlowSearchService {
       this.locationService.getLocationsForFlows(locationsFO, models),
       this.planService.getPlansForFlows(plansFO, models),
       this.usageYearService.getUsageYearsForFlows(usageYearsFO, models),
+      this.reportDetailService.getReportDetailsForFlows(flowIds, models),
     ]);
 
     const items = flows.map((flow) => {
@@ -121,16 +136,39 @@ export class FlowSearchService {
       const locations = locationsMap.get(flow.id) || [];
       const plans = plansMap.get(flow.id) || [];
       const usageYears = usageYearsMap.get(flow.id) || [];
+      const externalReferences = externalReferencesMap.get(flow.id) || [];
+      const reportDetails = reportDetailsMap.get(flow.id) || [];
+
+      const childIDs: number[] = (flowLinksMap.get(flow.id) || []).map(
+        (flowLink) => flowLink.childID.valueOf()
+      ) as number[];
+
+      const parentIDs: number[] = flowLinksMap
+        .get(flow.id)
+        ?.map((flowLink) => flowLink.parentID.valueOf()) as number[];
 
       return {
+        // Mandatory fields
         id: flow.id.valueOf(),
+        versionID: flow.versionID,
         amountUSD: flow.amountUSD.toString(),
-        createdAt: flow.createdAt,
+        updatedAt: flow.updatedAt.toISOString(),
+        activeStatus: flow.activeStatus,
+        restricted: flow.restricted,
+        // Optional fields
         categories,
         organizations,
         locations,
         plans,
         usageYears,
+        childIDs,
+        parentIDs,
+        origAmount: flow.origAmount ? flow.origAmount.toString() : '',
+        origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
+        externalReferences,
+        reportDetails,
+        parkedParentSource: 'placeholder',
+        // Paged item field
         cursor: flow.id.valueOf(),
       };
     });

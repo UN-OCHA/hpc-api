@@ -1,8 +1,16 @@
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import { ObjectType, Field } from 'type-graphql';
+import { ObjectType, Field, ArgsType } from 'type-graphql';
 
-export interface ItemPaged {
+export type SortOrder = 'asc' | 'desc';
+
+export interface IItemPaged {
+  cursor: number;
+}
+
+@ObjectType()
+export class ItemPaged implements IItemPaged {
+  @Field({ nullable: false })
   cursor: number;
 }
 
@@ -61,4 +69,22 @@ export function prepareConditionFromCursor(
   }
 
   return {};
+}
+
+@ArgsType()
+export class PaginationArgs<TSortFields extends string> {
+  @Field({ nullable: false })
+  limit: number;
+
+  @Field({ nullable: true })
+  afterCursor: number;
+
+  @Field({ nullable: true })
+  beforeCursor: number;
+
+  @Field(() => String, { nullable: true })
+  sortField: TSortFields;
+
+  @Field(() => String, { nullable: true, defaultValue: 'desc' })
+  sortOrder: SortOrder;
 }
