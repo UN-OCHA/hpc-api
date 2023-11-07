@@ -1,11 +1,11 @@
-import bunyan from 'bunyan';
-import { format } from 'util';
-import { LogData, LogDataAfterContextProcessing } from './data';
+import type bunyan from 'bunyan';
+import { format } from 'node:util';
+import type { LogData, LogDataAfterContextProcessing } from './data';
 import merge = require('lodash/merge');
 
-import {
-  LogMethod,
+import type {
   LogContext as LogContextInterface,
+  LogMethod,
 } from '@unocha/hpc-api-core/src/lib/logging';
 
 export type LogContextHandler = (
@@ -35,10 +35,10 @@ export class LogContext implements LogContextInterface<LogData> {
     const data: LogDataAfterContextProcessing = merge(
       {},
       this.context,
-      opts?.data || {},
+      opts?.data ?? {},
       opts?.error
         ? {
-            stackTrace: opts.error.stack || format(opts.error),
+            stackTrace: opts.error.stack ?? format(opts.error),
           }
         : {}
     );

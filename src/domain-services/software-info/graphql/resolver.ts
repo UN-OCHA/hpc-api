@@ -1,7 +1,7 @@
-import SoftwareInfo from './types';
-import { Service } from 'typedi';
 import { Query, Resolver } from 'type-graphql';
+import { Service } from 'typedi';
 import { SoftwareInfoService } from '../software-info-service';
+import SoftwareInfo from './types';
 
 @Service()
 @Resolver(SoftwareInfo)

@@ -1,8 +1,8 @@
 import { actionIsPermitted } from '@unocha/hpc-api-core/src/auth';
-import { RequiredPermissionsCondition } from '@unocha/hpc-api-core/src/auth/permissions';
-import { Context } from '@unocha/hpc-api-core/src/lib/context';
+import { type RequiredPermissionsCondition } from '@unocha/hpc-api-core/src/auth/permissions';
+import { type Context } from '@unocha/hpc-api-core/src/lib/context';
 import { ForbiddenError } from '@unocha/hpc-api-core/src/util/error';
-import { createMethodDecorator, ResolverData } from 'type-graphql';
+import { createMethodDecorator, type ResolverData } from 'type-graphql';
 
 type RequiredPermissions = (
   resolverData: ResolverData<Context>

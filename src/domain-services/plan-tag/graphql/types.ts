@@ -76,11 +76,9 @@ export class AddPlanTagInput implements Partial<PlanTag> {
   revisionState: RevisionState;
 
   @Field(() => [ID], { nullable: true })
-  reportingPeriodIds: Brand<
-    number,
-    { readonly s: unique symbol },
-    'planReportingPeriod ID'
-  >[];
+  reportingPeriodIds: Array<
+    Brand<number, { readonly s: unique symbol }, 'planReportingPeriod ID'>
+  >;
 
   @Field()
   publishMeasurements: boolean;
