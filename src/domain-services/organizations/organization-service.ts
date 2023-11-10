@@ -54,6 +54,7 @@ export class OrganizationService {
       name: organization.name,
       createdAt: organization.createdAt.toISOString(),
       updatedAt: organization.updatedAt.toISOString(),
+      abbreviation: organization.abbreviation,
     };
   }
 }

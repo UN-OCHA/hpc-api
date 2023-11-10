@@ -3,8 +3,7 @@ import { Service } from 'typedi';
 import { Arg, Args, Ctx, Query, Resolver } from 'type-graphql';
 import { FlowSearchService } from '../flow-search-service';
 import Context from '../../Context';
-import { SearchFlowsFilters } from './args';
-import { PaginationArgs } from '../../../utils/graphql/pagination';
+import { SearchFlowsArgs } from './args';
 
 @Service()
 @Resolver(FlowPaged)
@@ -14,23 +13,9 @@ export default class FlowResolver {
   @Query(() => FlowSearchResult)
   async searchFlows(
     @Ctx() context: Context,
-    @Args(() => PaginationArgs, { validate: false })
-    pagination: PaginationArgs<FlowSortField>,
-    @Arg('activeStatus', { nullable: true }) activeStatus: boolean
+    @Args(() => SearchFlowsArgs, { validate: false })
+    args: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    const { limit, sortOrder, sortField, afterCursor, beforeCursor } =
-      pagination;
-    const filters: SearchFlowsFilters = {
-      activeStatus,
-    };
-    return await this.flowSearchService.search(
-      context.models,
-      limit,
-      sortOrder,
-      sortField,
-      afterCursor,
-      beforeCursor,
-      filters
-    );
+    return await this.flowSearchService.search(context.models, args);
   }
 }

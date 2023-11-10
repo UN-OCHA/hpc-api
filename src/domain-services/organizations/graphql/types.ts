@@ -11,4 +11,7 @@ export class Organization extends BaseType {
 
   @Field({ nullable: true })
   name: string;
+
+  @Field({ nullable: true })
+  abbreviation: string;
 }
