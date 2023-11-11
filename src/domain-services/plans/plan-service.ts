@@ -74,15 +74,18 @@ export class PlanService {
         },
       });
 
-      
       const planFlowOobject = plansFO.find(
         (planFO) => planFO.objectID === plan.id
-        );
+      );
 
       const flowId = planFlowOobject && planFlowOobject.flowID;
-        
-      const planMapped = this.mapPlansToFlowPlans(plan, planVersion[0], planFlowOobject?.refDirection || null);
-      
+
+      const planMapped = this.mapPlansToFlowPlans(
+        plan,
+        planVersion[0],
+        planFlowOobject?.refDirection || null
+      );
+
       if (flowId) {
         if (!plansMap.has(flowId)) {
           plansMap.set(flowId, []);
@@ -98,7 +101,8 @@ export class PlanService {
   private mapPlansToFlowPlans(
     plan: InstanceDataOfModel<Database['plan']>,
     planVersion: InstanceDataOfModel<Database['planVersion']>,
-    direction: string | null): BasePlan {
+    direction: string | null
+  ): BasePlan {
     return {
       id: plan.id.valueOf(),
       name: planVersion.name,

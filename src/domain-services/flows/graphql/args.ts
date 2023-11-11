@@ -50,14 +50,12 @@ export class FlowObjectFilters {
 }
 
 @InputType()
-export class FlowCategory{
-
+export class FlowCategory {
   @Field({ nullable: false })
   id: number;
 
   @Field({ nullable: false })
   group: string;
-
 }
 
 @ArgsType()

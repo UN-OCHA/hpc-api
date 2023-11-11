@@ -19,7 +19,10 @@ export class FlowLinkService {
     });
 
     // Group flowLinks by flow ID for easy mapping
-    const flowLinksMap = new Map<number, InstanceOfModel<Database['flowLink']>[]>();
+    const flowLinksMap = new Map<
+      number,
+      InstanceOfModel<Database['flowLink']>[]
+    >();
 
     // Populate the map with flowLinks for each flow
     flowLinks.forEach((flowLink) => {

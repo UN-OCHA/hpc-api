@@ -1,7 +1,5 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
-import { Ctx } from 'type-graphql';
 import { Service } from 'typedi';
-import Context from '../../../Context';
 import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { CategoryService } from '../../../categories/category-service';
 import { ExternalReferenceService } from '../../../external-reference/external-reference-service';
@@ -18,8 +16,6 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 
 @Service()
 export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
-
-
   constructor(
     private readonly organizationService: OrganizationService,
     private readonly locationService: LocationService,
@@ -29,30 +25,25 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
     private readonly flowLinkService: FlowLinkService,
     private readonly externalReferenceService: ExternalReferenceService,
     private readonly reportDetailService: ReportDetailService,
-    private readonly flowService: FlowService) {
-  }
+    private readonly flowService: FlowService
+  ) {}
 
-  async search(flowConditions: Map<string, any>, orderBy: any, limit: number, cursorCondition: any, models: Database): Promise<FlowSearchResult> {
-
-    // Fetch one more item to check for hasNextPage 
+  async search(
+    flowConditions: Map<string, any>,
+    orderBy: any,
+    limit: number,
+    cursorCondition: any,
+    models: Database
+  ): Promise<FlowSearchResult> {
+    // Fetch one more item to check for hasNextPage
     const limitComputed = limit + 1;
 
     // Build conditions object
-    const conditions: any = { ...cursorCondition };
+    const conditions: any = { ...cursorCondition, ...flowConditions };
 
-    if (flowConditions.size > 0) {
-      flowConditions.forEach((value, key) => {
-        conditions[key] = value;
-      });
-    }
-
+    console.log('conditions in OnlyFlowFiltersStrategy', conditions);
     const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(
-        models,
-        conditions,
-        orderBy,
-        limitComputed
-      ),
+      this.flowService.getFlows(models, conditions, orderBy, limitComputed),
       this.flowService.getFlowsCount(models, conditions),
     ]);
 
@@ -109,66 +100,73 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
       this.reportDetailService.getReportDetailsForFlows(flowIds, models),
     ]);
 
-    const items = flows.map((flow) => {
-      const flowLink = flowLinksMap.get(flow.id) || [];
-      const categories = categoriesMap.get(flow.id) || [];
-      const organizations = organizationsMap.get(flow.id) || [];
-      const locations = [...(locationsMap.get(flow.id) || [])];
-      const plans = plansMap.get(flow.id) || [];
-      const usageYears = usageYearsMap.get(flow.id) || [];
-      const externalReferences = externalReferencesMap.get(flow.id) || [];
-      const reportDetails = reportDetailsMap.get(flow.id) || [];
+    const items = await Promise.all(
+      flows.map(async (flow) => {
+        const flowLink = flowLinksMap.get(flow.id) || [];
+        const categories = categoriesMap.get(flow.id) || [];
+        const organizations = organizationsMap.get(flow.id) || [];
+        const locations = [...(locationsMap.get(flow.id) || [])];
+        const plans = plansMap.get(flow.id) || [];
+        const usageYears = usageYearsMap.get(flow.id) || [];
+        const externalReferences = externalReferencesMap.get(flow.id) || [];
+        const reportDetails = reportDetailsMap.get(flow.id) || [];
 
-      const parkedParentSource: FlowParkedParentSource[] = [];
-      if (flow.activeStatus && flowLink.length > 0) {
-        this.getParketParents(flow, flowLink, models, parkedParentSource);
-      }
+        let parkedParentSource: FlowParkedParentSource[] = [];
+        if (flow.activeStatus && flowLink.length > 0) {
+          parkedParentSource = await this.getParketParents(
+            flow,
+            flowLink,
+            models
+          );
+        }
 
-      const childIDs: number[] = flowLinksMap
-        .get(flow.id)
-        ?.filter(
-          (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
-        )
-        .map((flowLink) => flowLink.childID.valueOf()) as number[];
+        const childIDs: number[] = flowLinksMap
+          .get(flow.id)
+          ?.filter(
+            (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
+          )
+          .map((flowLink) => flowLink.childID.valueOf()) as number[];
 
-      const parentIDs: number[] = flowLinksMap
-        .get(flow.id)
-        ?.filter(
-          (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
-        )
-        .map((flowLink) => flowLink.parentID.valueOf()) as number[];
+        const parentIDs: number[] = flowLinksMap
+          .get(flow.id)
+          ?.filter(
+            (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
+          )
+          .map((flowLink) => flowLink.parentID.valueOf()) as number[];
 
-      return {
-        // Mandatory fields
-        id: flow.id.valueOf(),
-        versionID: flow.versionID,
-        amountUSD: flow.amountUSD.toString(),
-        createdAt: flow.createdAt.toISOString(),
-        updatedAt: flow.updatedAt.toISOString(),
-        activeStatus: flow.activeStatus,
-        restricted: flow.restricted,
-        // Optional fields
-        categories,
-        organizations,
-        locations,
-        plans,
-        usageYears,
-        childIDs,
-        parentIDs,
-        origAmount: flow.origAmount ? flow.origAmount.toString() : '',
-        origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
-        externalReferences,
-        reportDetails,
-        parkedParentSource,
-        // Paged item field
-        cursor: flow.id.valueOf(),
-      };
-    });
+        return {
+          // Mandatory fields
+          id: flow.id.valueOf(),
+          versionID: flow.versionID,
+          amountUSD: flow.amountUSD.toString(),
+          createdAt: flow.createdAt.toISOString(),
+          updatedAt: flow.updatedAt.toISOString(),
+          activeStatus: flow.activeStatus,
+          restricted: flow.restricted,
+          // Optional fields
+          categories,
+          organizations,
+          locations,
+          plans,
+          usageYears,
+          childIDs,
+          parentIDs,
+          origAmount: flow.origAmount ? flow.origAmount.toString() : '',
+          origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
+          externalReferences,
+          reportDetails,
+          parkedParentSource:
+            parkedParentSource.length > 0 ? parkedParentSource : null,
+          // Paged item field
+          cursor: flow.id.valueOf(),
+        };
+      })
+    );
 
     return {
       flows: items,
       hasNextPage: limit <= flows.length,
-      hasPreviousPage: false,// TODO: cursorCondition['id'].GT !== undefined,
+      hasPreviousPage: false, // TODO: cursorCondition['id'].GT !== undefined,
       startCursor: flows.length ? flows[0].id.valueOf() : 0,
       endCursor: flows.length ? flows[flows.length - 1].id.valueOf() : 0,
       pageSize: flows.length,
@@ -210,17 +208,12 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
   private async getParketParents(
     flow: any,
     flowLink: any[],
-    models: Database,
-    parkedParentSource: FlowParkedParentSource[]
+    models: Database
   ): Promise<any> {
     const flowLinksDepth0 = flowLink.filter((flowLink) => flowLink.depth === 0);
 
     const flowLinksParent = flowLinksDepth0.filter(
       (flowLink) => flowLink.parentID === flow.id
-    );
-
-    const parentFlowIds = flowLinksParent.map((flowLink) =>
-      flowLink.parentID.valueOf()
     );
 
     const categories = await models.category.find({
@@ -241,12 +234,17 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
       },
     });
 
-    const parentFlows = flowLinksParent.filter((flowLink) => {
-      return categoryRef.some(
-        (categoryRef) =>
-          categoryRef.objectID.valueOf() === flowLink.parentID.valueOf()
-      );
-    });
-  }
+    const parentFlows = flowLinksParent
+      .filter((flowLink) => {
+        return categoryRef.some(
+          (categoryRef) =>
+            categoryRef.objectID.valueOf() === flowLink.parentID.valueOf()
+        );
+      })
+      .map((flowLink) => {
+        return flowLink.parentID.valueOf();
+      });
 
+    return parentFlows;
+  }
 }
