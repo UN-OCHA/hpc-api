@@ -7,9 +7,7 @@ import {
   SearchFlowsArgs,
   SearchFlowsFilters,
 } from './graphql/args';
-import {
-  FlowSearchResult
-} from './graphql/types';
+import { FlowSearchResult } from './graphql/types';
 import { FlowSearchStrategy } from './strategy/flow-search-strategy';
 import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy';
 
@@ -17,7 +15,7 @@ import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-st
 export class FlowSearchService {
   constructor(
     private readonly onlyFlowFiltersStrategy: OnlyFlowFiltersStrategy
-  ) { }
+  ) {}
 
   async search(
     models: Database,
@@ -45,39 +43,28 @@ export class FlowSearchService {
     }
 
     const orderBy = {
-      column: sortField??'updatedAt',
+      column: sortField ?? 'updatedAt',
       order: sortOrder ?? 'desc',
     };
 
     const { flowFilters, flowObjectFilters } = filters;
 
-    let onlyFlowFilters = false;
-    let onlyFlowObjectFilters = false;
-    let bothFlowFilters = false;
+    const { strategy, conditions } = this.determineStrategy(
+      flowFilters,
+      flowObjectFilters,
+      cursorCondition
+    );
 
-    if (
-      (!flowFilters && !flowObjectFilters) ||
-      (flowFilters && !flowObjectFilters)
-    ) {
-      onlyFlowFilters = true;
-    } else if (!flowFilters && flowObjectFilters) {
-      onlyFlowObjectFilters = true;
-    } else if (flowFilters && flowObjectFilters) {
-      bothFlowFilters = true;
-    }
-
-    let conditions: any = { ...cursorCondition };
-    const strategy = this.determineStrategy(flowFilters, flowObjectFilters, conditions);
-
-    return await strategy.search(conditions, orderBy, limit, cursorCondition, models);
-
+    return await strategy.search(
+      conditions,
+      orderBy,
+      limit,
+      cursorCondition,
+      models
+    );
   }
 
-  
-
-  
-
-  private prepareFlowObjectConditions(
+  prepareFlowObjectConditions(
     flowObjectFilters: FlowObjectFilters[]
   ): Map<string, Map<string, number[]>> {
     const flowObjectConditions = new Map<string, Map<string, number[]>>();
@@ -108,13 +95,13 @@ export class FlowSearchService {
     return flowObjectConditions;
   }
 
-  private prepareFlowConditions(flowFilters: SearchFlowsFilters): Map<string, any> {
-    const flowConditions = new Map<string, any>();
+  prepareFlowConditions(flowFilters: SearchFlowsFilters): any {
+    let flowConditions = {};
 
     if (flowFilters) {
       Object.entries(flowFilters).forEach(([key, value]) => {
         if (value !== undefined) {
-          flowConditions.set(key, value);
+          flowConditions = { ...flowConditions, [key]: value };
         }
       });
     }
@@ -122,11 +109,19 @@ export class FlowSearchService {
     return flowConditions;
   }
 
-  private determineStrategy(flowFilters: SearchFlowsFilters, flowObjectFilters: FlowObjectFilters[], conditions: any): FlowSearchStrategy {
-    if ((!flowFilters && (!flowObjectFilters || flowObjectFilters.length === 0)) || (flowFilters && (!flowObjectFilters || flowObjectFilters.length === 0))) {
+  determineStrategy(
+    flowFilters: SearchFlowsFilters,
+    flowObjectFilters: FlowObjectFilters[],
+    conditions: any
+  ): { strategy: FlowSearchStrategy; conditions: any } {
+    if (
+      (!flowFilters &&
+        (!flowObjectFilters || flowObjectFilters.length === 0)) ||
+      (flowFilters && (!flowObjectFilters || flowObjectFilters.length === 0))
+    ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
-      conditions = { ...conditions, ...flowConditions }
-      return this.onlyFlowFiltersStrategy;
+      conditions = { ...conditions, ...flowConditions };
+      return { strategy: this.onlyFlowFiltersStrategy, conditions };
     }
     // else if (!flowFilters && flowObjectFilters.length !== 0) {
     // const flowObjectConditions = this.prepareFlowObjectConditions(flowObjectFilters);
@@ -139,7 +134,8 @@ export class FlowSearchService {
     //   return new BothFlowFiltersStrategy(this);
     // }
 
-    throw new Error('Invalid combination of flowFilters and flowObjectFilters - temp: only provide flowFilters');
+    throw new Error(
+      'Invalid combination of flowFilters and flowObjectFilters - temp: only provide flowFilters'
+    );
   }
-
 }
