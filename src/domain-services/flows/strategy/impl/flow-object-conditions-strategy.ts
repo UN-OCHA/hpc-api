@@ -1,5 +1,5 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
-import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
 import { FlowService } from '../../flow-service';
@@ -42,7 +42,7 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     // Combine conditions from flowObjects FlowIDs and flow conditions
     const mergedFlowConditions = {
       ...flowEntityConditions,
-      flowID: {
+      id: {
         [Op.IN]: flowIDsFromFilteredFlowObjects,
       },
     };
@@ -80,15 +80,15 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
       for (const [refDirection, objectIDs] of refDirectionMap) {
         flowObjectWhere = {
           ...flowObjectWhere,
-            objectID: {
-              [Op.IN]: objectIDs,
-            },
-            refDirection: {
-              [Op.IN]: refDirection,
-            },
-            objectType: {
-              [Op.IN]: objectType,
-            },
+          objectID: {
+            [Op.IN]: objectIDs,
+          },
+          refDirection: {
+            [Op.LIKE]: refDirection,
+          },
+          objectType: {
+            [Op.LIKE]: objectType,
+          },
         };
       }
     }
