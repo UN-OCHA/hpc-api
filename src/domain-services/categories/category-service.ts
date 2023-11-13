@@ -5,7 +5,6 @@ import { Category } from './graphql/types';
 import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 
-// TODO: add proper type for flowLinks
 @Service()
 export class CategoryService {
   async getCategoriesForFlows(
@@ -50,7 +49,7 @@ export class CategoryService {
         categoriesMap.set(flowId, []);
       }
 
-      const categoriesForFlow = categoriesMap.get(flowId)!;
+      const categoriesPerFlow = categoriesMap.get(flowId)!;
 
       const category = categories.find((cat) => cat.id === catRef.categoryID);
 
@@ -58,7 +57,7 @@ export class CategoryService {
         throw new Error(`Category with ID ${catRef.categoryID} does not exist`);
       }
 
-      categoriesForFlow.push(this.mapCategoryToFlowCategory(category, catRef));
+      categoriesPerFlow.push(this.mapCategoryToFlowCategory(category, catRef));
     });
 
     return categoriesMap;

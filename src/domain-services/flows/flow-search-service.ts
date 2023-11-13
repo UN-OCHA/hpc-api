@@ -7,7 +7,11 @@ import {
   SearchFlowsArgs,
   SearchFlowsFilters,
 } from './graphql/args';
-import { FlowParkedParentSource, FlowSearchResult } from './graphql/types';
+import {
+  FlowPaged,
+  FlowParkedParentSource,
+  FlowSearchResult,
+} from './graphql/types';
 import { FlowSearchStrategy } from './strategy/flow-search-strategy';
 import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy';
 import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy';
@@ -20,6 +24,14 @@ import { PlanService } from '../plans/plan-service';
 import { ReportDetailService } from '../report-details/report-detail-service';
 import { UsageYearService } from '../usage-years/usage-year-service';
 import { FlowLinkService } from '../flow-link/flow-link-service';
+import { FlowObject } from '../flow-object/model';
+import { FlowObjectService } from '../flow-object/flow-object-service';
+import { FlowEntity } from './model';
+import { Category } from '../categories/graphql/types';
+import { Organization } from '../organizations/graphql/types';
+import { BaseLocation } from '../location/graphql/types';
+import { BasePlan } from '../plans/graphql/types';
+import { UsageYear } from '../usage-years/grpahql/types';
 
 @Service()
 export class FlowSearchService {
@@ -33,7 +45,8 @@ export class FlowSearchService {
     private readonly categoryService: CategoryService,
     private readonly flowLinkService: FlowLinkService,
     private readonly externalReferenceService: ExternalReferenceService,
-    private readonly reportDetailService: ReportDetailService
+    private readonly reportDetailService: ReportDetailService,
+    private readonly flowObjectService: FlowObjectService
   ) {}
 
   async search(
@@ -42,25 +55,6 @@ export class FlowSearchService {
   ): Promise<FlowSearchResult> {
     const { limit, afterCursor, beforeCursor, sortField, sortOrder } = filters;
 
-    if (beforeCursor && afterCursor) {
-      throw new Error('Cannot use before and after cursor at the same time');
-    }
-
-    let cursorCondition;
-    if (afterCursor) {
-      cursorCondition = {
-        id: {
-          [Op.GT]: createBrandedValue(afterCursor),
-        },
-      };
-    } else if (beforeCursor) {
-      cursorCondition = {
-        id: {
-          [Op.LT]: createBrandedValue(beforeCursor),
-        },
-      };
-    }
-
     const orderBy = {
       column: sortField ?? 'updatedAt',
       order: sortOrder ?? 'desc',
@@ -68,15 +62,21 @@ export class FlowSearchService {
 
     const { flowFilters, flowObjectFilters } = filters;
 
+    const cursorCondition = this.buildCursorCondition(
+      beforeCursor,
+      afterCursor
+    );
+
+    // Determine strategy of how to search for flows
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
-      flowObjectFilters,
-      cursorCondition
+      flowObjectFilters
     );
 
     // Fetch one more item to check for hasNextPage
     const limitComputed = limit + 1;
 
+    // Obtain flows and its count based on the strategy selected
     const { flows, count } = await strategy.search(
       conditions,
       orderBy,
@@ -93,31 +93,36 @@ export class FlowSearchService {
 
     const flowIds: FlowId[] = flows.map((flow) => flow.id);
 
-    const organizationsFO: any[] = [];
-    const locationsFO: any[] = [];
-    const plansFO: any[] = [];
-    const usageYearsFO: any[] = [];
-
-    const [externalReferencesMap] = await Promise.all([
+    // Obtain external references and flow objects in parallel
+    const [externalReferencesMap, flowObjects] = await Promise.all([
       this.externalReferenceService.getExternalReferencesForFlows(
         flowIds,
         models
       ),
-      this.getFlowObjects(
-        flowIds,
-        models,
-        organizationsFO,
-        locationsFO,
-        plansFO,
-        usageYearsFO
-      ),
+      this.flowObjectService.getFlowObjectByFlowId(models, flowIds),
     ]);
 
+    // Map flow objects to their respective arrays
+    const organizationsFO: FlowObject[] = [];
+    const locationsFO: FlowObject[] = [];
+    const plansFO: FlowObject[] = [];
+    const usageYearsFO: FlowObject[] = [];
+
+    this.mapFlowObjects(
+      flowObjects,
+      organizationsFO,
+      locationsFO,
+      plansFO,
+      usageYearsFO
+    );
+
+    // Obtain flow links
     const flowLinksMap = await this.flowLinkService.getFlowLinksForFlows(
       flowIds,
       models
     );
 
+    // Perform all nested queries in parallel
     const [
       categoriesMap,
       organizationsMap,
@@ -171,16 +176,8 @@ export class FlowSearchService {
           )
           .map((flowLink) => flowLink.parentID.valueOf()) as number[];
 
-        return {
-          // Mandatory fields
-          id: flow.id.valueOf(),
-          versionID: flow.versionID,
-          amountUSD: flow.amountUSD.toString(),
-          createdAt: flow.createdAt.toISOString(),
-          updatedAt: flow.updatedAt.toISOString(),
-          activeStatus: flow.activeStatus,
-          restricted: flow.restricted,
-          // Optional fields
+        return this.buildFlowDTO(
+          flow,
           categories,
           organizations,
           locations,
@@ -188,15 +185,10 @@ export class FlowSearchService {
           usageYears,
           childIDs,
           parentIDs,
-          origAmount: flow.origAmount ? flow.origAmount.toString() : '',
-          origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
           externalReferences,
           reportDetails,
-          parkedParentSource:
-            parkedParentSource.length > 0 ? parkedParentSource : null,
-          // Paged item field
-          cursor: flow.id.valueOf(),
-        };
+          parkedParentSource
+        );
       })
     );
 
@@ -260,9 +252,9 @@ export class FlowSearchService {
 
   determineStrategy(
     flowFilters: SearchFlowsFilters,
-    flowObjectFilters: FlowObjectFilters[],
-    conditions: any
+    flowObjectFilters: FlowObjectFilters[]
   ): { strategy: FlowSearchStrategy; conditions: any } {
+    let conditions = {};
     if (
       (!flowFilters &&
         (!flowObjectFilters || flowObjectFilters.length === 0)) ||
@@ -310,22 +302,13 @@ export class FlowSearchService {
     conditionsMap.set('flow', flowConditions);
     return conditionsMap;
   }
-  private async getFlowObjects(
-    flowIds: FlowId[],
-    models: Database,
+  private mapFlowObjects(
+    flowObjects: FlowObject[],
     organizationsFO: any[],
     locationsFO: any[],
     plansFO: any[],
     usageYearsFO: any[]
-  ): Promise<void> {
-    const flowObjects = await models.flowObject.find({
-      where: {
-        flowID: {
-          [Op.IN]: flowIds,
-        },
-      },
-    });
-
+  ) {
     flowObjects.forEach((flowObject) => {
       if (flowObject.objectType === 'organization') {
         organizationsFO.push(flowObject);
@@ -380,5 +363,69 @@ export class FlowSearchService {
       });
 
     return parentFlows;
+  }
+
+  private buildCursorCondition(beforeCursor: number, afterCursor: number) {
+    if (beforeCursor && afterCursor) {
+      throw new Error('Cannot use before and after cursor at the same time');
+    }
+
+    let cursorCondition;
+    if (afterCursor) {
+      cursorCondition = {
+        id: {
+          [Op.GT]: createBrandedValue(afterCursor),
+        },
+      };
+    } else if (beforeCursor) {
+      cursorCondition = {
+        id: {
+          [Op.LT]: createBrandedValue(beforeCursor),
+        },
+      };
+    }
+
+    return cursorCondition;
+  }
+
+  private buildFlowDTO(
+    flow: FlowEntity,
+    categories: Category[],
+    organizations: Organization[],
+    locations: BaseLocation[],
+    plans: BasePlan[],
+    usageYears: UsageYear[],
+    childIDs: number[],
+    parentIDs: number[],
+    externalReferences: any[],
+    reportDetails: any[],
+    parkedParentSource: FlowParkedParentSource[]
+  ): FlowPaged {
+    return {
+      // Mandatory fields
+      id: flow.id.valueOf(),
+      versionID: flow.versionID,
+      amountUSD: flow.amountUSD.toString(),
+      createdAt: flow.createdAt.toISOString(),
+      updatedAt: flow.updatedAt.toISOString(),
+      activeStatus: flow.activeStatus,
+      restricted: flow.restricted,
+      // Optional fields
+      categories,
+      organizations,
+      locations,
+      plans,
+      usageYears,
+      childIDs,
+      parentIDs,
+      origAmount: flow.origAmount ? flow.origAmount.toString() : '',
+      origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
+      externalReferences,
+      reportDetails,
+      parkedParentSource:
+        parkedParentSource.length > 0 ? parkedParentSource : null,
+      // Paged item field
+      cursor: flow.id.valueOf(),
+    };
   }
 }
