@@ -19,7 +19,7 @@ import { OrganizationService } from '../organizations/organization-service';
 import { PlanService } from '../plans/plan-service';
 import { ReportDetailService } from '../report-details/report-detail-service';
 import { UsageYearService } from '../usage-years/usage-year-service';
-import { FlowLinkService } from './flow-link-service';
+import { FlowLinkService } from '../flow-link/flow-link-service';
 
 @Service()
 export class FlowSearchService {
