@@ -1,10 +1,8 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
-import { FlowSearchResult } from '../graphql/types';
-import { InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { FlowEntity } from '../model';
 
 export interface FlowSearchStrategyResponse {
-  flows: InstanceDataOfModel<Database['flow']>[];
+  flows: FlowEntity[];
   count: number;
 }
 

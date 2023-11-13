@@ -1,12 +1,10 @@
 import { Database } from '@unocha/hpc-api-core/src/db';
 import { Service } from 'typedi';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { FlowService } from '../../flow-service';
 import {
   FlowSearchStrategy,
   FlowSearchStrategyResponse,
 } from '../flow-search-strategy';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 
 @Service()
 export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
@@ -24,7 +22,7 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
 
     const [flows, countRes] = await Promise.all([
       this.flowService.getFlows(models, conditions, orderBy, limit),
-      this.flowService.getFlowsCount(models, conditions),
+      this.flowService.getFlowsCount(models, flowConditions),
     ]);
 
     // Map count result query to count object

@@ -53,7 +53,7 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     // and flow conditions
     const [flows, countRes] = await Promise.all([
       this.flowService.getFlows(models, conditions, orderBy, limit),
-      this.flowService.getFlowsCount(models, conditions),
+      this.flowService.getFlowsCount(models, mergedFlowConditions),
     ]);
 
     // Map count result query to count object
