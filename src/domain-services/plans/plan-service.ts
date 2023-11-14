@@ -1,11 +1,11 @@
 import { type PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { NotFoundError } from '@unocha/hpc-api-core/src/util/error';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { BasePlan } from './graphql/types';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type BasePlan } from './graphql/types';
 
 @Service()
 export class PlanService {
@@ -49,13 +49,13 @@ export class PlanService {
   }
 
   async getPlansForFlows(
-    plansFO: InstanceDataOfModel<Database['flowObject']>[],
+    plansFO: Array<InstanceDataOfModel<Database['flowObject']>>,
     models: Database
   ): Promise<Map<number, BasePlan[]>> {
     const planObjectsIDs: PlanId[] = plansFO.map((planFO) =>
       createBrandedValue(planFO.objectID)
     );
-    const plans: InstanceDataOfModel<Database['plan']>[] =
+    const plans: Array<InstanceDataOfModel<Database['plan']>> =
       await models.plan.find({
         where: {
           id: {
@@ -83,7 +83,7 @@ export class PlanService {
       const planMapped = this.mapPlansToFlowPlans(
         plan,
         planVersion[0],
-        planFlowOobject?.refDirection || null
+        planFlowOobject?.refDirection ?? null
       );
 
       if (flowId) {

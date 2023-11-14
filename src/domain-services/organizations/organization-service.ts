@@ -1,7 +1,7 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
-import { Service } from 'typedi';
+import { type Database } from '@unocha/hpc-api-core/src/db';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { Organization } from './graphql/types';
+import { Service } from 'typedi';
+import { type Organization } from './graphql/types';
 
 @Service()
 export class OrganizationService {
@@ -16,7 +16,7 @@ export class OrganizationService {
 
     const organizationsMap = new Map<number, Organization[]>();
 
-    organizationsFO.forEach((orgFO) => {
+    for (const orgFO of organizationsFO) {
       const flowId = orgFO.flowID;
 
       if (!organizationsMap.has(flowId)) {
@@ -39,7 +39,7 @@ export class OrganizationService {
         );
 
       organizationsMap.get(flowId)!.push(organizationMapped);
-    });
+    }
 
     return organizationsMap;
   }

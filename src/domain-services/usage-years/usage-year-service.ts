@@ -1,8 +1,8 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
+import { type Database } from '@unocha/hpc-api-core/src/db';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
-import { UsageYear } from './grpahql/types';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type UsageYear } from './grpahql/types';
 
 @Service()
 export class UsageYearService {
@@ -10,7 +10,7 @@ export class UsageYearService {
     usageYearsFO: any[],
     models: Database
   ): Promise<Map<number, UsageYear[]>> {
-    const usageYears: InstanceDataOfModel<Database['usageYear']>[] =
+    const usageYears: Array<InstanceDataOfModel<Database['usageYear']>> =
       await models.usageYear.find({
         where: {
           id: {
@@ -21,7 +21,7 @@ export class UsageYearService {
 
     const usageYearsMap = new Map<number, UsageYear[]>();
 
-    usageYearsFO.forEach((usageYearFO) => {
+    for (const usageYearFO of usageYearsFO) {
       const flowId = usageYearFO.flowID;
       if (!usageYearsMap.has(flowId)) {
         usageYearsMap.set(flowId, []);
@@ -40,7 +40,7 @@ export class UsageYearService {
         usageYearFO.refDirection
       );
       usageYearsMap.get(flowId)!.push(usageYearMapped);
-    });
+    }
 
     return usageYearsMap;
   }

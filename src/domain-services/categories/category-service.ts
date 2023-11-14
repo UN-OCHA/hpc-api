@@ -1,14 +1,14 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
+import { type Database } from '@unocha/hpc-api-core/src/db';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { Category } from './graphql/types';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { type Category } from './graphql/types';
 
 @Service()
 export class CategoryService {
   async getCategoriesForFlows(
-    flowLinks: Map<number, InstanceDataOfModel<Database['flowLink']>[]>,
+    flowLinks: Map<number, Array<InstanceDataOfModel<Database['flowLink']>>>,
     models: Database
   ): Promise<Map<number, Category[]>> {
     const flowLinksBrandedIds = [];
@@ -23,7 +23,7 @@ export class CategoryService {
       return categoriesMap;
     }
 
-    const categoriesRef: InstanceDataOfModel<Database['categoryRef']>[] =
+    const categoriesRef: Array<InstanceDataOfModel<Database['categoryRef']>> =
       await models.categoryRef.find({
         where: {
           objectID: {
@@ -32,7 +32,7 @@ export class CategoryService {
         },
       });
 
-    const categories: InstanceDataOfModel<Database['category']>[] =
+    const categories: Array<InstanceDataOfModel<Database['category']>> =
       await models.category.find({
         where: {
           id: {
@@ -42,7 +42,7 @@ export class CategoryService {
       });
 
     // Populate the map with categories for each flow
-    categoriesRef.forEach((catRef) => {
+    for (const catRef of categoriesRef) {
       const flowId = catRef.objectID.valueOf();
 
       if (!categoriesMap.has(flowId)) {
@@ -58,7 +58,7 @@ export class CategoryService {
       }
 
       categoriesPerFlow.push(this.mapCategoryToFlowCategory(category, catRef));
-    });
+    }
 
     return categoriesMap;
   }

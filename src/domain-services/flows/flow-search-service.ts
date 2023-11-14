@@ -1,37 +1,37 @@
-import { Database } from '@unocha/hpc-api-core/src/db/type';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import {
-  FlowObjectFilters,
-  SearchFlowsArgs,
-  SearchFlowsFilters,
-} from './graphql/args';
-import {
-  FlowPaged,
-  FlowParkedParentSource,
-  FlowSearchResult,
-} from './graphql/types';
-import { FlowSearchStrategy } from './strategy/flow-search-strategy';
-import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy';
-import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { CategoryService } from '../categories/category-service';
+import { type Category } from '../categories/graphql/types';
 import { ExternalReferenceService } from '../external-reference/external-reference-service';
+import { FlowLinkService } from '../flow-link/flow-link-service';
+import { FlowObjectService } from '../flow-object/flow-object-service';
+import { type FlowObject } from '../flow-object/model';
+import { type BaseLocation } from '../location/graphql/types';
 import { LocationService } from '../location/location-service';
+import { type Organization } from '../organizations/graphql/types';
 import { OrganizationService } from '../organizations/organization-service';
+import { type BasePlan } from '../plans/graphql/types';
 import { PlanService } from '../plans/plan-service';
 import { ReportDetailService } from '../report-details/report-detail-service';
+import { type UsageYear } from '../usage-years/grpahql/types';
 import { UsageYearService } from '../usage-years/usage-year-service';
-import { FlowLinkService } from '../flow-link/flow-link-service';
-import { FlowObject } from '../flow-object/model';
-import { FlowObjectService } from '../flow-object/flow-object-service';
-import { FlowEntity } from './model';
-import { Category } from '../categories/graphql/types';
-import { Organization } from '../organizations/graphql/types';
-import { BaseLocation } from '../location/graphql/types';
-import { BasePlan } from '../plans/graphql/types';
-import { UsageYear } from '../usage-years/grpahql/types';
+import {
+  type FlowObjectFilters,
+  type SearchFlowsArgs,
+  type SearchFlowsFilters,
+} from './graphql/args';
+import {
+  type FlowPaged,
+  type FlowParkedParentSource,
+  type FlowSearchResult,
+} from './graphql/types';
+import { type FlowEntity } from './model';
+import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
+import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy';
+import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy';
 
 @Service()
 export class FlowSearchService {
@@ -144,14 +144,14 @@ export class FlowSearchService {
 
     const items = await Promise.all(
       flows.map(async (flow) => {
-        const flowLink = flowLinksMap.get(flow.id) || [];
-        const categories = categoriesMap.get(flow.id) || [];
-        const organizations = organizationsMap.get(flow.id) || [];
-        const locations = [...(locationsMap.get(flow.id) || [])];
-        const plans = plansMap.get(flow.id) || [];
-        const usageYears = usageYearsMap.get(flow.id) || [];
-        const externalReferences = externalReferencesMap.get(flow.id) || [];
-        const reportDetails = reportDetailsMap.get(flow.id) || [];
+        const flowLink = flowLinksMap.get(flow.id) ?? [];
+        const categories = categoriesMap.get(flow.id) ?? [];
+        const organizations = organizationsMap.get(flow.id) ?? [];
+        const locations = [...(locationsMap.get(flow.id) ?? [])];
+        const plans = plansMap.get(flow.id) ?? [];
+        const usageYears = usageYearsMap.get(flow.id) ?? [];
+        const externalReferences = externalReferencesMap.get(flow.id) ?? [];
+        const reportDetails = reportDetailsMap.get(flow.id) ?? [];
 
         let parkedParentSource: FlowParkedParentSource[] = [];
         if (flow.activeStatus && flowLink.length > 0) {
@@ -197,7 +197,7 @@ export class FlowSearchService {
       hasNextPage: limit <= flows.length,
       hasPreviousPage: afterCursor !== undefined,
       startCursor: flows.length ? flows[0].id.valueOf() : 0,
-      endCursor: flows.length ? flows[flows.length - 1].id.valueOf() : 0,
+      endCursor: flows.length ? flows.at(-1)?.id.valueOf() ?? 0 : 0,
       pageSize: flows.length,
       sortField: orderBy.column,
       sortOrder: orderBy.order,
@@ -209,11 +209,15 @@ export class FlowSearchService {
     let flowConditions = {};
 
     if (flowFilters) {
-      Object.entries(flowFilters).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(flowFilters)) {
         if (value !== undefined) {
-          flowConditions = { ...flowConditions, [key]: value };
+          if (Array.isArray(value) && value.length !== 0) {
+            flowConditions = { ...flowConditions, [key]: { [Op.IN]: value } };
+          } else {
+            flowConditions = { ...flowConditions, [key]: value };
+          }
         }
-      });
+      }
     }
 
     return flowConditions;
@@ -222,13 +226,16 @@ export class FlowSearchService {
   prepareFlowObjectConditions(
     flowObjectFilters: FlowObjectFilters[]
   ): Map<string, Map<string, number[]>> {
-    const flowObjectsConditions: Map<string, Map<string, number[]>> = new Map();
+    const flowObjectsConditions: Map<string, Map<string, number[]>> = new Map<
+      string,
+      Map<string, number[]>
+    >();
 
-    flowObjectFilters.forEach((flowObjectFilter) => {
+    for (const flowObjectFilter of flowObjectFilters) {
       const { objectType, direction, objectID } = flowObjectFilter;
 
       if (!flowObjectsConditions.has(objectType)) {
-        flowObjectsConditions.set(objectType, new Map());
+        flowObjectsConditions.set(objectType, new Map<string, number[]>());
       }
 
       const refDirectionMap = flowObjectsConditions.get(objectType);
@@ -245,7 +252,7 @@ export class FlowSearchService {
       }
 
       objectIDsArray!.push(objectID);
-    });
+    }
 
     return flowObjectsConditions;
   }
@@ -257,8 +264,8 @@ export class FlowSearchService {
     let conditions = {};
     if (
       (!flowFilters &&
-        (!flowObjectFilters || flowObjectFilters.length === 0)) ||
-      (flowFilters && (!flowObjectFilters || flowObjectFilters.length === 0))
+        (!flowObjectFilters ?? flowObjectFilters.length === 0)) ??
+      (flowFilters && (!flowObjectFilters ?? flowObjectFilters.length === 0))
     ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
       conditions = { ...conditions, ...flowConditions };
@@ -302,6 +309,7 @@ export class FlowSearchService {
     conditionsMap.set('flow', flowConditions);
     return conditionsMap;
   }
+
   private mapFlowObjects(
     flowObjects: FlowObject[],
     organizationsFO: any[],
@@ -309,7 +317,7 @@ export class FlowSearchService {
     plansFO: any[],
     usageYearsFO: any[]
   ) {
-    flowObjects.forEach((flowObject) => {
+    for (const flowObject of flowObjects) {
       if (flowObject.objectType === 'organization') {
         organizationsFO.push(flowObject);
       } else if (flowObject.objectType === 'location') {
@@ -319,7 +327,7 @@ export class FlowSearchService {
       } else if (flowObject.objectType === 'usageYear') {
         usageYearsFO.push(flowObject);
       }
-    });
+    }
   }
 
   private async getParketParents(

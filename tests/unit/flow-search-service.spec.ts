@@ -1,8 +1,8 @@
 import Container from 'typedi';
 import { FlowSearchService } from '../../src/domain-services/flows/flow-search-service';
 import {
-  FlowObjectFilters,
   SearchFlowsFilters,
+  type FlowObjectFilters,
 } from '../../src/domain-services/flows/graphql/args';
 
 describe('FlowSearchService', () => {
@@ -15,7 +15,7 @@ describe('FlowSearchService', () => {
   describe('PrepareFlowConditions', () => {
     it('should prepare flow conditions with valid filters', () => {
       const flowFilters = new SearchFlowsFilters();
-      flowFilters.id = 1;
+      flowFilters.id = [1];
       flowFilters.activeStatus = true;
       flowFilters.status = 'commitment';
       flowFilters.type = 'carryover';
@@ -40,7 +40,7 @@ describe('FlowSearchService', () => {
 
     it('should prepare flow conditions with some filters set to undefined', () => {
       const flowFilters = new SearchFlowsFilters();
-      flowFilters.id = 1;
+      flowFilters.id = [1];
       flowFilters.activeStatus = true;
 
       const result = flowSearchService.prepareFlowConditions(flowFilters);
@@ -61,14 +61,14 @@ describe('FlowSearchService', () => {
 
     it('should prepare flow conditions with some filters having falsy values', () => {
       const flowFilters = new SearchFlowsFilters();
-      flowFilters.id = 0;
+      flowFilters.id = [];
       flowFilters.activeStatus = false;
       flowFilters.amountUSD = 0;
 
       const result = flowSearchService.prepareFlowConditions(flowFilters);
 
       expect(result).toEqual({
-        id: 0,
+        id: [],
         activeStatus: false,
         amountUSD: 0,
       });
@@ -77,7 +77,7 @@ describe('FlowSearchService', () => {
   describe('prepareFlowObjectConditions', () => {
     it('should prepare flow object conditions correctly', () => {
       const flowObjectFilters: FlowObjectFilters[] = [
-        { objectType: 'organization', direction: 'source', objectID: 12469 },
+        { objectType: 'organization', direction: 'source', objectID: 12_469 },
         {
           objectType: 'organization',
           direction: 'destination',
@@ -92,7 +92,7 @@ describe('FlowSearchService', () => {
         [
           'organization',
           new Map<string, number[]>([
-            ['source', [12469]],
+            ['source', [12_469]],
             ['destination', [5197]],
           ]),
         ],
@@ -103,8 +103,8 @@ describe('FlowSearchService', () => {
 
     it('should throw an error for duplicate flow object filter', () => {
       const flowObjectFilters: FlowObjectFilters[] = [
-        { objectType: 'organization', direction: 'source', objectID: 12469 },
-        { objectType: 'organization', direction: 'source', objectID: 12469 }, // Duplicate filter
+        { objectType: 'organization', direction: 'source', objectID: 12_469 },
+        { objectType: 'organization', direction: 'source', objectID: 12_469 }, // Duplicate filter
       ];
 
       expect(() =>

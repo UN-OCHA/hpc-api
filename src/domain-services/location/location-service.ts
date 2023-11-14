@@ -1,10 +1,10 @@
+import { type LocationId } from '@unocha/hpc-api-core/src/db/models/location';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { BaseLocation } from './graphql/types';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { LocationId } from '@unocha/hpc-api-core/src/db/models/location';
+import { type BaseLocation } from './graphql/types';
 
 @Service()
 export class LocationService {
@@ -31,14 +31,14 @@ export class LocationService {
   }
 
   async getLocationsForFlows(
-    locationsFO: InstanceDataOfModel<Database['flowObject']>[],
+    locationsFO: Array<InstanceDataOfModel<Database['flowObject']>>,
     models: Database
   ): Promise<Map<number, Set<BaseLocation>>> {
     const locationObjectsIDs: LocationId[] = locationsFO.map((locFO) =>
       createBrandedValue(locFO.objectID)
     );
 
-    const locations: InstanceDataOfModel<Database['location']>[] =
+    const locations: Array<InstanceDataOfModel<Database['location']>> =
       await models.location.find({
         where: {
           id: {
@@ -49,7 +49,7 @@ export class LocationService {
 
     const locationsMap = new Map<number, Set<BaseLocation>>();
 
-    locationsFO.forEach((locFO) => {
+    for (const locFO of locationsFO) {
       const flowId = locFO.flowID;
       if (!locationsMap.has(flowId)) {
         locationsMap.set(flowId, new Set<BaseLocation>());
@@ -61,7 +61,7 @@ export class LocationService {
       }
       const locationMapped = this.mapLocationsToFlowLocations(location, locFO);
       locationsMap.get(flowId)!.add(locationMapped);
-    });
+    }
     return locationsMap;
   }
 

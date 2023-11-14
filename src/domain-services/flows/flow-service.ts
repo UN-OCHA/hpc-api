@@ -1,5 +1,5 @@
+import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Service } from 'typedi';
-import { Database } from '@unocha/hpc-api-core/src/db/type';
 
 @Service()
 export class FlowService {
