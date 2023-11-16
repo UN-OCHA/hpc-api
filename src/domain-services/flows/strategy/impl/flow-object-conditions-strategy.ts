@@ -3,7 +3,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
-import { type FlowService } from '../../flow-service';
+import { FlowService } from '../../flow-service';
 import {
   type FlowSearchStrategy,
   type FlowSearchStrategyResponse,
