@@ -1,11 +1,12 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
+import { type Database } from '@unocha/hpc-api-core/src/db';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
-import { FlowService } from '../../flow-service';
+import { type FlowService } from '../../flow-service';
 import {
-  FlowSearchStrategy,
-  FlowSearchStrategyResponse,
+  type FlowSearchStrategy,
+  type FlowSearchStrategyResponse,
 } from '../flow-search-strategy';
 
 @Service()
@@ -22,22 +23,23 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     cursorCondition: any,
     models: Database
   ): Promise<FlowSearchStrategyResponse> {
+    // Obtain flowObjects conditions
     const flowObjectsConditions: Map<
       string,
       Map<string, number[]>
-    > = flowConditions.get('flowObjects');
-    const flowEntityConditions = flowConditions.get('flow');
+    > = flowConditions.get('flowObjects') ?? new Map();
 
+    // Obtain flow conditions
+    const flowEntityConditions = flowConditions.get('flow') ?? new Map();
+
+    // Obtain where clause for flowObjects
     const flowObjectWhere = this.mapFlowObjectConditionsToWhereClause(
       flowObjectsConditions
     );
 
     // Obtain flowIDs based on provided flowObject conditions
-    const flowIDsFromFilteredFlowObjects =
-      await this.flowObjectService.getFlowIdsFromFlowObjects(
-        models,
-        flowObjectWhere
-      );
+    const flowIDsFromFilteredFlowObjects: FlowId[] =
+      await this.getFlowIDsFromFilteredFlowObjects(models, flowObjectWhere);
 
     // Combine conditions from flowObjects FlowIDs and flow conditions
     const mergedFlowConditions = {
@@ -62,6 +64,25 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     return { flows, count: countObject.count };
   }
 
+  private async getFlowIDsFromFilteredFlowObjects(
+    models: Database,
+    flowObjectWhere: any[]
+  ): Promise<FlowId[]> {
+    const flowIDsFromFilteredFlowObjects: FlowId[] = [];
+    const tempFlowIDs: FlowId[][] = await Promise.all(
+      flowObjectWhere.map((whereClause) =>
+        this.flowObjectService.getFlowIdsFromFlowObjects(models, whereClause)
+      )
+    );
+    // Flatten array of arrays keeping only values present in all arrays
+    const flowIDs = tempFlowIDs.reduce((a, b) =>
+      a.filter((c) => b.includes(c))
+    );
+    flowIDsFromFilteredFlowObjects.push(...flowIDs);
+
+    return flowIDsFromFilteredFlowObjects;
+  }
+
   /*
    * Map structure:
    * {
@@ -74,12 +95,11 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
    */
   private mapFlowObjectConditionsToWhereClause(
     flowObjectConditions: Map<string, Map<string, number[]>>
-  ): any {
-    let flowObjectWhere: any = {};
+  ): any[] {
+    const whereClauses = [];
     for (const [objectType, refDirectionMap] of flowObjectConditions) {
       for (const [refDirection, objectIDs] of refDirectionMap) {
-        flowObjectWhere = {
-          ...flowObjectWhere,
+        const whereClause = {
           objectID: {
             [Op.IN]: objectIDs,
           },
@@ -90,9 +110,11 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
             [Op.LIKE]: objectType,
           },
         };
+
+        whereClauses.push(whereClause);
       }
     }
 
-    return flowObjectWhere;
+    return whereClauses;
   }
 }

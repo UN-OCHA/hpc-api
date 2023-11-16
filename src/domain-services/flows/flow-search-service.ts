@@ -262,9 +262,10 @@ export class FlowSearchService {
     flowObjectFilters: FlowObjectFilters[]
   ): { strategy: FlowSearchStrategy; conditions: any } {
     let conditions = {};
+
     if (
       (!flowFilters &&
-        (!flowObjectFilters ?? flowObjectFilters.length === 0)) ??
+        (!flowObjectFilters || flowObjectFilters.length === 0)) ??
       (flowFilters && (!flowObjectFilters ?? flowObjectFilters.length === 0))
     ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
@@ -298,9 +299,7 @@ export class FlowSearchService {
       };
     }
 
-    throw new Error(
-      'Invalid combination of flowFilters and flowObjectFilters - temp: only provide flowFilters'
-    );
+    throw new Error('Invalid combination of flowFilters and flowObjectFilters');
   }
 
   private buildConditionsMap(flowConditions: any, flowObjectConditions: any) {
