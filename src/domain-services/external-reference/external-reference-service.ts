@@ -1,9 +1,9 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { type Database } from '@unocha/hpc-api-core/src/db';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
-import { FlowExternalReference } from '../flows/graphql/types';
+import { type FlowExternalReference } from '../flows/graphql/types';
 
 @Service()
 export class ExternalReferenceService {
@@ -19,11 +19,11 @@ export class ExternalReferenceService {
 
     const externalReferencesMap = new Map<number, any>();
 
-    flowIDs.forEach((flowID) => {
+    for (const flowID of flowIDs) {
       externalReferencesMap.set(flowID, []);
-    });
+    }
 
-    externalReferences.forEach((externalReference) => {
+    for (const externalReference of externalReferences) {
       const flowID = externalReference.flowID;
       const externalReferenceMapped =
         this.mapExternalReferenceToExternalReferenceFlows(externalReference);
@@ -33,7 +33,7 @@ export class ExternalReferenceService {
       }
 
       externalReferencesMap.get(flowID).push(externalReferenceMapped);
-    });
+    }
 
     return externalReferencesMap;
   }
