@@ -1,16 +1,16 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { type Database } from '@unocha/hpc-api-core/src/db';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
-import { ReportDetail } from './graphql/types';
+import { type ReportDetail } from './graphql/types';
 @Service()
 export class ReportDetailService {
   async getReportDetailsForFlows(
     flowIds: FlowId[],
     models: Database
   ): Promise<Map<number, ReportDetail[]>> {
-    const reportDetails: InstanceDataOfModel<Database['reportDetail']>[] =
+    const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
           flowID: {
@@ -22,7 +22,7 @@ export class ReportDetailService {
 
     const reportDetailsMap = new Map<number, ReportDetail[]>();
 
-    flowIds.forEach((flowId: FlowId) => {
+    for (const flowId of flowIds) {
       if (!reportDetailsMap.has(flowId)) {
         reportDetailsMap.set(flowId, []);
       }
@@ -35,7 +35,7 @@ export class ReportDetailService {
           this.mapReportDetailsToFlowReportDetail(reportDetail);
         reportDetailsMap.get(flowId)?.push(reportDetailMapped);
       }
-    });
+    }
 
     return reportDetailsMap;
   }

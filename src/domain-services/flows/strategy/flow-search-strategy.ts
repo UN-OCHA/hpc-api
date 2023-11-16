@@ -1,5 +1,5 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
-import { FlowEntity } from '../model';
+import { type Database } from '@unocha/hpc-api-core/src/db';
+import { type FlowEntity } from '../model';
 
 export interface FlowSearchStrategyResponse {
   flows: FlowEntity[];

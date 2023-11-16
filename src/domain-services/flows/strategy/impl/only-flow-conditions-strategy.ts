@@ -1,9 +1,9 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
+import { type Database } from '@unocha/hpc-api-core/src/db';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
 import {
-  FlowSearchStrategy,
-  FlowSearchStrategyResponse,
+  type FlowSearchStrategy,
+  type FlowSearchStrategyResponse,
 } from '../flow-search-strategy';
 
 @Service()
