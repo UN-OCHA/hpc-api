@@ -15,6 +15,7 @@ package-lock.json
 ._entypo-social
 .smbdelete*
 test-data/*
+data/*
 .env
 .vscode
 *.sublime-project
