@@ -1,9 +1,9 @@
-import { FlowPaged, FlowSearchResult, FlowSortField } from './types';
+import { Args, Ctx, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import { Arg, Args, Ctx, Query, Resolver } from 'type-graphql';
-import { FlowSearchService } from '../flow-search-service';
 import Context from '../../Context';
+import { FlowSearchService } from '../flow-search-service';
 import { SearchFlowsArgs } from './args';
+import { FlowPaged, FlowSearchResult } from './types';
 
 @Service()
 @Resolver(FlowPaged)

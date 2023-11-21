@@ -1,12 +1,12 @@
 import { Field, ObjectType } from 'type-graphql';
-import { IItemPaged, PageInfo } from '../../../utils/graphql/pagination';
+import { BaseType } from '../../../utils/graphql/base-types';
+import { PageInfo, type IItemPaged } from '../../../utils/graphql/pagination';
 import { Category } from '../../categories/graphql/types';
 import { BaseLocation } from '../../location/graphql/types';
 import { Organization } from '../../organizations/graphql/types';
 import { BasePlan } from '../../plans/graphql/types';
 import { ReportDetail } from '../../report-details/graphql/types';
 import { UsageYear } from '../../usage-years/grpahql/types';
-import { BaseType } from '../../../utils/graphql/base-types';
 
 @ObjectType()
 export class FlowExternalReference {

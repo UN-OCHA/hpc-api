@@ -1,11 +1,11 @@
 import { ArgsType, Field, InputType } from 'type-graphql';
-import { FlowSortField } from './types';
 import { PaginationArgs } from '../../../utils/graphql/pagination';
+import { type FlowSortField } from './types';
 
 @InputType()
 export class SearchFlowsFilters {
-  @Field({ nullable: true })
-  id: number;
+  @Field(() => [Number], { nullable: true })
+  id: number[];
 
   @Field({ nullable: true })
   activeStatus: boolean;
