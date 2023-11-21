@@ -1,6 +1,6 @@
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import { ObjectType, Field, ArgsType } from 'type-graphql';
+import { ArgsType, Field, ObjectType } from 'type-graphql';
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -46,7 +46,7 @@ export function prepareConditionFromCursor(
 
   if (afterCursor || beforeCursor) {
     const isAscending = sortCondition.order === 'asc';
-    const cursorValue = afterCursor || beforeCursor;
+    const cursorValue = afterCursor ?? beforeCursor;
 
     let op;
     if (isAscending) {
