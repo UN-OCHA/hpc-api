@@ -1,8 +1,8 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType } from 'type-graphql';
-import PlanTag from '../../plan-tag/graphql/types';
 import { BaseType } from '../../../utils/graphql/base-types';
+import PlanTag from '../../plan-tag/graphql/types';
 
 @ObjectType()
 export class PlanCaseload {
