@@ -57,7 +57,10 @@ export class CategoryService {
         throw new Error(`Category with ID ${catRef.categoryID} does not exist`);
       }
 
-      categoriesPerFlow.push(this.mapCategoryToFlowCategory(category, catRef));
+      if (!categoriesPerFlow.some((cat) => cat.id === category.id.valueOf())) {
+        const mappedCategory = this.mapCategoryToFlowCategory(category, catRef);
+        categoriesPerFlow.push(mappedCategory);
+      }
     }
 
     return categoriesMap;

@@ -61,41 +61,41 @@ export class BaseFlow extends BaseType {
 
 @ObjectType()
 export class Flow extends BaseFlow {
-  @Field(() => [Category], { nullable: true })
+  @Field(() => [Category], { nullable: false })
   categories: Category[];
 
-  @Field(() => [Organization], { nullable: true })
+  @Field(() => [Organization], { nullable: false })
   organizations: Organization[];
 
-  @Field(() => [BasePlan], { nullable: true })
+  @Field(() => [BasePlan], { nullable: false })
   plans: BasePlan[];
 
-  @Field(() => [BaseLocation], { nullable: true })
+  @Field(() => [BaseLocation], { nullable: false })
   locations: BaseLocation[];
 
-  @Field(() => [UsageYear], { nullable: true })
+  @Field(() => [UsageYear], { nullable: false })
   usageYears: UsageYear[];
 
-  @Field(() => [Number], { nullable: true })
+  @Field(() => [Number], { nullable: false })
   childIDs: number[];
 
-  @Field(() => [Number], { nullable: true })
+  @Field(() => [Number], { nullable: false })
   parentIDs: number[];
 
-  @Field({ nullable: true })
-  origAmount: string;
+  @Field(() => String, { nullable: true })
+  origAmount: string | null;
 
-  @Field({ nullable: true })
-  origCurrency: string;
+  @Field(() => String, { nullable: true })
+  origCurrency: string | null;
 
-  @Field(() => [FlowExternalReference], { nullable: true })
+  @Field(() => [FlowExternalReference], { nullable: false })
   externalReferences: FlowExternalReference[];
 
-  @Field(() => [ReportDetail], { nullable: true })
+  @Field(() => [ReportDetail], { nullable: false })
   reportDetails: ReportDetail[];
 
-  @Field(() => [FlowParkedParentSource], { nullable: true })
-  parkedParentSource: FlowParkedParentSource[] | null;
+  @Field(() => [FlowParkedParentSource], { nullable: false })
+  parkedParentSource: FlowParkedParentSource[];
 }
 
 @ObjectType()

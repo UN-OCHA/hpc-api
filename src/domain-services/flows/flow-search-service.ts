@@ -147,7 +147,7 @@ export class FlowSearchService {
         const flowLink = flowLinksMap.get(flow.id) ?? [];
         const categories = categoriesMap.get(flow.id) ?? [];
         const organizations = organizationsMap.get(flow.id) ?? [];
-        const locations = [...(locationsMap.get(flow.id) ?? [])];
+        const locations = locationsMap.get(flow.id) ?? [];
         const plans = plansMap.get(flow.id) ?? [];
         const usageYears = usageYearsMap.get(flow.id) ?? [];
         const externalReferences = externalReferencesMap.get(flow.id) ?? [];
@@ -162,19 +162,21 @@ export class FlowSearchService {
           );
         }
 
-        const childIDs: number[] = flowLinksMap
-          .get(flow.id)
-          ?.filter(
-            (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
-          )
-          .map((flowLink) => flowLink.childID.valueOf()) as number[];
+        const childIDs: number[] =
+          (flowLinksMap
+            .get(flow.id)
+            ?.filter(
+              (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
+            )
+            .map((flowLink) => flowLink.childID.valueOf()) as number[]) ?? [];
 
-        const parentIDs: number[] = flowLinksMap
-          .get(flow.id)
-          ?.filter(
-            (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
-          )
-          .map((flowLink) => flowLink.parentID.valueOf()) as number[];
+        const parentIDs: number[] =
+          (flowLinksMap
+            .get(flow.id)
+            ?.filter(
+              (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
+            )
+            .map((flowLink) => flowLink.parentID.valueOf()) as number[]) ?? [];
 
         return this.buildFlowDTO(
           flow,
@@ -431,12 +433,11 @@ export class FlowSearchService {
       usageYears,
       childIDs,
       parentIDs,
-      origAmount: flow.origAmount ? flow.origAmount.toString() : '',
-      origCurrency: flow.origCurrency ? flow.origCurrency.toString() : '',
+      origAmount: flow.origAmount ? flow.origAmount.toString() : null,
+      origCurrency: flow.origCurrency ? flow.origCurrency.toString() : null,
       externalReferences,
       reportDetails,
-      parkedParentSource:
-        parkedParentSource.length > 0 ? parkedParentSource : null,
+      parkedParentSource,
       // Paged item field
       cursor: flow.id.valueOf(),
     };

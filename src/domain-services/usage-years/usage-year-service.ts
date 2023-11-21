@@ -35,11 +35,14 @@ export class UsageYearService {
           `Usage year with ID ${usageYearFO.objectID} does not exist`
         );
       }
-      const usageYearMapped = this.mapUsageYearsToFlowUsageYears(
-        usageYear,
-        usageYearFO.refDirection
-      );
-      usageYearsMap.get(flowId)!.push(usageYearMapped);
+      const usageYearsPerFlow = usageYearsMap.get(flowId)!;
+      if (!usageYearsPerFlow.some((uYear) => uYear.year === usageYear.year)) {
+        const usageYearMapped = this.mapUsageYearsToFlowUsageYears(
+          usageYear,
+          usageYearFO.refDirection
+        );
+        usageYearsPerFlow.push(usageYearMapped);
+      }
     }
 
     return usageYearsMap;
