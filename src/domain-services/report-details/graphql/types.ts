@@ -32,4 +32,7 @@ export class ReportDetail extends BaseType {
 
   @Field(() => Number, { nullable: true })
   organizationID: number | null;
+
+  @Field(() => String, { nullable: true })
+  channel: string | null;
 }

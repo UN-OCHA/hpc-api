@@ -52,8 +52,8 @@ export class UsageYearService {
     return {
       year: usageYear.year,
       direction: refDirection,
-      createdAt: usageYear.createdAt,
-      updatedAt: usageYear.updatedAt,
+      createdAt: usageYear.createdAt.toISOString(),
+      updatedAt: usageYear.updatedAt.toISOString(),
     };
   }
 }
