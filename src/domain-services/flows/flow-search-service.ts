@@ -108,7 +108,7 @@ export class FlowSearchService {
     const plansFO: FlowObject[] = [];
     const usageYearsFO: FlowObject[] = [];
 
-    this.mapFlowObjects(
+    this.groupByFlowObjectType(
       flowObjects,
       organizationsFO,
       locationsFO,
@@ -153,6 +153,12 @@ export class FlowSearchService {
         const externalReferences = externalReferencesMap.get(flow.id) ?? [];
         const reportDetails = reportDetailsMap.get(flow.id) ?? [];
 
+        const reportDetailsWithChannel =
+          this.reportDetailService.addChannelToReportDetails(
+            reportDetails,
+            categories
+          );
+
         let parkedParentSource: FlowParkedParentSource[] = [];
         if (flow.activeStatus && flowLink.length > 0) {
           parkedParentSource = await this.getParketParents(
@@ -188,7 +194,7 @@ export class FlowSearchService {
           childIDs,
           parentIDs,
           externalReferences,
-          reportDetails,
+          reportDetailsWithChannel,
           parkedParentSource
         );
       })
@@ -317,12 +323,12 @@ export class FlowSearchService {
     return conditionsMap;
   }
 
-  private mapFlowObjects(
+  private groupByFlowObjectType(
     flowObjects: FlowObject[],
-    organizationsFO: any[],
-    locationsFO: any[],
-    plansFO: any[],
-    usageYearsFO: any[]
+    organizationsFO: FlowObject[],
+    locationsFO: FlowObject[],
+    plansFO: FlowObject[],
+    usageYearsFO: FlowObject[]
   ) {
     for (const flowObject of flowObjects) {
       if (flowObject.objectType === 'organization') {

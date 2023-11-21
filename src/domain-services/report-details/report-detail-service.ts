@@ -3,6 +3,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
+import { type Category } from '../categories/graphql/types';
 import { type ReportDetail } from './graphql/types';
 @Service()
 export class ReportDetailService {
@@ -58,13 +59,30 @@ export class ReportDetailService {
       versionID: reportDetail.versionID,
       contactInfo: reportDetail.contactInfo,
       source: reportDetail.source,
-      date: reportDetail.date,
+      date: reportDetail.date
+        ? new Date(reportDetail.date).toISOString()
+        : null,
       sourceID: reportDetail.sourceID,
       refCode: reportDetail.refCode,
       verified: reportDetail.verified,
       createdAt: reportDetail.createdAt.toISOString(),
       updatedAt: reportDetail.updatedAt.toISOString(),
       organizationID: reportDetail.organizationID,
+      channel: null,
     };
+  }
+
+  addChannelToReportDetails(
+    reportDetails: ReportDetail[],
+    categories: Category[]
+  ) {
+    for (const reportDetail of reportDetails) {
+      const category = categories.find((cat) => cat.group === 'reportChannel');
+
+      if (category) {
+        reportDetail.channel = category.name;
+      }
+    }
+    return reportDetails;
   }
 }
