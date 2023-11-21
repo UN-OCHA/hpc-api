@@ -32,13 +32,17 @@ export class OrganizationService {
         );
       }
 
-      const organizationMapped: Organization =
-        this.mapOrganizationsToOrganizationFlows(
-          organization,
-          orgFO.refDirection
-        );
-
-      organizationsMap.get(flowId)!.push(organizationMapped);
+      const organizationPerFlow = organizationsMap.get(flowId)!;
+      if (
+        !organizationPerFlow.some((org) => org.id === organization.id.valueOf())
+      ) {
+        const organizationMapped: Organization =
+          this.mapOrganizationsToOrganizationFlows(
+            organization,
+            orgFO.refDirection
+          );
+        organizationsMap.get(flowId)!.push(organizationMapped);
+      }
     }
 
     return organizationsMap;

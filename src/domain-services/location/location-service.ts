@@ -33,7 +33,7 @@ export class LocationService {
   async getLocationsForFlows(
     locationsFO: Array<InstanceDataOfModel<Database['flowObject']>>,
     models: Database
-  ): Promise<Map<number, Set<BaseLocation>>> {
+  ): Promise<Map<number, BaseLocation[]>> {
     const locationObjectsIDs: LocationId[] = locationsFO.map((locFO) =>
       createBrandedValue(locFO.objectID)
     );
@@ -47,20 +47,26 @@ export class LocationService {
         },
       });
 
-    const locationsMap = new Map<number, Set<BaseLocation>>();
+    const locationsMap = new Map<number, BaseLocation[]>();
 
     for (const locFO of locationsFO) {
       const flowId = locFO.flowID;
       if (!locationsMap.has(flowId)) {
-        locationsMap.set(flowId, new Set<BaseLocation>());
+        locationsMap.set(flowId, []);
       }
       const location = locations.find((loc) => loc.id === locFO.objectID);
 
       if (!location) {
         throw new Error(`Location with ID ${locFO.objectID} does not exist`);
       }
-      const locationMapped = this.mapLocationsToFlowLocations(location, locFO);
-      locationsMap.get(flowId)!.add(locationMapped);
+      const locationsPerFlow = locationsMap.get(flowId)!;
+      if (!locationsPerFlow.some((loc) => loc.id === location.id)) {
+        const locationMapped = this.mapLocationsToFlowLocations(
+          location,
+          locFO
+        );
+        locationsPerFlow.push(locationMapped);
+      }
     }
     return locationsMap;
   }
