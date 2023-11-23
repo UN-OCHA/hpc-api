@@ -72,3 +72,18 @@ export class SearchFlowsArgs extends PaginationArgs<FlowSortField> {
   @Field({ nullable: true })
   includeChildrenOfParkedFlows: boolean;
 }
+
+@ArgsType()
+export class SearchFlowsArgsNonPaginated {
+  @Field(() => SearchFlowsFilters, { nullable: true })
+  flowFilters: SearchFlowsFilters;
+
+  @Field(() => [FlowObjectFilters], { nullable: true })
+  flowObjectFilters: FlowObjectFilters[];
+
+  @Field(() => [FlowCategory], { nullable: true })
+  categoryFilters: FlowCategory[];
+
+  @Field({ nullable: true })
+  includeChildrenOfParkedFlows: boolean;
+}

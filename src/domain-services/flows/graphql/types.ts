@@ -110,6 +110,15 @@ export class FlowSearchResult extends PageInfo<FlowSortField> {
   flows: FlowPaged[];
 }
 
+@ObjectType()
+export class FlowSearchTotalAmountResult {
+  @Field(() => String, { nullable: false })
+  totalAmountUSD: string;
+
+  @Field(() => Number, { nullable: false })
+  flowsCount: number;
+}
+
 export type FlowSortField =
   | 'id'
   | 'versionID'

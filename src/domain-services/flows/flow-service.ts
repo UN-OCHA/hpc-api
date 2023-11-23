@@ -8,8 +8,8 @@ export class FlowService {
   async getFlows(
     models: Database,
     conditions: any,
-    orderBy: any,
-    limit: number
+    orderBy?: any,
+    limit?: number
   ) {
     return await models.flow.find({
       orderBy,

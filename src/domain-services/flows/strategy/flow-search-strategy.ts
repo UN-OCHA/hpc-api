@@ -9,9 +9,9 @@ export interface FlowSearchStrategyResponse {
 export interface FlowSearchStrategy {
   search(
     flowConditions: Map<string, any>,
-    orderBy: any,
-    limit: number,
-    cursorCondition: any,
-    models: Database
+    models: Database,
+    orderBy?: any,
+    limit?: number,
+    cursorCondition?: any
   ): Promise<FlowSearchStrategyResponse>;
 }

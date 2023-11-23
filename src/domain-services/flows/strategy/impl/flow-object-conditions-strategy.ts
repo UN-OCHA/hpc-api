@@ -18,10 +18,10 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
 
   async search(
     flowConditions: Map<string, any>,
-    orderBy: any,
-    limit: number,
-    cursorCondition: any,
-    models: Database
+    models: Database,
+    orderBy?: any,
+    limit?: number,
+    cursorCondition?: any
   ): Promise<FlowSearchStrategyResponse> {
     // Obtain flowObjects conditions
     const flowObjectsConditions: Map<
