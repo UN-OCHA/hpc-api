@@ -5,7 +5,7 @@ import { ArgsType, Field, ObjectType } from 'type-graphql';
 export type SortOrder = 'asc' | 'desc';
 
 export interface IItemPaged {
-  cursor: number;
+  cursor: string;
 }
 
 @ObjectType()
@@ -17,10 +17,10 @@ export class PageInfo<TSortFields extends string> {
   hasPreviousPage: boolean;
 
   @Field({ nullable: false })
-  startCursor: number;
+  startCursor: string;
 
   @Field({ nullable: false })
-  endCursor: number;
+  endCursor: string;
 
   @Field({ nullable: false })
   pageSize: number;
@@ -71,10 +71,10 @@ export class PaginationArgs<TSortFields extends string> {
   limit: number;
 
   @Field({ nullable: true })
-  afterCursor: number;
+  afterCursor: string;
 
   @Field({ nullable: true })
-  beforeCursor: number;
+  beforeCursor: string;
 
   @Field(() => String, { nullable: true })
   sortField: TSortFields;

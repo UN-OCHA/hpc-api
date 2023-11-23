@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
 import {
@@ -18,10 +19,12 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
     cursorCondition?: any
   ): Promise<FlowSearchStrategyResponse> {
     // Build conditions object
-    const conditions: any = { ...cursorCondition, ...flowConditions };
+    const searchConditions = {
+      [Cond.AND]: [flowConditions ?? {}, cursorCondition ?? {}],
+    };
 
     const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(models, conditions, orderBy, limit),
+      this.flowService.getFlows(models, searchConditions, orderBy, limit),
       this.flowService.getFlowsCount(models, flowConditions),
     ]);
 
