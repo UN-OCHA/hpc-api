@@ -1,7 +1,6 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { CategoryService } from '../categories/category-service';
 import { type Category } from '../categories/graphql/types';
@@ -29,6 +28,7 @@ import {
   type FlowParkedParentSource,
   type FlowSearchResult,
   type FlowSearchTotalAmountResult,
+  type FlowSortField,
 } from './graphql/types';
 import { type FlowEntity } from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
@@ -57,7 +57,9 @@ export class FlowSearchService {
   ): Promise<FlowSearchResult> {
     const { limit, afterCursor, beforeCursor, sortField, sortOrder } = filters;
 
-    const orderBy = {
+    const orderBy:
+      | { column: FlowSortField; order: 'asc' | 'desc' }
+      | Array<{ column: FlowSortField; order: 'asc' | 'desc' }> = {
       column: sortField ?? 'updatedAt',
       order: sortOrder ?? 'desc',
     };
@@ -66,7 +68,8 @@ export class FlowSearchService {
 
     const cursorCondition = this.buildCursorCondition(
       beforeCursor,
-      afterCursor
+      afterCursor,
+      orderBy
     );
 
     // Determine strategy of how to search for flows
@@ -197,7 +200,8 @@ export class FlowSearchService {
           parentIDs,
           externalReferences,
           reportDetailsWithChannel,
-          parkedParentSource
+          parkedParentSource,
+          sortField
         );
       })
     );
@@ -206,11 +210,11 @@ export class FlowSearchService {
       flows: items,
       hasNextPage: limit <= flows.length,
       hasPreviousPage: afterCursor !== undefined,
-      startCursor: flows.length ? flows[0].id.valueOf() : 0,
-      endCursor: flows.length ? flows.at(-1)?.id.valueOf() ?? 0 : 0,
+      startCursor: flows.length ? items[0].cursor : '',
+      endCursor: flows.length ? items.at(-1)?.cursor ?? '' : '',
       pageSize: flows.length,
-      sortField: orderBy.column,
-      sortOrder: orderBy.order,
+      sortField: sortField ?? 'updatedAt',
+      sortOrder: sortOrder ?? 'desc',
       total: count,
     };
   }
@@ -388,22 +392,61 @@ export class FlowSearchService {
     return parentFlows;
   }
 
-  private buildCursorCondition(beforeCursor: number, afterCursor: number) {
+  private buildCursorCondition(
+    beforeCursor: string,
+    afterCursor: string,
+    orderBy:
+      | { column: FlowSortField; order: 'asc' | 'desc' }
+      | Array<{ column: FlowSortField; order: 'asc' | 'desc' }>
+  ) {
     if (beforeCursor && afterCursor) {
       throw new Error('Cannot use before and after cursor at the same time');
     }
 
+    if (!beforeCursor && !afterCursor) {
+      return {};
+    }
+
+    if (Array.isArray(orderBy)) {
+      // Build iterations of cursor conditions
+      const cursorConditions = orderBy.map((orderBy) => {
+        return this.buildCursorConditionForSingleOrderBy(
+          beforeCursor,
+          afterCursor,
+          orderBy
+        );
+      });
+
+      // Combine cursor conditions
+      return { [Cond.AND]: cursorConditions };
+    }
+
+    return this.buildCursorConditionForSingleOrderBy(
+      beforeCursor,
+      afterCursor,
+      orderBy
+    );
+  }
+
+  private buildCursorConditionForSingleOrderBy(
+    beforeCursor: string,
+    afterCursor: string,
+    orderBy: { column: FlowSortField; order: 'asc' | 'desc' }
+  ) {
     let cursorCondition;
-    if (afterCursor) {
+
+    const comparisonOperator =
+      (afterCursor && orderBy.order === 'asc') ||
+      (beforeCursor && orderBy.order === 'desc')
+        ? Op.GT
+        : Op.LT;
+
+    const cursorValue = afterCursor || beforeCursor;
+
+    if (cursorValue) {
       cursorCondition = {
-        id: {
-          [Op.GT]: createBrandedValue(afterCursor),
-        },
-      };
-    } else if (beforeCursor) {
-      cursorCondition = {
-        id: {
-          [Op.LT]: createBrandedValue(beforeCursor),
+        [orderBy.column]: {
+          [comparisonOperator]: cursorValue,
         },
       };
     }
@@ -422,8 +465,19 @@ export class FlowSearchService {
     parentIDs: number[],
     externalReferences: any[],
     reportDetails: any[],
-    parkedParentSource: FlowParkedParentSource[]
+    parkedParentSource: FlowParkedParentSource[],
+    sortColumn?: FlowSortField
   ): FlowPaged {
+    let cursor: string | number | Date = sortColumn
+      ? flow.id.valueOf()
+      : flow[sortColumn ?? 'updatedAt'];
+
+    if (cursor instanceof Date) {
+      cursor = cursor.toISOString();
+    } else if (typeof cursor === 'number') {
+      cursor = cursor.toString();
+    }
+
     return {
       // Mandatory fields
       id: flow.id.valueOf(),
@@ -447,7 +501,7 @@ export class FlowSearchService {
       reportDetails,
       parkedParentSource,
       // Paged item field
-      cursor: flow.id.valueOf(),
+      cursor,
     };
   }
 

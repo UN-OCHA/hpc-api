@@ -1,6 +1,6 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
 import { FlowService } from '../../flow-service';
@@ -42,20 +42,35 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
       await this.getFlowIDsFromFilteredFlowObjects(models, flowObjectWhere);
 
     // Combine conditions from flowObjects FlowIDs and flow conditions
-    const mergedFlowConditions = {
-      ...flowEntityConditions,
-      id: {
-        [Op.IN]: flowIDsFromFilteredFlowObjects,
-      },
+    const countConditions = {
+      [Cond.AND]: [
+        flowEntityConditions ?? {},
+        {
+          id: {
+            [Op.IN]: flowIDsFromFilteredFlowObjects,
+          },
+        },
+      ],
     };
 
-    const conditions = { ...cursorCondition, ...mergedFlowConditions };
+    // Combine cursor condition with flow conditions
+    const searchConditions = {
+      [Cond.AND]: [
+        flowEntityConditions ?? {},
+        cursorCondition ?? {},
+        {
+          id: {
+            [Op.IN]: flowIDsFromFilteredFlowObjects,
+          },
+        },
+      ],
+    };
 
     // Obtain flows and flowCount based on flowIDs from filtered flowObjects
     // and flow conditions
     const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(models, conditions, orderBy, limit),
-      this.flowService.getFlowsCount(models, mergedFlowConditions),
+      this.flowService.getFlows(models, searchConditions, orderBy, limit),
+      this.flowService.getFlowsCount(models, countConditions),
     ]);
 
     // Map count result query to count object
@@ -80,7 +95,7 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     );
     flowIDsFromFilteredFlowObjects.push(...flowIDs);
 
-    return flowIDsFromFilteredFlowObjects;
+    return flowIDsFromFilteredFlowObjects.sort();
   }
 
   /*

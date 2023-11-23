@@ -100,14 +100,23 @@ export class Flow extends BaseFlow {
 
 @ObjectType()
 export class FlowPaged extends Flow implements IItemPaged {
-  @Field({ nullable: false })
-  cursor: number;
+  @Field(() => String, { nullable: false })
+  cursor: string;
 }
 
 @ObjectType()
 export class FlowSearchResult extends PageInfo<FlowSortField> {
   @Field(() => [FlowPaged], { nullable: false })
   flows: FlowPaged[];
+}
+
+@ObjectType()
+export class FlowSearchResultNonPaginated {
+  @Field(() => [FlowPaged], { nullable: false })
+  flows: FlowPaged[];
+
+  @Field(() => Number, { nullable: false })
+  flowsCount: number;
 }
 
 @ObjectType()
