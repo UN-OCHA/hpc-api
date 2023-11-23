@@ -21,12 +21,14 @@ import { UsageYearService } from '../usage-years/usage-year-service';
 import {
   type FlowObjectFilters,
   type SearchFlowsArgs,
+  type SearchFlowsArgsNonPaginated,
   type SearchFlowsFilters,
 } from './graphql/args';
 import {
   type FlowPaged,
   type FlowParkedParentSource,
   type FlowSearchResult,
+  type FlowSearchTotalAmountResult,
 } from './graphql/types';
 import { type FlowEntity } from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
@@ -79,10 +81,10 @@ export class FlowSearchService {
     // Obtain flows and its count based on the strategy selected
     const { flows, count } = await strategy.search(
       conditions,
+      models,
       orderBy,
       limitComputed,
-      cursorCondition,
-      models
+      cursorCondition
     );
 
     // Remove the extra item used to check hasNextPage
@@ -446,6 +448,34 @@ export class FlowSearchService {
       parkedParentSource,
       // Paged item field
       cursor: flow.id.valueOf(),
+    };
+  }
+
+  async searchTotalAmount(
+    models: Database,
+    args: SearchFlowsArgsNonPaginated
+  ): Promise<FlowSearchTotalAmountResult> {
+    const { flowFilters, flowObjectFilters } = args;
+
+    const { strategy, conditions } = this.determineStrategy(
+      flowFilters,
+      flowObjectFilters
+    );
+
+    const { flows, count } = await strategy.search(conditions, models);
+
+    const flowsAmountUSD: Array<string | number> = flows.map(
+      (flow) => flow.amountUSD
+    );
+
+    const totalAmount = flowsAmountUSD.reduce((a, b) => +a + +b, 0);
+
+    return {
+      totalAmountUSD: totalAmount.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+      flowsCount: count,
     };
   }
 }

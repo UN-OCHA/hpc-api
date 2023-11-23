@@ -12,10 +12,10 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
 
   async search(
     flowConditions: any,
-    orderBy: any,
-    limit: number,
-    cursorCondition: any,
-    models: Database
+    models: Database,
+    orderBy?: any,
+    limit?: number,
+    cursorCondition?: any
   ): Promise<FlowSearchStrategyResponse> {
     // Build conditions object
     const conditions: any = { ...cursorCondition, ...flowConditions };
