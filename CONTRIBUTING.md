@@ -19,7 +19,7 @@ This repository can be run as a standalone application or as part of [hpc-suite]
 ### Standalone
 
 To run this projects docker containers:
-`docker-compose up -d`
+`docker compose up -d`
 
 This will spin up the server and a postgres database. To restore data to this database see the [section below](#Restore_database).
 
