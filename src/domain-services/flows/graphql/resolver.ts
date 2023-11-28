@@ -6,6 +6,7 @@ import { SearchFlowsArgs, SearchFlowsArgsNonPaginated } from './args';
 import {
   FlowPaged,
   FlowSearchResult,
+  FlowSearchResultNonPaginated,
   FlowSearchTotalAmountResult,
 } from './types';
 
@@ -30,5 +31,17 @@ export default class FlowResolver {
     args: SearchFlowsArgsNonPaginated
   ): Promise<FlowSearchTotalAmountResult> {
     return await this.flowSearchService.searchTotalAmount(context.models, args);
+  }
+
+  @Query(() => FlowSearchResultNonPaginated)
+  async searchFlowsBatches(
+    @Ctx() context: Context,
+    @Args(() => SearchFlowsArgs, { validate: false })
+    args: SearchFlowsArgs
+  ): Promise<FlowSearchResultNonPaginated> {
+    // Set default batch size to 1000
+    args.limit = args.limit > 0 ? args.limit : 1000;
+
+    return await this.flowSearchService.searchBatches(context.models, args);
   }
 }
