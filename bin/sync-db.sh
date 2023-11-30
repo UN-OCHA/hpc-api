@@ -120,7 +120,7 @@ DROP SCHEMA public CASCADE; \
 GRANT CREATE ON SCHEMA public to postgres;" $PG_DB_NAME
 
 # Because we are using Postgre container specified elsewhere,
-# outside of docker-compose.yaml in this repo, we must manually
+# outside of compose.yaml in this repo, we must manually
 # move the downloaded dumps into postgre container.
 # Ideally, local dumps directory should be mounted in PG container's `volumes`
 echo "Copy DB snapshot file to Postgre container"

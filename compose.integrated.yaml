@@ -1,7 +1,5 @@
-version: '3.3'
 services:
   api:
-    container_name: hpc_api
     build:
       context: .
       dockerfile: ./env/api/Dockerfile
