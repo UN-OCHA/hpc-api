@@ -78,29 +78,23 @@ export class PlanService {
         (planFO) => planFO.objectID === plan.id
       );
 
-      if (!planVersion.length) {
-        throw new Error(`Plan with ID ${plan.id} does not have a version`);
-      }
+      if (planVersion.length && planFlowObject) {
+        const flowId = planFlowObject && planFlowObject.flowID;
 
-      if (!planFlowObject) {
-        throw new Error(`Plan with ID ${plan.id} does not have a flow object`);
-      }
+        if (!plansMap.has(flowId)) {
+          plansMap.set(flowId, []);
+        }
 
-      const flowId = planFlowObject && planFlowObject.flowID;
+        const plansPerFlow = plansMap.get(flowId)!;
 
-      if (!plansMap.has(flowId)) {
-        plansMap.set(flowId, []);
-      }
-
-      const plansPerFlow = plansMap.get(flowId)!;
-
-      if (!plansPerFlow.some((plan) => plan.id === plan.id)) {
-        const planMapped = this.mapPlansToFlowPlans(
-          plan,
-          planVersion[0],
-          planFlowObject?.refDirection ?? null
-        );
-        plansPerFlow.push(planMapped);
+        if (!plansPerFlow.some((plan) => plan.id === plan.id)) {
+          const planMapped = this.mapPlansToFlowPlans(
+            plan,
+            planVersion[0],
+            planFlowObject?.refDirection ?? null
+          );
+          plansPerFlow.push(planMapped);
+        }
       }
     }
 

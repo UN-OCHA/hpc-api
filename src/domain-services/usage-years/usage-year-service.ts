@@ -30,18 +30,15 @@ export class UsageYearService {
         (uYear) => uYear.id === usageYearFO.objectID
       );
 
-      if (!usageYear) {
-        throw new Error(
-          `Usage year with ID ${usageYearFO.objectID} does not exist`
-        );
-      }
-      const usageYearsPerFlow = usageYearsMap.get(flowId)!;
-      if (!usageYearsPerFlow.some((uYear) => uYear.year === usageYear.year)) {
-        const usageYearMapped = this.mapUsageYearsToFlowUsageYears(
-          usageYear,
-          usageYearFO.refDirection
-        );
-        usageYearsPerFlow.push(usageYearMapped);
+      if (usageYear) {
+        const usageYearsPerFlow = usageYearsMap.get(flowId)!;
+        if (!usageYearsPerFlow.some((uYear) => uYear.year === usageYear.year)) {
+          const usageYearMapped = this.mapUsageYearsToFlowUsageYears(
+            usageYear,
+            usageYearFO.refDirection
+          );
+          usageYearsPerFlow.push(usageYearMapped);
+        }
       }
     }
 

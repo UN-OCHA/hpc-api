@@ -26,22 +26,20 @@ export class OrganizationService {
         (org) => org.id === orgFO.objectID
       );
 
-      if (!organization) {
-        throw new Error(
-          `Organization with ID ${orgFO.objectID} does not exist`
-        );
-      }
-
-      const organizationPerFlow = organizationsMap.get(flowId)!;
-      if (
-        !organizationPerFlow.some((org) => org.id === organization.id.valueOf())
-      ) {
-        const organizationMapped: Organization =
-          this.mapOrganizationsToOrganizationFlows(
-            organization,
-            orgFO.refDirection
-          );
-        organizationsMap.get(flowId)!.push(organizationMapped);
+      if (organization) {
+        const organizationPerFlow = organizationsMap.get(flowId)!;
+        if (
+          !organizationPerFlow.some(
+            (org) => org.id === organization.id.valueOf()
+          )
+        ) {
+          const organizationMapped: Organization =
+            this.mapOrganizationsToOrganizationFlows(
+              organization,
+              orgFO.refDirection
+            );
+          organizationsMap.get(flowId)!.push(organizationMapped);
+        }
       }
     }
 

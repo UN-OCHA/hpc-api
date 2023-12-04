@@ -56,16 +56,15 @@ export class LocationService {
       }
       const location = locations.find((loc) => loc.id === locFO.objectID);
 
-      if (!location) {
-        throw new Error(`Location with ID ${locFO.objectID} does not exist`);
-      }
-      const locationsPerFlow = locationsMap.get(flowId)!;
-      if (!locationsPerFlow.some((loc) => loc.id === location.id)) {
-        const locationMapped = this.mapLocationsToFlowLocations(
-          location,
-          locFO
-        );
-        locationsPerFlow.push(locationMapped);
+      if (location) {
+        const locationsPerFlow = locationsMap.get(flowId)!;
+        if (!locationsPerFlow.some((loc) => loc.id === location.id)) {
+          const locationMapped = this.mapLocationsToFlowLocations(
+            location,
+            locFO
+          );
+          locationsPerFlow.push(locationMapped);
+        }
       }
     }
     return locationsMap;

@@ -41,7 +41,6 @@ export default class FlowResolver {
   ): Promise<FlowSearchResultNonPaginated> {
     // Set default batch size to 1000
     args.limit = args.limit > 0 ? args.limit : 1000;
-
     return await this.flowSearchService.searchBatches(context.models, args);
   }
 }
