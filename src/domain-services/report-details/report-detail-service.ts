@@ -31,19 +31,18 @@ export class ReportDetailService {
         (report) => report && flowId === report?.flowID
       );
 
-      if (!reportDetail) {
-        throw new Error(`Report detail with flow ID ${flowId} does not exist`);
-      }
+      if (reportDetail) {
+        const reportDetailsPerFlow = reportDetailsMap.get(flowId)!;
 
-      const reportDetailsPerFlow = reportDetailsMap.get(flowId)!;
-      if (
-        !reportDetailsPerFlow.some(
-          (report) => report.id === reportDetail.id.valueOf()
-        )
-      ) {
-        const reportDetailMapped =
-          this.mapReportDetailsToFlowReportDetail(reportDetail);
-        reportDetailsPerFlow.push(reportDetailMapped);
+        if (
+          !reportDetailsPerFlow.some(
+            (report) => report.id === reportDetail.id.valueOf()
+          )
+        ) {
+          const reportDetailMapped =
+            this.mapReportDetailsToFlowReportDetail(reportDetail);
+          reportDetailsPerFlow.push(reportDetailMapped);
+        }
       }
     }
 

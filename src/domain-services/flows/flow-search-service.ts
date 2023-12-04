@@ -540,28 +540,22 @@ export class FlowSearchService {
   ): Promise<FlowSearchResultNonPaginated> {
     const flowSearchResponse = await this.search(models, args);
 
-    const batchesMissing =
-      Math.round(flowSearchResponse.total / args.limit) - 1;
     const flows: FlowPaged[] = flowSearchResponse.flows;
 
     let hasNextPage = flowSearchResponse.hasNextPage;
-    let batchCount = 1;
 
     let cursor = flowSearchResponse.endCursor;
     let nextArgs: SearchFlowsArgs = { ...args, afterCursor: cursor };
 
     let nextFlowSearchResponse: FlowSearchResult;
     while (hasNextPage) {
-      batchCount++;
-
       nextFlowSearchResponse = await this.search(models, nextArgs);
 
       flows.push(...nextFlowSearchResponse.flows);
 
-      hasNextPage =
-        nextFlowSearchResponse.hasNextPage && batchCount <= batchesMissing;
-
+      hasNextPage = nextFlowSearchResponse.hasNextPage;
       cursor = nextFlowSearchResponse.endCursor;
+
       // Update the cursor for the next iteration
       nextArgs = { ...args, afterCursor: cursor };
     }
