@@ -19,14 +19,14 @@ export class SearchFlowsFilters {
   @Field({ nullable: true })
   amountUSD: number;
 
-  @Field({ nullable: true })
-  reporterRefCode: number;
+  @Field({ name: 'reporterRefCode', nullable: true })
+  reporterReferenceCode: number;
 
-  @Field({ nullable: true })
-  sourceSystemID: number;
+  @Field({ name: 'sourceSystemID', nullable: true })
+  sourceSystemId: number;
 
-  @Field({ nullable: true })
-  legacyID: number;
+  @Field({ name: 'legacyID', nullable: true })
+  legacyId: number;
 }
 
 @InputType()
