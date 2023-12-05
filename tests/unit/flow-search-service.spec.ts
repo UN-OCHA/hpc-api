@@ -20,9 +20,9 @@ describe('FlowSearchService', () => {
       flowFilters.status = 'commitment';
       flowFilters.type = 'carryover';
       flowFilters.amountUSD = 1000;
-      flowFilters.reporterRefCode = 123;
-      flowFilters.sourceSystemID = 456;
-      flowFilters.legacyID = 789;
+      flowFilters.reporterReferenceCode = 123;
+      flowFilters.sourceSystemId = 456;
+      flowFilters.legacyId = 789;
 
       const result = flowSearchService.prepareFlowConditions(flowFilters);
 
