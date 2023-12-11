@@ -30,7 +30,9 @@ export class OrganizationService {
         const organizationPerFlow = organizationsMap.get(flowId)!;
         if (
           !organizationPerFlow.some(
-            (org) => org.id === organization.id.valueOf()
+            (org) =>
+              org.id === organization.id.valueOf() &&
+              org.direction === orgFO.refDirection
           )
         ) {
           const organizationMapped: Organization =

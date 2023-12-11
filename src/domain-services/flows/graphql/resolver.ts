@@ -4,14 +4,14 @@ import Context from '../../Context';
 import { FlowSearchService } from '../flow-search-service';
 import { SearchFlowsArgs, SearchFlowsArgsNonPaginated } from './args';
 import {
-  FlowPaged,
+  Flow,
   FlowSearchResult,
   FlowSearchResultNonPaginated,
   FlowSearchTotalAmountResult,
 } from './types';
 
 @Service()
-@Resolver(FlowPaged)
+@Resolver(Flow)
 export default class FlowResolver {
   constructor(private flowSearchService: FlowSearchService) {}
 

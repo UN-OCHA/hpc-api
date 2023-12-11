@@ -36,7 +36,7 @@ export class PageInfo<TSortFields extends string> {
 }
 
 export function prepareConditionFromCursor(
-  sortCondition: { column: string; order: 'asc' | 'desc' },
+  sortCondition: { column: string; order: SortOrder },
   afterCursor?: number,
   beforeCursor?: number
 ): any {

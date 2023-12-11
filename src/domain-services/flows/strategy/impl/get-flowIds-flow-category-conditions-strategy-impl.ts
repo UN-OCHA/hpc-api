@@ -20,7 +20,7 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
 
   async search(
     models: Database,
-    flowObjectsConditions: Map<string, Map<string, number[]>>,
+    _flowObjectsConditions: Map<string, Map<string, number[]>>,
     flowCategoryConditions: FlowCategoryFilters
   ): Promise<FlowIdSearchStrategyResponse> {
     const whereClause = mapFlowCategoryConditionsToWhereClause(
