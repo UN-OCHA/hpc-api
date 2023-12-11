@@ -8,7 +8,9 @@ export interface FlowSearchStrategyResponse {
 
 export interface FlowSearchStrategy {
   search(
-    flowConditions: Map<string, any>,
+    flowConditions:
+      | Map<string, any>
+      | { conditionsMap: Map<string, any>; flowCategoryFilters: any },
     models: Database,
     orderBy?: any,
     limit?: number,

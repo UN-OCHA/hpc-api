@@ -1,6 +1,6 @@
 import { Field, ObjectType } from 'type-graphql';
 import { BaseType } from '../../../utils/graphql/base-types';
-import { PageInfo, type IItemPaged } from '../../../utils/graphql/pagination';
+import { PageInfo } from '../../../utils/graphql/pagination';
 import { Category } from '../../categories/graphql/types';
 import { BaseLocation } from '../../location/graphql/types';
 import { Organization } from '../../organizations/graphql/types';
@@ -99,21 +99,15 @@ export class Flow extends BaseFlow {
 }
 
 @ObjectType()
-export class FlowPaged extends Flow implements IItemPaged {
-  @Field(() => String, { nullable: false })
-  cursor: string;
-}
-
-@ObjectType()
 export class FlowSearchResult extends PageInfo<FlowSortField> {
-  @Field(() => [FlowPaged], { nullable: false })
-  flows: FlowPaged[];
+  @Field(() => [Flow], { nullable: false })
+  flows: Flow[];
 }
 
 @ObjectType()
 export class FlowSearchResultNonPaginated {
-  @Field(() => [FlowPaged], { nullable: false })
-  flows: FlowPaged[];
+  @Field(() => [Flow], { nullable: false })
+  flows: Flow[];
 
   @Field(() => Number, { nullable: false })
   flowsCount: number;
@@ -129,23 +123,23 @@ export class FlowSearchTotalAmountResult {
 }
 
 export type FlowSortField =
-  | 'id'
-  | 'versionID'
-  | 'amountUSD'
-  | 'updatedAt'
-  | 'activeStatus'
-  | 'restricted'
-  | 'newMoney'
-  | 'flowDate'
-  | 'decisionDate'
-  | 'firstReportedDate'
-  | 'budgetYear'
-  | 'origAmount'
-  | 'origCurrency'
-  | 'exchangeRate'
-  | 'description'
-  | 'notes'
-  | 'versionStartDate'
-  | 'versionEndDate'
-  | 'createdAt'
-  | 'deletedAt';
+  | 'flow.id'
+  | 'flow.versionID'
+  | 'flow.amountUSD'
+  | 'flow.updatedAt'
+  | 'flow.activeStatus'
+  | 'flow.restricted'
+  | 'flow.newMoney'
+  | 'flow.flowDate'
+  | 'flow.decisionDate'
+  | 'flow.firstReportedDate'
+  | 'flow.budgetYear'
+  | 'flow.origAmount'
+  | 'flow.origCurrency'
+  | 'flow.exchangeRate'
+  | 'flow.description'
+  | 'flow.notes'
+  | 'flow.versionStartDate'
+  | 'flow.versionEndDate'
+  | 'flow.createdAt'
+  | 'flow.deletedAt';

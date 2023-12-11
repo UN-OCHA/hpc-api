@@ -1,7 +1,8 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
-import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
+import { type SortOrder } from '../../utils/graphql/pagination';
 import { CategoryService } from '../categories/category-service';
 import { type Category } from '../categories/graphql/types';
 import { ExternalReferenceService } from '../external-reference/external-reference-service';
@@ -18,23 +19,24 @@ import { ReportDetailService } from '../report-details/report-detail-service';
 import { type UsageYear } from '../usage-years/grpahql/types';
 import { UsageYearService } from '../usage-years/usage-year-service';
 import {
+  type FlowCategoryFilters,
   type FlowObjectFilters,
   type SearchFlowsArgs,
   type SearchFlowsArgsNonPaginated,
   type SearchFlowsFilters,
 } from './graphql/args';
 import {
-  type FlowPaged,
+  type Flow,
   type FlowParkedParentSource,
   type FlowSearchResult,
   type FlowSearchResultNonPaginated,
   type FlowSearchTotalAmountResult,
   type FlowSortField,
 } from './graphql/types';
-import { type FlowEntity } from './model';
+import { type FlowEntity, type FlowOrderBy } from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
-import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy';
-import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy';
+import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy-impl';
+import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy-impl';
 
 @Service()
 export class FlowSearchService {
@@ -56,27 +58,25 @@ export class FlowSearchService {
     models: Database,
     filters: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    const { limit, afterCursor, beforeCursor, sortField, sortOrder } = filters;
+    const { limit, nextPageCursor, prevPageCursor, sortField, sortOrder } =
+      filters;
 
-    const orderBy:
-      | { column: FlowSortField; order: 'asc' | 'desc' }
-      | Array<{ column: FlowSortField; order: 'asc' | 'desc' }> = {
-      column: sortField ?? 'updatedAt',
-      order: sortOrder ?? 'desc',
-    };
+    const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
 
-    const { flowFilters, flowObjectFilters } = filters;
+    const { flowFilters, flowObjectFilters, flowCategoryFilters } = filters;
 
     const cursorCondition = this.buildCursorCondition(
-      beforeCursor,
-      afterCursor,
+      prevPageCursor,
+      nextPageCursor,
       orderBy
     );
 
     // Determine strategy of how to search for flows
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
-      flowObjectFilters
+      flowObjectFilters,
+      flowCategoryFilters,
+      orderBy
     );
 
     // Fetch one more item to check for hasNextPage
@@ -137,7 +137,7 @@ export class FlowSearchService {
       usageYearsMap,
       reportDetailsMap,
     ] = await Promise.all([
-      this.categoryService.getCategoriesForFlows(flowLinksMap, models),
+      this.categoryService.getCategoriesForFlows(flowIds, models),
       this.organizationService.getOrganizationsForFlows(
         organizationsFO,
         models
@@ -201,25 +201,86 @@ export class FlowSearchService {
           parentIDs,
           externalReferences,
           reportDetailsWithChannel,
-          parkedParentSource,
-          sortField
+          parkedParentSource
         );
       })
     );
 
+    // Sort items
+    // FIXME: this sorts the page, not the whole result set
+    items.sort((a: Flow, b: Flow) => {
+      const nestedA = a[orderBy.entity as keyof Flow];
+      const nestedB = b[orderBy.entity as keyof Flow];
+
+      if (nestedA && nestedB) {
+        const propertyA = nestedA[orderBy.column as keyof typeof nestedA];
+        const propertyB = nestedB[orderBy.column as keyof typeof nestedB];
+
+        // Implement your custom comparison logic
+        // For example, compare strings or numbers
+        if (propertyA < propertyB) {
+          return orderBy.order === 'asc' ? -1 : 1;
+        }
+        if (propertyA > propertyB) {
+          return orderBy.order === 'asc' ? 1 : -1;
+        }
+      }
+
+      return 0;
+    });
+
+    const isOrderByForFlows = orderBy.entity === 'flow';
+    const firstItem = items[0];
+    const prevPageCursorEntity = isOrderByForFlows
+      ? firstItem
+      : firstItem[orderBy.entity as keyof typeof firstItem];
+    const prevPageCursorValue = prevPageCursorEntity
+      ? prevPageCursorEntity[
+          orderBy.column as keyof typeof prevPageCursorEntity
+        ] ?? ''
+      : '';
+
+    const lastItem = items.at(-1);
+    const nextPageCursorEntity = isOrderByForFlows
+      ? lastItem
+      : lastItem![orderBy.entity as keyof typeof lastItem];
+    const nextPageCursorValue = nextPageCursorEntity
+      ? nextPageCursorEntity[
+          orderBy.column as keyof typeof nextPageCursorEntity
+        ]?.toString() ?? ''
+      : '';
+
+    // TODO: implement nested cursors for page
     return {
       flows: items,
       hasNextPage: limit <= flows.length,
-      hasPreviousPage: afterCursor !== undefined,
-      startCursor: flows.length ? items[0].cursor : '',
-      endCursor: flows.length ? items.at(-1)?.cursor ?? '' : '',
+      hasPreviousPage: nextPageCursor !== undefined,
+      prevPageCursor: prevPageCursorValue,
+      nextPageCursor: nextPageCursorValue,
       pageSize: flows.length,
-      sortField: sortField ?? 'updatedAt',
+      sortField: `${orderBy.entity}.${orderBy.column}` as FlowSortField,
       sortOrder: sortOrder ?? 'desc',
       total: count,
     };
   }
 
+  buildOrderBy(sortField?: FlowSortField, sortOrder?: SortOrder) {
+    const orderBy: FlowOrderBy = {
+      column: sortField ?? 'updatedAt',
+      order: sortOrder ?? ('desc' as SortOrder),
+      entity: 'flow',
+    };
+
+    // Check if sortField is a nested property
+    if (orderBy.column.includes('.')) {
+      const [nestedEntity, propertyToSort] = orderBy.column.split('.');
+      // Update orderBy object with nested information
+      orderBy.column = propertyToSort;
+      orderBy.entity = nestedEntity;
+    }
+
+    return orderBy;
+  }
   prepareFlowConditions(flowFilters: SearchFlowsFilters): any {
     let flowConditions = {};
 
@@ -239,7 +300,7 @@ export class FlowSearchService {
   }
 
   prepareFlowObjectConditions(
-    flowObjectFilters: FlowObjectFilters[]
+    flowObjectFilters: FlowObjectFilters[] = []
   ): Map<string, Map<string, number[]>> {
     const flowObjectsConditions: Map<string, Map<string, number[]>> = new Map<
       string,
@@ -274,49 +335,55 @@ export class FlowSearchService {
 
   determineStrategy(
     flowFilters: SearchFlowsFilters,
-    flowObjectFilters: FlowObjectFilters[]
+    flowObjectFilters: FlowObjectFilters[],
+    flowCategoryFilters: FlowCategoryFilters,
+    orderBy?: FlowOrderBy
   ): { strategy: FlowSearchStrategy; conditions: any } {
-    let conditions = {};
-
     const isFlowFilterDefined = flowFilters !== undefined;
     const isFlowObjectFilterDefined = flowObjectFilters !== undefined;
     const isFlowObjectFiltersNotEmpty =
       isFlowObjectFilterDefined && flowObjectFilters.length !== 0;
 
+    const isFlowCategoryFilterDefined = flowCategoryFilters !== undefined;
+
+    const isOrderByForFlows = orderBy?.entity === 'flow';
+
     if (
       (!isFlowFilterDefined &&
-        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty)) ||
+        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
+        !isFlowCategoryFilterDefined) ||
       (isFlowFilterDefined &&
-        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty))
+        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
+        !isFlowCategoryFilterDefined)
     ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
-      conditions = { ...conditions, ...flowConditions };
-      return { strategy: this.onlyFlowFiltersStrategy, conditions };
-    } else if (!isFlowFilterDefined && isFlowObjectFiltersNotEmpty) {
-      const flowObjectConditions =
-        this.prepareFlowObjectConditions(flowObjectFilters);
-      conditions = { ...conditions, ...flowObjectConditions };
-
+      if (!isOrderByForFlows) {
+        return {
+          strategy: this.flowObjectFiltersStrategy,
+          conditions: {
+            conditionsMap: this.buildConditionsMap(flowConditions, {}),
+            flowCategoryFilters,
+          },
+        };
+      }
       return {
-        strategy: this.flowObjectFiltersStrategy,
-        conditions: this.buildConditionsMap(undefined, flowObjectConditions),
+        strategy: this.onlyFlowFiltersStrategy,
+        conditions: flowConditions,
       };
-    } else if (isFlowFilterDefined && isFlowObjectFiltersNotEmpty) {
+    } else if (isFlowObjectFiltersNotEmpty || isFlowCategoryFilterDefined) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
       const flowObjectConditions =
         this.prepareFlowObjectConditions(flowObjectFilters);
-      conditions = {
-        ...conditions,
-        ...flowConditions,
-        ...flowObjectConditions,
-      };
 
       return {
         strategy: this.flowObjectFiltersStrategy,
-        conditions: this.buildConditionsMap(
-          flowConditions,
-          flowObjectConditions
-        ),
+        conditions: {
+          conditionsMap: this.buildConditionsMap(
+            flowConditions,
+            flowObjectConditions
+          ),
+          flowCategoryFilters,
+        },
       };
     }
 
@@ -396,9 +463,7 @@ export class FlowSearchService {
   private buildCursorCondition(
     beforeCursor: string,
     afterCursor: string,
-    orderBy:
-      | { column: FlowSortField; order: 'asc' | 'desc' }
-      | Array<{ column: FlowSortField; order: 'asc' | 'desc' }>
+    orderBy: FlowOrderBy
   ) {
     if (beforeCursor && afterCursor) {
       throw new Error('Cannot use before and after cursor at the same time');
@@ -406,20 +471,6 @@ export class FlowSearchService {
 
     if (!beforeCursor && !afterCursor) {
       return {};
-    }
-
-    if (Array.isArray(orderBy)) {
-      // Build iterations of cursor conditions
-      const cursorConditions = orderBy.map((orderBy) => {
-        return this.buildCursorConditionForSingleOrderBy(
-          beforeCursor,
-          afterCursor,
-          orderBy
-        );
-      });
-
-      // Combine cursor conditions
-      return { [Cond.AND]: cursorConditions };
     }
 
     return this.buildCursorConditionForSingleOrderBy(
@@ -432,7 +483,7 @@ export class FlowSearchService {
   private buildCursorConditionForSingleOrderBy(
     beforeCursor: string,
     afterCursor: string,
-    orderBy: { column: FlowSortField; order: 'asc' | 'desc' }
+    orderBy: FlowOrderBy
   ) {
     let cursorCondition;
 
@@ -466,19 +517,8 @@ export class FlowSearchService {
     parentIDs: number[],
     externalReferences: any[],
     reportDetails: any[],
-    parkedParentSource: FlowParkedParentSource[],
-    sortColumn?: FlowSortField
-  ): FlowPaged {
-    let cursor: string | number | Date = sortColumn
-      ? flow.id.valueOf()
-      : flow[sortColumn ?? 'updatedAt'];
-
-    if (cursor instanceof Date) {
-      cursor = cursor.toISOString();
-    } else if (typeof cursor === 'number') {
-      cursor = cursor.toString();
-    }
-
+    parkedParentSource: FlowParkedParentSource[]
+  ): Flow {
     return {
       // Mandatory fields
       id: flow.id.valueOf(),
@@ -501,8 +541,6 @@ export class FlowSearchService {
       externalReferences,
       reportDetails,
       parkedParentSource,
-      // Paged item field
-      cursor,
     };
   }
 
@@ -510,11 +548,12 @@ export class FlowSearchService {
     models: Database,
     args: SearchFlowsArgsNonPaginated
   ): Promise<FlowSearchTotalAmountResult> {
-    const { flowFilters, flowObjectFilters } = args;
+    const { flowFilters, flowObjectFilters, flowCategoryFilters } = args;
 
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
-      flowObjectFilters
+      flowObjectFilters,
+      flowCategoryFilters
     );
 
     const { flows, count } = await strategy.search(conditions, models);
@@ -540,12 +579,12 @@ export class FlowSearchService {
   ): Promise<FlowSearchResultNonPaginated> {
     const flowSearchResponse = await this.search(models, args);
 
-    const flows: FlowPaged[] = flowSearchResponse.flows;
+    const flows: Flow[] = flowSearchResponse.flows;
 
     let hasNextPage = flowSearchResponse.hasNextPage;
 
-    let cursor = flowSearchResponse.endCursor;
-    let nextArgs: SearchFlowsArgs = { ...args, afterCursor: cursor };
+    let cursor = flowSearchResponse.nextPageCursor;
+    let nextArgs: SearchFlowsArgs = { ...args, nextPageCursor: cursor };
 
     let nextFlowSearchResponse: FlowSearchResult;
     while (hasNextPage) {
@@ -554,10 +593,10 @@ export class FlowSearchService {
       flows.push(...nextFlowSearchResponse.flows);
 
       hasNextPage = nextFlowSearchResponse.hasNextPage;
-      cursor = nextFlowSearchResponse.endCursor;
+      cursor = nextFlowSearchResponse.nextPageCursor;
 
       // Update the cursor for the next iteration
-      nextArgs = { ...args, afterCursor: cursor };
+      nextArgs = { ...args, nextPageCursor: cursor };
     }
 
     return { flows, flowsCount: flows.length };
