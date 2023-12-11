@@ -1,34 +1,26 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type Category } from './graphql/types';
 
 @Service()
 export class CategoryService {
   async getCategoriesForFlows(
-    flowLinks: Map<number, Array<InstanceDataOfModel<Database['flowLink']>>>,
+    flowIDs: FlowId[],
     models: Database
   ): Promise<Map<number, Category[]>> {
-    const flowLinksBrandedIds = [];
-    for (const flowLink of flowLinks.keys()) {
-      flowLinksBrandedIds.push(createBrandedValue(flowLink));
-    }
-
     // Group categories by flow ID for easy mapping
     const categoriesMap = new Map<number, Category[]>();
-
-    if (flowLinksBrandedIds.length === 0) {
-      return categoriesMap;
-    }
 
     const categoriesRef: Array<InstanceDataOfModel<Database['categoryRef']>> =
       await models.categoryRef.find({
         where: {
           objectID: {
-            [Op.IN]: flowLinksBrandedIds,
+            [Op.IN]: flowIDs,
           },
+          objectType: 'flow',
         },
       });
 
@@ -88,5 +80,21 @@ export class CategoryService {
         updatedAt: categoryRef.updatedAt.toISOString(),
       },
     };
+  }
+
+  async findCategories(models: Database, where: any) {
+    const category = await models.category.find({
+      where,
+    });
+
+    return category;
+  }
+
+  async findCategoryRefs(models: Database, where: any) {
+    const categoryRef = await models.categoryRef.find({
+      where,
+    });
+
+    return categoryRef;
   }
 }

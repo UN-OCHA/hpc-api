@@ -18,6 +18,7 @@ import { ReportDetailService } from '../report-details/report-detail-service';
 import { type UsageYear } from '../usage-years/grpahql/types';
 import { UsageYearService } from '../usage-years/usage-year-service';
 import {
+  type FlowCategoryFilters,
   type FlowObjectFilters,
   type SearchFlowsArgs,
   type SearchFlowsArgsNonPaginated,
@@ -33,8 +34,8 @@ import {
 } from './graphql/types';
 import { type FlowEntity } from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
-import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy';
-import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy';
+import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy-impl';
+import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy-impl';
 
 @Service()
 export class FlowSearchService {
@@ -56,7 +57,8 @@ export class FlowSearchService {
     models: Database,
     filters: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    const { limit, afterCursor, beforeCursor, sortField, sortOrder } = filters;
+    const { limit, nextPageCursor, prevPageCursor, sortField, sortOrder } =
+      filters;
 
     const orderBy:
       | { column: FlowSortField; order: 'asc' | 'desc' }
@@ -65,18 +67,19 @@ export class FlowSearchService {
       order: sortOrder ?? 'desc',
     };
 
-    const { flowFilters, flowObjectFilters } = filters;
+    const { flowFilters, flowObjectFilters, flowCategoryFilters } = filters;
 
     const cursorCondition = this.buildCursorCondition(
-      beforeCursor,
-      afterCursor,
+      prevPageCursor,
+      nextPageCursor,
       orderBy
     );
 
     // Determine strategy of how to search for flows
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
-      flowObjectFilters
+      flowObjectFilters,
+      flowCategoryFilters
     );
 
     // Fetch one more item to check for hasNextPage
@@ -137,7 +140,7 @@ export class FlowSearchService {
       usageYearsMap,
       reportDetailsMap,
     ] = await Promise.all([
-      this.categoryService.getCategoriesForFlows(flowLinksMap, models),
+      this.categoryService.getCategoriesForFlows(flowIds, models),
       this.organizationService.getOrganizationsForFlows(
         organizationsFO,
         models
@@ -210,9 +213,9 @@ export class FlowSearchService {
     return {
       flows: items,
       hasNextPage: limit <= flows.length,
-      hasPreviousPage: afterCursor !== undefined,
-      startCursor: flows.length ? items[0].cursor : '',
-      endCursor: flows.length ? items.at(-1)?.cursor ?? '' : '',
+      hasPreviousPage: nextPageCursor !== undefined,
+      prevPageCursor: flows.length ? items[0].cursor : '',
+      nextPageCursor: flows.length ? items.at(-1)?.cursor ?? '' : '',
       pageSize: flows.length,
       sortField: sortField ?? 'updatedAt',
       sortOrder: sortOrder ?? 'desc',
@@ -274,49 +277,62 @@ export class FlowSearchService {
 
   determineStrategy(
     flowFilters: SearchFlowsFilters,
-    flowObjectFilters: FlowObjectFilters[]
+    flowObjectFilters: FlowObjectFilters[],
+    flowCategoryFilters: FlowCategoryFilters
   ): { strategy: FlowSearchStrategy; conditions: any } {
-    let conditions = {};
-
     const isFlowFilterDefined = flowFilters !== undefined;
     const isFlowObjectFilterDefined = flowObjectFilters !== undefined;
     const isFlowObjectFiltersNotEmpty =
       isFlowObjectFilterDefined && flowObjectFilters.length !== 0;
 
+    const isFlowCategoryFilterDefined = flowCategoryFilters !== undefined;
+
     if (
       (!isFlowFilterDefined &&
-        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty)) ||
+        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
+        !isFlowCategoryFilterDefined) ||
       (isFlowFilterDefined &&
-        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty))
+        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
+        !isFlowCategoryFilterDefined)
     ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
-      conditions = { ...conditions, ...flowConditions };
-      return { strategy: this.onlyFlowFiltersStrategy, conditions };
-    } else if (!isFlowFilterDefined && isFlowObjectFiltersNotEmpty) {
+      return {
+        strategy: this.onlyFlowFiltersStrategy,
+        conditions: flowConditions,
+      };
+    } else if (
+      !isFlowFilterDefined &&
+      isFlowObjectFiltersNotEmpty &&
+      isFlowCategoryFilterDefined
+    ) {
       const flowObjectConditions =
         this.prepareFlowObjectConditions(flowObjectFilters);
-      conditions = { ...conditions, ...flowObjectConditions };
 
       return {
         strategy: this.flowObjectFiltersStrategy,
-        conditions: this.buildConditionsMap(undefined, flowObjectConditions),
+        conditions: {
+          conditionsMap: this.buildConditionsMap({}, flowObjectConditions),
+          flowCategoryFilters,
+        },
       };
-    } else if (isFlowFilterDefined && isFlowObjectFiltersNotEmpty) {
+    } else if (
+      isFlowFilterDefined &&
+      isFlowObjectFiltersNotEmpty &&
+      isFlowCategoryFilterDefined
+    ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
       const flowObjectConditions =
         this.prepareFlowObjectConditions(flowObjectFilters);
-      conditions = {
-        ...conditions,
-        ...flowConditions,
-        ...flowObjectConditions,
-      };
 
       return {
         strategy: this.flowObjectFiltersStrategy,
-        conditions: this.buildConditionsMap(
-          flowConditions,
-          flowObjectConditions
-        ),
+        conditions: {
+          conditionsMap: this.buildConditionsMap(
+            flowConditions,
+            flowObjectConditions
+          ),
+          flowCategoryFilters,
+        },
       };
     }
 
@@ -469,14 +485,15 @@ export class FlowSearchService {
     parkedParentSource: FlowParkedParentSource[],
     sortColumn?: FlowSortField
   ): FlowPaged {
-    let cursor: string | number | Date = sortColumn
-      ? flow.id.valueOf()
-      : flow[sortColumn ?? 'updatedAt'];
+    let cursor = sortColumn ? flow[sortColumn] : flow.updatedAt;
 
     if (cursor instanceof Date) {
       cursor = cursor.toISOString();
     } else if (typeof cursor === 'number') {
       cursor = cursor.toString();
+    } else if (typeof cursor === 'boolean' || cursor === null) {
+      // cases such as 'boolean'
+      cursor = flow.id.toString();
     }
 
     return {
@@ -510,11 +527,12 @@ export class FlowSearchService {
     models: Database,
     args: SearchFlowsArgsNonPaginated
   ): Promise<FlowSearchTotalAmountResult> {
-    const { flowFilters, flowObjectFilters } = args;
+    const { flowFilters, flowObjectFilters, flowCategoryFilters } = args;
 
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
-      flowObjectFilters
+      flowObjectFilters,
+      flowCategoryFilters
     );
 
     const { flows, count } = await strategy.search(conditions, models);
@@ -544,8 +562,8 @@ export class FlowSearchService {
 
     let hasNextPage = flowSearchResponse.hasNextPage;
 
-    let cursor = flowSearchResponse.endCursor;
-    let nextArgs: SearchFlowsArgs = { ...args, afterCursor: cursor };
+    let cursor = flowSearchResponse.nextPageCursor;
+    let nextArgs: SearchFlowsArgs = { ...args, nextPageCursor: cursor };
 
     let nextFlowSearchResponse: FlowSearchResult;
     while (hasNextPage) {
@@ -554,10 +572,10 @@ export class FlowSearchService {
       flows.push(...nextFlowSearchResponse.flows);
 
       hasNextPage = nextFlowSearchResponse.hasNextPage;
-      cursor = nextFlowSearchResponse.endCursor;
+      cursor = nextFlowSearchResponse.nextPageCursor;
 
       // Update the cursor for the next iteration
-      nextArgs = { ...args, afterCursor: cursor };
+      nextArgs = { ...args, nextPageCursor: cursor };
     }
 
     return { flows, flowsCount: flows.length };

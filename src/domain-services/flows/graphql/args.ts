@@ -30,6 +30,15 @@ export class SearchFlowsFilters {
 }
 
 @InputType()
+export class FlowCategoryFilters {
+  @Field({ nullable: true })
+  pending: boolean;
+
+  @Field(() => [FlowCategory], { nullable: true })
+  categoryFilters: FlowCategory[];
+}
+
+@InputType()
 export class FlowObjectFilters {
   @Field({ nullable: false })
   objectID: number;
@@ -51,11 +60,14 @@ export class FlowObjectFilters {
 
 @InputType()
 export class FlowCategory {
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   id: number;
 
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   group: string;
+
+  @Field({ nullable: true })
+  name: string;
 }
 
 @ArgsType()
@@ -66,11 +78,11 @@ export class SearchFlowsArgs extends PaginationArgs<FlowSortField> {
   @Field(() => [FlowObjectFilters], { nullable: true })
   flowObjectFilters: FlowObjectFilters[];
 
-  @Field(() => [FlowCategory], { nullable: true })
-  categoryFilters: FlowCategory[];
-
   @Field({ nullable: true })
   includeChildrenOfParkedFlows: boolean;
+
+  @Field({ nullable: true })
+  flowCategoryFilters: FlowCategoryFilters;
 }
 
 @ArgsType()
@@ -81,9 +93,9 @@ export class SearchFlowsArgsNonPaginated {
   @Field(() => [FlowObjectFilters], { nullable: true })
   flowObjectFilters: FlowObjectFilters[];
 
-  @Field(() => [FlowCategory], { nullable: true })
-  categoryFilters: FlowCategory[];
-
   @Field({ nullable: true })
   includeChildrenOfParkedFlows: boolean;
+
+  @Field({ nullable: true })
+  flowCategoryFilters: FlowCategoryFilters;
 }
