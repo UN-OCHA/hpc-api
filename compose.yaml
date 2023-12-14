@@ -1,7 +1,5 @@
-version: '3.8'
 services:
   api:
-    container_name: hpc_api
     build:
       context: .
       dockerfile: ./env/api/Dockerfile
@@ -26,8 +24,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:11.7
-    container_name: hpc_postgres_db
+    image: postgres:14.8-alpine3.18
     environment:
       - POSTGRES_PASSWORD=demo
       - POSTGRES_USER=demo
