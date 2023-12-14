@@ -97,7 +97,18 @@ export class FlowSearchService {
       flows.pop();
     }
 
-    const flowIds: FlowId[] = flows.map((flow) => flow.id);
+    const flowIds: FlowId[] = [];
+    const flowWithVersion: Map<FlowId, number[]> = new Map<FlowId, number[]>();
+
+    // Obtain flow IDs and flow version IDs
+    for (const flow of flows) {
+      flowIds.push(flow.id);
+      if (!flowWithVersion.has(flow.id)) {
+        flowWithVersion.set(flow.id, []);
+      }
+      const flowVersionIDs = flowWithVersion.get(flow.id)!;
+      flowVersionIDs.push(flow.versionID);
+    }
 
     // Obtain external references and flow objects in parallel
     const [externalReferencesMap, flowObjects] = await Promise.all([
@@ -137,7 +148,7 @@ export class FlowSearchService {
       usageYearsMap,
       reportDetailsMap,
     ] = await Promise.all([
-      this.categoryService.getCategoriesForFlows(flowIds, models),
+      this.categoryService.getCategoriesForFlows(flowWithVersion, models),
       this.organizationService.getOrganizationsForFlows(
         organizationsFO,
         models
@@ -151,7 +162,12 @@ export class FlowSearchService {
     const items = await Promise.all(
       flows.map(async (flow) => {
         const flowLink = flowLinksMap.get(flow.id) ?? [];
-        const categories = categoriesMap.get(flow.id) ?? [];
+
+        // Categories Map follows the structure:
+        // flowID: { versionID: [categories]}
+        // So we need to get the categories for the flow version
+        const categories =
+          categoriesMap.get(flow.id)!.get(flow.versionID) ?? [];
         const organizations = organizationsMap.get(flow.id) ?? [];
         const locations = locationsMap.get(flow.id) ?? [];
         const plans = plansMap.get(flow.id) ?? [];
