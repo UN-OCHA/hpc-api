@@ -250,7 +250,6 @@ export class FlowSearchService {
         ]?.toString() ?? ''
       : '';
 
-    // TODO: implement nested cursors for page
     return {
       flows: items,
       hasNextPage: limit <= flows.length,

@@ -1,5 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
-import { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
