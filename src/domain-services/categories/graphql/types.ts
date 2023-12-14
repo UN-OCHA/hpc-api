@@ -41,4 +41,7 @@ export class Category extends BaseType {
 
   @Field(() => CategoryRef, { nullable: true })
   categoryRef: CategoryRef;
+
+  @Field({ nullable: false })
+  versionID: number;
 }

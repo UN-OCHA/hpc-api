@@ -8,11 +8,20 @@ import { type Category } from './graphql/types';
 @Service()
 export class CategoryService {
   async getCategoriesForFlows(
-    flowIDs: FlowId[],
+    flowWithVersion: Map<FlowId, number[]>,
     models: Database
-  ): Promise<Map<number, Category[]>> {
-    // Group categories by flow ID for easy mapping
-    const categoriesMap = new Map<number, Category[]>();
+  ): Promise<Map<number, Map<number, Category[]>>> {
+    // Group of flowIDs and its versions
+    // Structure:
+    // flowID: {
+    //   versionID: [categories]
+    // }
+    const flowVersionCategoryMap = new Map<number, Map<number, Category[]>>();
+
+    const flowIDs: FlowId[] = [];
+    for (const flowID of flowWithVersion.keys()) {
+      flowIDs.push(flowID);
+    }
 
     const categoriesRef: Array<InstanceDataOfModel<Database['categoryRef']>> =
       await models.categoryRef.find({
@@ -37,24 +46,34 @@ export class CategoryService {
     for (const catRef of categoriesRef) {
       const flowId = catRef.objectID.valueOf();
 
-      if (!categoriesMap.has(flowId)) {
-        categoriesMap.set(flowId, []);
+      if (!flowVersionCategoryMap.has(flowId)) {
+        flowVersionCategoryMap.set(flowId, new Map());
       }
 
-      const categoriesPerFlow = categoriesMap.get(flowId)!;
+      // Here the key is the versionID of the flow
+      const flowVersionMap = flowVersionCategoryMap.get(flowId)!;
+
+      const flowVersion = catRef.versionID;
+      if (!flowVersionMap.has(flowVersion)) {
+        flowVersionMap.set(flowVersion, []);
+      }
+
+      const categoriesPerFlowVersion = flowVersionMap.get(flowVersion)!;
 
       const category = categories.find((cat) => cat.id === catRef.categoryID);
 
       if (
         category &&
-        !categoriesPerFlow.some((cat) => cat.id === category.id.valueOf())
+        !categoriesPerFlowVersion.some(
+          (cat) => cat.id === category.id.valueOf()
+        )
       ) {
         const mappedCategory = this.mapCategoryToFlowCategory(category, catRef);
-        categoriesPerFlow.push(mappedCategory);
+        categoriesPerFlowVersion.push(mappedCategory);
       }
     }
 
-    return categoriesMap;
+    return flowVersionCategoryMap;
   }
 
   private mapCategoryToFlowCategory(
@@ -79,6 +98,7 @@ export class CategoryService {
         createdAt: categoryRef.createdAt.toISOString(),
         updatedAt: categoryRef.updatedAt.toISOString(),
       },
+      versionID: categoryRef.versionID,
     };
   }
 
