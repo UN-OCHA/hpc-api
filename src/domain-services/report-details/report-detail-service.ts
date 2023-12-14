@@ -27,18 +27,15 @@ export class ReportDetailService {
       if (!reportDetailsMap.has(flowId)) {
         reportDetailsMap.set(flowId, []);
       }
-      const reportDetail = reportDetails.find(
-        (report) => report && flowId === report?.flowID
+
+      const flowsReportingDetails = reportDetails.filter(
+        (report) => report.flowID === flowId
       );
 
-      if (reportDetail) {
+      if (flowsReportingDetails && flowsReportingDetails.length > 0) {
         const reportDetailsPerFlow = reportDetailsMap.get(flowId)!;
 
-        if (
-          !reportDetailsPerFlow.some(
-            (report) => report.id === reportDetail.id.valueOf()
-          )
-        ) {
+        for (const reportDetail of flowsReportingDetails) {
           const reportDetailMapped =
             this.mapReportDetailsToFlowReportDetail(reportDetail);
           reportDetailsPerFlow.push(reportDetailMapped);
