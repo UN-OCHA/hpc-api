@@ -30,8 +30,8 @@ export class Category extends BaseType {
   @Field({ nullable: true })
   description: string;
 
-  @Field({ nullable: true })
-  parentID: number;
+  @Field(() => Number, { nullable: true })
+  parentID: number | null;
 
   @Field({ nullable: true })
   code: string;

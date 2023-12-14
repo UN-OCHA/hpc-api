@@ -68,7 +68,7 @@ export class CategoryService {
       createdAt: category.createdAt.toISOString(),
       updatedAt: category.updatedAt.toISOString(),
       description: category.description ?? '',
-      parentID: category.parentID ? category.parentID.valueOf() : 0,
+      parentID: category.parentID ? category.parentID.valueOf() : null,
       code: category.code ?? '',
       includeTotals: category.includeTotals ?? false,
       categoryRef: {
