@@ -19,7 +19,7 @@ import { ReportDetailService } from '../report-details/report-detail-service';
 import { type UsageYear } from '../usage-years/grpahql/types';
 import { UsageYearService } from '../usage-years/usage-year-service';
 import {
-  type FlowCategoryFilters,
+  type FlowCategory,
   type FlowObjectFilters,
   type SearchFlowsArgs,
   type SearchFlowsArgsNonPaginated,
@@ -62,8 +62,14 @@ export class FlowSearchService {
     models: Database,
     filters: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    const { limit, nextPageCursor, prevPageCursor, sortField, sortOrder } =
-      filters;
+    const {
+      limit,
+      nextPageCursor,
+      prevPageCursor,
+      sortField,
+      sortOrder,
+      pending: isPendingFlows,
+    } = filters;
 
     const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
 
@@ -79,7 +85,8 @@ export class FlowSearchService {
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
       flowObjectFilters,
-      flowCategoryFilters
+      flowCategoryFilters,
+      isPendingFlows
     );
 
     // Fetch one more item to check for hasNextPage
@@ -91,7 +98,8 @@ export class FlowSearchService {
       models,
       orderBy,
       limitComputed,
-      cursorCondition
+      cursorCondition,
+      isPendingFlows
     );
 
     // Remove the extra item used to check hasNextPage
@@ -432,7 +440,8 @@ export class FlowSearchService {
   determineStrategy(
     flowFilters: SearchFlowsFilters,
     flowObjectFilters: FlowObjectFilters[],
-    flowCategoryFilters: FlowCategoryFilters
+    flowCategoryFilters: FlowCategory[],
+    isFilterByPendingFlows: boolean
   ): { strategy: FlowSearchStrategy; conditions: any } {
     const isFlowFilterDefined = flowFilters !== undefined;
     const isFlowObjectFilterDefined = flowObjectFilters !== undefined;
@@ -440,21 +449,30 @@ export class FlowSearchService {
       isFlowObjectFilterDefined && flowObjectFilters.length !== 0;
 
     const isFlowCategoryFilterDefined = flowCategoryFilters !== undefined;
+    const isFlowCategoryFilterNotEmpty =
+      isFlowCategoryFilterDefined && flowCategoryFilters.length !== 0;
 
+    const isFilterByPendingFlowsDefined = isFilterByPendingFlows !== undefined;
     if (
       (!isFlowFilterDefined &&
         (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
-        !isFlowCategoryFilterDefined) ||
+        !isFlowCategoryFilterNotEmpty &&
+        !isFilterByPendingFlowsDefined) ||
       (isFlowFilterDefined &&
         (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
-        !isFlowCategoryFilterDefined)
+        !isFlowCategoryFilterNotEmpty &&
+        !isFilterByPendingFlowsDefined)
     ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
       return {
         strategy: this.onlyFlowFiltersStrategy,
         conditions: flowConditions,
       };
-    } else if (isFlowObjectFiltersNotEmpty || isFlowCategoryFilterDefined) {
+    } else if (
+      isFlowObjectFiltersNotEmpty ||
+      isFlowCategoryFilterNotEmpty ||
+      isFilterByPendingFlowsDefined
+    ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
       const flowObjectConditions =
         this.prepareFlowObjectConditions(flowObjectFilters);
@@ -632,15 +650,28 @@ export class FlowSearchService {
     models: Database,
     args: SearchFlowsArgsNonPaginated
   ): Promise<FlowSearchTotalAmountResult> {
-    const { flowFilters, flowObjectFilters, flowCategoryFilters } = args;
+    const {
+      flowFilters,
+      flowObjectFilters,
+      flowCategoryFilters,
+      pending: isPendingFlows,
+    } = args;
 
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
       flowObjectFilters,
-      flowCategoryFilters
+      flowCategoryFilters,
+      isPendingFlows
     );
 
-    const { flows, count } = await strategy.search(conditions, models);
+    const { flows, count } = await strategy.search(
+      conditions,
+      models,
+      undefined,
+      undefined,
+      undefined,
+      isPendingFlows
+    );
 
     const flowsAmountUSD: Array<string | number> = flows.map(
       (flow) => flow.amountUSD

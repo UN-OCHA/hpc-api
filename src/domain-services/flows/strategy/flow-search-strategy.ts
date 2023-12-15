@@ -14,6 +14,7 @@ export interface FlowSearchStrategy {
     models: Database,
     orderBy?: any,
     limit?: number,
-    cursorCondition?: any
+    cursorCondition?: any,
+    filterByPendingFlows?: boolean
   ): Promise<FlowSearchStrategyResponse>;
 }
