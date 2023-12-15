@@ -5,7 +5,7 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { CategoryService } from '../../../categories/category-service';
-import { type FlowCategoryFilters } from '../../graphql/args';
+import { type FlowCategory } from '../../graphql/args';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyResponse,
@@ -21,9 +21,11 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
   async search(
     models: Database,
     _flowObjectsConditions: Map<string, Map<string, number[]>>,
-    flowCategoryConditions: FlowCategoryFilters
+    flowCategoryConditions: FlowCategory[],
+    filterByPendingFlows: boolean
   ): Promise<FlowIdSearchStrategyResponse> {
     const whereClause = mapFlowCategoryConditionsToWhereClause(
+      filterByPendingFlows,
       flowCategoryConditions
     );
 
@@ -55,9 +57,10 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
 
   generateWhereClause(
     flowIds: FlowId[],
-    flowCategoryConditions: FlowCategoryFilters
+    _conditions: any,
+    filterByPendingFlows: boolean
   ) {
-    const operation = flowCategoryConditions.pending ? Op.IN : Op.NOT_IN;
+    const operation = filterByPendingFlows === true ? Op.IN : Op.NOT_IN;
     return {
       id: {
         [operation]: flowIds,

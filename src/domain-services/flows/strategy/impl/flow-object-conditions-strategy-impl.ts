@@ -2,7 +2,7 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
-import { type FlowCategoryFilters } from '../../graphql/args';
+import { type FlowCategory } from '../../graphql/args';
 import {
   type FlowSearchStrategy,
   type FlowSearchStrategyResponse,
@@ -27,12 +27,13 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
   async search(
     flowConditions: {
       conditionsMap: Map<string, any>;
-      flowCategoryFilters: FlowCategoryFilters;
+      flowCategoryFilters: FlowCategory[];
     },
     models: Database,
     orderBy?: any,
     limit?: number,
-    cursorCondition?: any
+    cursorCondition?: any,
+    filterByPendingFlows?: boolean
   ): Promise<FlowSearchStrategyResponse> {
     const flowConditionsMap = flowConditions.conditionsMap;
     // Obtain flowObjects conditions
@@ -45,30 +46,31 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     const flowEntityConditions = flowConditionsMap.get('flow') ?? new Map();
 
     // Obtain flowCategory conditions
-    const flowCategoryConditions = flowConditions.flowCategoryFilters ?? {};
+    const flowCategoryConditions = flowConditions.flowCategoryFilters ?? [];
 
     const searchFlowIdsStrategy: FlowIDSearchStrategy = this.determineStrategy(
       flowObjectsConditions,
-      flowCategoryConditions
+      flowCategoryConditions,
+      filterByPendingFlows
     );
 
     const { flowIDs: flowIdsToFilter }: FlowIdSearchStrategyResponse =
       await searchFlowIdsStrategy.search(
         models,
         flowObjectsConditions,
-        flowCategoryConditions
+        flowCategoryConditions,
+        filterByPendingFlows
       );
+
+    const whereClauseFromStrategy = searchFlowIdsStrategy.generateWhereClause(
+      flowIdsToFilter,
+      flowCategoryConditions,
+      filterByPendingFlows
+    );
 
     // Combine conditions from flowObjects FlowIDs and flow conditions
     const countConditions = {
-      [Cond.AND]: [
-        flowEntityConditions ?? {},
-
-        searchFlowIdsStrategy.generateWhereClause(
-          flowIdsToFilter,
-          flowCategoryConditions
-        ),
-      ],
+      [Cond.AND]: [flowEntityConditions ?? {}, whereClauseFromStrategy ?? {}],
     };
 
     // Combine cursor condition with flow conditions
@@ -76,10 +78,7 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
       [Cond.AND]: [
         flowEntityConditions ?? {},
         cursorCondition ?? {},
-        searchFlowIdsStrategy.generateWhereClause(
-          flowIdsToFilter,
-          flowCategoryConditions
-        ),
+        whereClauseFromStrategy ?? {},
       ],
     };
 
@@ -111,24 +110,31 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
   // otherwise keep all flowIDs from the one that is not empty
   determineStrategy(
     flowObjectsConditions: Map<string, Map<string, number[]>>,
-    flowCategoryConditions: any
+    flowCategoryConditions: any,
+    filterByPendingFlows?: boolean
   ): any {
     const isFlowObjectsConditionsIsDefined =
       flowObjectsConditions !== undefined;
     const isFlowCategoryConditionsIsDefined =
       flowCategoryConditions !== undefined;
+    const isFilterByPendingFlowsIsDefined = filterByPendingFlows !== undefined;
 
     const flowObjectsConditionsIsNotEmpty =
       isFlowObjectsConditionsIsDefined && flowObjectsConditions.size;
-    const flowCategoryConditionsIsNotEmpty =
-      isFlowCategoryConditionsIsDefined &&
-      Object.keys(flowCategoryConditions).length;
+    const isFlowCategoryConditionsIsNotEmpty =
+      isFlowCategoryConditionsIsDefined && flowCategoryConditions.length !== 0;
 
-    if (flowObjectsConditionsIsNotEmpty && flowCategoryConditionsIsNotEmpty) {
+    if (
+      flowObjectsConditionsIsNotEmpty &&
+      (isFlowCategoryConditionsIsNotEmpty || isFilterByPendingFlowsIsDefined)
+    ) {
       return this.getFlowIdsFromMixedConditions;
     } else if (flowObjectsConditionsIsNotEmpty) {
       return this.getFlowIdsFromObjectConditions;
-    } else if (flowCategoryConditionsIsNotEmpty) {
+    } else if (
+      isFlowCategoryConditionsIsNotEmpty ||
+      isFilterByPendingFlowsIsDefined
+    ) {
       return this.getFlowIdsFromCategoryConditions;
     }
     throw new Error(

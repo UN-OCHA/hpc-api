@@ -2,7 +2,7 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
-import { type FlowCategoryFilters } from '../../graphql/args';
+import { type FlowCategory } from '../../graphql/args';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyResponse,
@@ -23,7 +23,8 @@ export class GetFlowIdsFromMixedConditionsStrategyImpl
   async search(
     models: Database,
     flowObjectsConditions: Map<string, Map<string, number[]>>,
-    flowCategoryConditions: FlowCategoryFilters
+    flowCategoryConditions: FlowCategory[],
+    filterByPendingFlows: boolean
   ): Promise<FlowIdSearchStrategyResponse> {
     const { flowIDs: flowIdsFromFlowObjects }: FlowIdSearchStrategyResponse =
       await this.getFlowIdsFromObjectConditionsStrategy.search(
@@ -35,7 +36,8 @@ export class GetFlowIdsFromMixedConditionsStrategyImpl
       await this.getFlowIdsFromCategoryConditionsStrategy.search(
         models,
         flowObjectsConditions,
-        flowCategoryConditions
+        flowCategoryConditions,
+        filterByPendingFlows
       );
 
     const mergeFlowIDs: FlowId[] =

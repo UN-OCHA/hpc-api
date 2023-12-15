@@ -1,6 +1,6 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { type FlowCategoryFilters } from '../../graphql/args';
+import { type FlowCategory } from '../../graphql/args';
 
 /*
  * Map structure:
@@ -38,24 +38,25 @@ export function mapFlowObjectConditionsToWhereClause(
 }
 
 export function mapFlowCategoryConditionsToWhereClause(
-  flowCategoryConditions: FlowCategoryFilters
+  filterByPendingFlows: boolean,
+  flowCategoryConditions: FlowCategory[]
 ) {
   let whereClause = {};
 
-  if (flowCategoryConditions.pending !== undefined) {
+  if (filterByPendingFlows !== undefined) {
     whereClause = {
       group: 'inactiveReason',
       name: 'Pending review',
     };
   }
 
-  if (flowCategoryConditions.categoryFilters?.length > 0) {
+  if (flowCategoryConditions.length > 0) {
     // Map category filters
     // getting Id when possible
     // or name and group otherwise
     const categoryIdFilters: number[] = [];
     const categoryFilters = new Map<string, string[]>();
-    for (const categoryFilter of flowCategoryConditions.categoryFilters) {
+    for (const categoryFilter of flowCategoryConditions) {
       if (categoryFilter.id) {
         categoryIdFilters.push(categoryFilter.id);
       } else if (categoryFilter.group && categoryFilter.name) {
