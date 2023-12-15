@@ -13,6 +13,7 @@ import {
 } from '../flowID-search-strategy';
 import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow-category-conditions-strategy-impl';
 import { GetFlowIdsFromMixedConditionsStrategyImpl } from './get-flowIds-flow-mixed-conditions-strategy-impl';
+import { checkAndMapFlowOrderBy } from './utils';
 
 @Service()
 export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
@@ -82,10 +83,13 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
       ],
     };
 
+    // check and map orderBy to be from entity 'flow'
+    const orderByFlow = checkAndMapFlowOrderBy(orderBy);
+
     // Obtain flows and flowCount based on flowIDs from filtered flowObjects
     // and flow conditions
     const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(models, searchConditions, orderBy, limit),
+      this.flowService.getFlows(models, searchConditions, orderByFlow, limit),
       this.flowService.getFlowsCount(models, countConditions),
     ]);
 

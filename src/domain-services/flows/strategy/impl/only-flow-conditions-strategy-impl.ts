@@ -6,6 +6,7 @@ import {
   type FlowSearchStrategy,
   type FlowSearchStrategyResponse,
 } from '../flow-search-strategy';
+import { checkAndMapFlowOrderBy } from './utils';
 
 @Service()
 export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
@@ -23,8 +24,11 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
       [Cond.AND]: [flowConditions ?? {}, cursorCondition ?? {}],
     };
 
+    // check and map orderBy to be from entity 'flow'
+    const orderByFlow = checkAndMapFlowOrderBy(orderBy);
+
     const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(models, searchConditions, orderBy, limit),
+      this.flowService.getFlows(models, searchConditions, orderByFlow, limit),
       this.flowService.getFlowsCount(models, flowConditions),
     ]);
 
