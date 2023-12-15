@@ -7,4 +7,10 @@ export type FlowOrderBy = {
   column: string;
   order: SortOrder;
   entity: string;
+  direction: FlowNestedDirection | null;
 };
+
+export enum FlowNestedDirection {
+  source = 'source',
+  destination = 'destination',
+}

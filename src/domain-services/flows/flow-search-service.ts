@@ -33,7 +33,11 @@ import {
   type FlowSearchTotalAmountResult,
   type FlowSortField,
 } from './graphql/types';
-import { type FlowEntity, type FlowOrderBy } from './model';
+import {
+  type FlowEntity,
+  type FlowNestedDirection,
+  type FlowOrderBy,
+} from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
 import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy-impl';
 import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy-impl';
@@ -75,8 +79,7 @@ export class FlowSearchService {
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
       flowObjectFilters,
-      flowCategoryFilters,
-      orderBy
+      flowCategoryFilters
     );
 
     // Fetch one more item to check for hasNextPage
@@ -225,20 +228,87 @@ export class FlowSearchService {
     // Sort items
     // FIXME: this sorts the page, not the whole result set
     items.sort((a: Flow, b: Flow) => {
-      const nestedA = a[orderBy.entity as keyof Flow];
-      const nestedB = b[orderBy.entity as keyof Flow];
+      const entityKey = orderBy.entity as keyof Flow;
+
+      const nestedA = a[entityKey];
+      const nestedB = b[entityKey];
 
       if (nestedA && nestedB) {
+        if (orderBy.direction) {
+          // This means the orderBy came in the format:
+          // column: 'nestedEntity.direction.property'
+          // So we need to get the entry of the nested entity
+          // which its direction matches the orderBy direction
+          // and sort by the property using the orderBy order
+
+          // Fisrt, check if the nestedEntity is trusy an Array
+          if (!Array.isArray(nestedA)) {
+            return 0;
+          }
+          if (!Array.isArray(nestedB)) {
+            return 0;
+          }
+
+          // Now we ensure both properties are arrays
+          // we can assume that the nestedEntity is one of the following:
+          // organizations, locations, plans, usageYears
+          const directionEntityA = nestedA as unknown as
+            | Organization[]
+            | BaseLocation[]
+            | BasePlan[]
+            | UsageYear[];
+          const directionEntityB = nestedB as unknown as
+            | Organization[]
+            | BaseLocation[]
+            | BasePlan[]
+            | UsageYear[];
+
+          // Then we find the entry of the nestedEntity that matches the orderBy direction
+          const nestedEntityA = directionEntityA.find(
+            (nestedEntity: any) => orderBy.direction === nestedEntity.direction
+          );
+          const nestedEntityB = directionEntityB.find(
+            (nestedEntity: any) => orderBy.direction === nestedEntity.direction
+          );
+
+          // After, we need to check there is an entry that matches the orderBy direction
+          // if not, we return 0
+          if (!nestedEntityA) {
+            return 0;
+          }
+          if (!nestedEntityB) {
+            return 0;
+          }
+
+          // Now we can sort by the property using the orderBy order
+          const propertyA =
+            nestedEntityA[orderBy.column as keyof typeof nestedEntityA];
+          const propertyB =
+            nestedEntityB[orderBy.column as keyof typeof nestedEntityB];
+
+          // Finally, we check that the property is defined
+          // and if so - we sort by the property using the orderBy order
+          if (propertyA && propertyB) {
+            if (orderBy.order === 'asc') {
+              return propertyA > propertyB ? 1 : -1;
+            }
+            return propertyA < propertyB ? 1 : -1;
+          }
+        }
+        // Since there is no direction expecified in the orderBy
+        // we can assume that the nestedEntity is one of the following:
+        // childIDs, parentIDs, externalReferences, reportDetails, parkedParentSource, categories
+        // and we can sort by the property using the orderBy order
         const propertyA = nestedA[orderBy.column as keyof typeof nestedA];
         const propertyB = nestedB[orderBy.column as keyof typeof nestedB];
 
-        // Implement your custom comparison logic
-        // For example, compare strings or numbers
-        if (propertyA < propertyB) {
-          return orderBy.order === 'asc' ? -1 : 1;
-        }
-        if (propertyA > propertyB) {
-          return orderBy.order === 'asc' ? 1 : -1;
+        // Finally, we check that the property is defined
+        // and if so - we sort by the property using the orderBy order
+        if (propertyA && propertyB) {
+          if (orderBy.order === 'asc') {
+            return propertyA > propertyB ? 1 : -1;
+          }
+          return propertyA < propertyB ? 1 : -1;
         }
       }
 
@@ -283,15 +353,26 @@ export class FlowSearchService {
     const orderBy: FlowOrderBy = {
       column: sortField ?? 'updatedAt',
       order: sortOrder ?? ('desc' as SortOrder),
+      direction: null,
       entity: 'flow',
     };
 
     // Check if sortField is a nested property
     if (orderBy.column.includes('.')) {
-      const [nestedEntity, propertyToSort] = orderBy.column.split('.');
-      // Update orderBy object with nested information
-      orderBy.column = propertyToSort;
-      orderBy.entity = nestedEntity;
+      // OrderBy can came in the format:
+      // column: 'organizations.source.name'
+      // or in the format:
+      // column: 'flow.updatedAt'
+      const struct = orderBy.column.split('.');
+
+      if (struct.length === 2) {
+        orderBy.column = struct[0];
+        orderBy.entity = struct[1];
+      } else if (struct.length === 3) {
+        orderBy.column = struct[0];
+        orderBy.direction = struct[1] as FlowNestedDirection;
+        orderBy.entity = struct[2];
+      }
     }
 
     return orderBy;
@@ -351,8 +432,7 @@ export class FlowSearchService {
   determineStrategy(
     flowFilters: SearchFlowsFilters,
     flowObjectFilters: FlowObjectFilters[],
-    flowCategoryFilters: FlowCategoryFilters,
-    orderBy?: FlowOrderBy
+    flowCategoryFilters: FlowCategoryFilters
   ): { strategy: FlowSearchStrategy; conditions: any } {
     const isFlowFilterDefined = flowFilters !== undefined;
     const isFlowObjectFilterDefined = flowObjectFilters !== undefined;
@@ -360,8 +440,6 @@ export class FlowSearchService {
       isFlowObjectFilterDefined && flowObjectFilters.length !== 0;
 
     const isFlowCategoryFilterDefined = flowCategoryFilters !== undefined;
-
-    const isOrderByForFlows = orderBy?.entity === 'flow';
 
     if (
       (!isFlowFilterDefined &&
@@ -372,15 +450,6 @@ export class FlowSearchService {
         !isFlowCategoryFilterDefined)
     ) {
       const flowConditions = this.prepareFlowConditions(flowFilters);
-      if (!isOrderByForFlows) {
-        return {
-          strategy: this.flowObjectFiltersStrategy,
-          conditions: {
-            conditionsMap: this.buildConditionsMap(flowConditions, {}),
-            flowCategoryFilters,
-          },
-        };
-      }
       return {
         strategy: this.onlyFlowFiltersStrategy,
         conditions: flowConditions,

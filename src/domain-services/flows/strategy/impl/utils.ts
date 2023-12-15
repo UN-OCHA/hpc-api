@@ -142,3 +142,15 @@ export function mergeFlowIDsFromFilteredFlowObjectsAndFlowCategories(
         flowIDsFromFilteredFlowCategories.includes(flowID)
       );
 }
+
+export function checkAndMapFlowOrderBy(orderBy: any) {
+  if (!orderBy) {
+    return { column: 'updatedAt', order: 'DESC' };
+  }
+  let orderByForFlow = { column: orderBy.column, order: orderBy.order };
+  if (orderBy.entity !== 'flow') {
+    orderByForFlow = { column: 'updatedAt', order: 'DESC' };
+  }
+
+  return orderByForFlow;
+}
