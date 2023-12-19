@@ -1,6 +1,7 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import type Knex from 'knex';
 import { Service } from 'typedi';
 import { type SortOrder } from '../../utils/graphql/pagination';
 import { CategoryService } from '../categories/category-service';
@@ -41,12 +42,14 @@ import {
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
 import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy-impl';
 import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy-impl';
+import { SearchFlowByFiltersStrategy } from './strategy/impl/search-flow-by-filters-strategy-impl';
 
 @Service()
 export class FlowSearchService {
   constructor(
     private readonly onlyFlowFiltersStrategy: OnlyFlowFiltersStrategy,
     private readonly flowObjectFiltersStrategy: FlowObjectFiltersStrategy,
+    private readonly searchFlowByFiltersStrategy: SearchFlowByFiltersStrategy,
     private readonly organizationService: OrganizationService,
     private readonly locationService: LocationService,
     private readonly planService: PlanService,
@@ -357,11 +360,261 @@ export class FlowSearchService {
     };
   }
 
+  async searchV2(
+    models: Database,
+    databaseConnection: Knex,
+    filters: SearchFlowsArgs
+  ): Promise<FlowSearchResult> {
+    const { limit, nextPageCursor, prevPageCursor, sortField, sortOrder } =
+      filters;
+
+    const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
+
+    const {
+      flowFilters,
+      flowObjectFilters,
+      flowCategoryFilters,
+      pending: isPendingFlows,
+    } = filters;
+
+    // Once we've gathered all the filters, we need to determine the strategy
+    // to use in order to obtain the flowIDs
+    const strategy: FlowSearchStrategy = this.determineStrategyV2(
+      flowFilters,
+      flowObjectFilters,
+      flowCategoryFilters,
+      isPendingFlows,
+      orderBy
+    );
+
+    // Build cursor condition
+    const cursorCondition = this.buildCursorCondition(
+      prevPageCursor,
+      nextPageCursor,
+      orderBy
+    );
+
+    const { flows, count } = await strategy.searchV2(
+      models,
+      databaseConnection,
+      limit,
+      orderBy,
+      cursorCondition,
+      flowFilters,
+      flowObjectFilters,
+      flowCategoryFilters,
+      isPendingFlows
+    );
+
+    // Remove the extra item used to check hasNextPage
+    const hasNextPage = flows.length > limit;
+    if (hasNextPage) {
+      flows.pop();
+    }
+
+    const flowIds: FlowId[] = [];
+    const flowWithVersion: Map<FlowId, number[]> = new Map<FlowId, number[]>();
+
+    // Obtain flow IDs and flow version IDs
+    for (const flow of flows) {
+      flowIds.push(flow.id);
+      if (!flowWithVersion.has(flow.id)) {
+        flowWithVersion.set(flow.id, []);
+      }
+      const flowVersionIDs = flowWithVersion.get(flow.id)!;
+      flowVersionIDs.push(flow.versionID);
+    }
+
+    // Obtain external references and flow objects in parallel
+    const [externalReferencesMap, flowObjects] = await Promise.all([
+      this.externalReferenceService.getExternalReferencesForFlows(
+        flowIds,
+        models
+      ),
+      this.flowObjectService.getFlowObjectByFlowId(models, flowIds),
+    ]);
+
+    // Map flow objects to their respective arrays
+    const organizationsFO: FlowObject[] = [];
+    const locationsFO: FlowObject[] = [];
+    const plansFO: FlowObject[] = [];
+    const usageYearsFO: FlowObject[] = [];
+
+    this.groupByFlowObjectType(
+      flowObjects,
+      organizationsFO,
+      locationsFO,
+      plansFO,
+      usageYearsFO
+    );
+
+    // Obtain flow links
+    const flowLinksMap = await this.flowLinkService.getFlowLinksForFlows(
+      flowIds,
+      models
+    );
+
+    // Perform all nested queries in parallel
+    const [
+      categoriesMap,
+      organizationsMap,
+      locationsMap,
+      plansMap,
+      usageYearsMap,
+      reportDetailsMap,
+    ] = await Promise.all([
+      this.categoryService.getCategoriesForFlows(flowWithVersion, models),
+      this.organizationService.getOrganizationsForFlows(
+        organizationsFO,
+        models
+      ),
+      this.locationService.getLocationsForFlows(locationsFO, models),
+      this.planService.getPlansForFlows(plansFO, models),
+      this.usageYearService.getUsageYearsForFlows(usageYearsFO, models),
+      this.reportDetailService.getReportDetailsForFlows(flowIds, models),
+    ]);
+
+    const items = await Promise.all(
+      flows.map(async (flow) => {
+        const flowLink = flowLinksMap.get(flow.id) ?? [];
+
+        // Categories Map follows the structure:
+        // flowID: { versionID: [categories]}
+        // So we need to get the categories for the flow version
+        const categories =
+          categoriesMap.get(flow.id)!.get(flow.versionID) ?? [];
+        const organizations = organizationsMap.get(flow.id) ?? [];
+        const locations = locationsMap.get(flow.id) ?? [];
+        const plans = plansMap.get(flow.id) ?? [];
+        const usageYears = usageYearsMap.get(flow.id) ?? [];
+        const externalReferences = externalReferencesMap.get(flow.id) ?? [];
+        const reportDetails = reportDetailsMap.get(flow.id) ?? [];
+
+        const reportDetailsWithChannel =
+          this.reportDetailService.addChannelToReportDetails(
+            reportDetails,
+            categories
+          );
+
+        let parkedParentSource: FlowParkedParentSource[] = [];
+        if (flow.activeStatus && flowLink.length > 0) {
+          parkedParentSource = await this.getParketParents(
+            flow,
+            flowLink,
+            models
+          );
+        }
+
+        const childIDs: number[] =
+          (flowLinksMap
+            .get(flow.id)
+            ?.filter(
+              (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
+            )
+            .map((flowLink) => flowLink.childID.valueOf()) as number[]) ?? [];
+
+        const parentIDs: number[] =
+          (flowLinksMap
+            .get(flow.id)
+            ?.filter(
+              (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
+            )
+            .map((flowLink) => flowLink.parentID.valueOf()) as number[]) ?? [];
+
+        return this.buildFlowDTO(
+          flow,
+          categories,
+          organizations,
+          locations,
+          plans,
+          usageYears,
+          childIDs,
+          parentIDs,
+          externalReferences,
+          reportDetailsWithChannel,
+          parkedParentSource
+        );
+      })
+    );
+
+    const isOrderByForFlows = orderBy.entity === 'flow';
+    const firstItem = items[0];
+    const prevPageCursorEntity = isOrderByForFlows
+      ? firstItem
+      : firstItem[orderBy.entity as keyof typeof firstItem];
+    const prevPageCursorValue = prevPageCursorEntity
+      ? prevPageCursorEntity[
+          orderBy.column as keyof typeof prevPageCursorEntity
+        ] ?? ''
+      : '';
+
+    const lastItem = items.at(-1);
+    const nextPageCursorEntity = isOrderByForFlows
+      ? lastItem
+      : lastItem![orderBy.entity as keyof typeof lastItem];
+    const nextPageCursorValue = nextPageCursorEntity
+      ? nextPageCursorEntity[
+          orderBy.column as keyof typeof nextPageCursorEntity
+        ]?.toString() ?? ''
+      : '';
+
+    return {
+      flows: items,
+      hasNextPage: limit <= flows.length,
+      hasPreviousPage: nextPageCursor !== undefined,
+      prevPageCursor: prevPageCursorValue,
+      nextPageCursor: nextPageCursorValue,
+      pageSize: flows.length,
+      sortField: `${orderBy.entity}.${orderBy.column}` as FlowSortField,
+      sortOrder: sortOrder ?? 'desc',
+      total: count,
+    };
+  }
+
+  determineStrategyV2(
+    flowFilters: SearchFlowsFilters,
+    flowObjectFilters: FlowObjectFilters[],
+    flowCategoryFilters: FlowCategory[],
+    isPendingFlows: boolean,
+    orderBy: FlowOrderBy
+  ) {
+    // If there are no filters (flowFilters, flowObjectFilters, flowCategoryFilters or pending)
+    // and there is no sortByEntity (orderBy.entity === 'flow')
+    // use onlyFlowFiltersStrategy
+    // If there are no sortByEntity (orderBy.entity === 'flow')
+    // but flowFilters only
+    // use onlyFlowFiltersStrategy
+    const isOrderByEntityFlow = orderBy.entity === 'flow';
+    const isFlowFiltersDefined = flowFilters !== undefined;
+    const isFlowObjectFiltersDefined = flowObjectFilters !== undefined;
+    const isFlowCategoryFiltersDefined = flowCategoryFilters !== undefined;
+    const isFilterByPendingFlowsDefined = isPendingFlows !== undefined;
+
+    const isNoFilterDefined =
+      !isFlowFiltersDefined &&
+      !isFlowObjectFiltersDefined &&
+      !isFlowCategoryFiltersDefined &&
+      !isFilterByPendingFlowsDefined;
+    const isFlowFiltersOnly =
+      isFlowFiltersDefined &&
+      !isFlowObjectFiltersDefined &&
+      !isFlowCategoryFiltersDefined &&
+      !isFilterByPendingFlowsDefined;
+
+    if (isOrderByEntityFlow && (isNoFilterDefined || isFlowFiltersOnly)) {
+      // use onlyFlowFiltersStrategy
+      return this.onlyFlowFiltersStrategy;
+    }
+
+    // Otherwise, use flowObjectFiltersStrategy
+    return this.searchFlowByFiltersStrategy;
+  }
+
   buildOrderBy(sortField?: FlowSortField, sortOrder?: SortOrder) {
     const orderBy: FlowOrderBy = {
       column: sortField ?? 'updatedAt',
       order: sortOrder ?? ('desc' as SortOrder),
-      direction: null,
+      direction: undefined,
       entity: 'flow',
     };
 
@@ -374,12 +627,12 @@ export class FlowSearchService {
       const struct = orderBy.column.split('.');
 
       if (struct.length === 2) {
-        orderBy.column = struct[0];
-        orderBy.entity = struct[1];
+        orderBy.column = struct[1];
+        orderBy.entity = struct[0];
       } else if (struct.length === 3) {
-        orderBy.column = struct[0];
+        orderBy.column = struct[2];
         orderBy.direction = struct[1] as FlowNestedDirection;
-        orderBy.entity = struct[2];
+        orderBy.entity = struct[0];
       }
     }
 

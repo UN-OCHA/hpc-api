@@ -22,7 +22,7 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     models: Database,
     _flowObjectsConditions: Map<string, Map<string, number[]>>,
     flowCategoryConditions: FlowCategory[],
-    filterByPendingFlows: boolean
+    filterByPendingFlows: boolean | undefined
   ): Promise<FlowIdSearchStrategyResponse> {
     const whereClause = mapFlowCategoryConditionsToWhereClause(
       filterByPendingFlows,

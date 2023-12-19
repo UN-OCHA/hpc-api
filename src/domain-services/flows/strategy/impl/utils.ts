@@ -1,6 +1,10 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { type FlowCategory } from '../../graphql/args';
+import {
+  type FlowCategory,
+  type FlowObjectFilters,
+  type SearchFlowsFilters,
+} from '../../graphql/args';
 
 /*
  * Map structure:
@@ -38,7 +42,7 @@ export function mapFlowObjectConditionsToWhereClause(
 }
 
 export function mapFlowCategoryConditionsToWhereClause(
-  filterByPendingFlows: boolean,
+  filterByPendingFlows: boolean | undefined,
   flowCategoryConditions: FlowCategory[]
 ) {
   let whereClause = {};
@@ -144,7 +148,7 @@ export function mergeFlowIDsFromFilteredFlowObjectsAndFlowCategories(
       );
 }
 
-export function checkAndMapFlowOrderBy(orderBy: any) {
+export function mapFlowOrderBy(orderBy: any) {
   if (!orderBy) {
     return { column: 'updatedAt', order: 'DESC' };
   }
@@ -154,4 +158,63 @@ export function checkAndMapFlowOrderBy(orderBy: any) {
   }
 
   return orderByForFlow;
+}
+
+export function prepareFlowConditions(flowFilters: SearchFlowsFilters): any {
+  let flowConditions = {};
+
+  if (flowFilters) {
+    for (const [key, value] of Object.entries(flowFilters)) {
+      if (value !== undefined) {
+        if (Array.isArray(value) && value.length !== 0) {
+          flowConditions = { ...flowConditions, [key]: { [Op.IN]: value } };
+        } else {
+          flowConditions = { ...flowConditions, [key]: value };
+        }
+      }
+    }
+  }
+
+  return flowConditions;
+}
+
+export function mapCountResultToCountObject(countRes: any[]) {
+  // Map count result query to count object
+  const countObject = countRes[0] as { count: number };
+
+  return countObject;
+}
+
+export function mapFlowObjectConditions(
+  flowObjectFilters: FlowObjectFilters[] = []
+): Map<string, Map<string, number[]>> {
+  const flowObjectsConditions: Map<string, Map<string, number[]>> = new Map<
+    string,
+    Map<string, number[]>
+  >();
+
+  for (const flowObjectFilter of flowObjectFilters) {
+    const { objectType, direction, objectID } = flowObjectFilter;
+
+    if (!flowObjectsConditions.has(objectType)) {
+      flowObjectsConditions.set(objectType, new Map<string, number[]>());
+    }
+
+    const refDirectionMap = flowObjectsConditions.get(objectType);
+    if (!refDirectionMap!.has(direction)) {
+      refDirectionMap!.set(direction, []);
+    }
+
+    const objectIDsArray = refDirectionMap!.get(direction);
+
+    if (objectIDsArray!.includes(objectID)) {
+      throw new Error(
+        `Duplicate flow object filter: ${objectType} ${direction} ${objectID}`
+      );
+    }
+
+    objectIDsArray!.push(objectID);
+  }
+
+  return flowObjectsConditions;
 }
