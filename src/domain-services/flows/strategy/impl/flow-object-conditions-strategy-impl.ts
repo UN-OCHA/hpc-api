@@ -13,7 +13,7 @@ import {
 } from '../flowID-search-strategy';
 import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow-category-conditions-strategy-impl';
 import { GetFlowIdsFromMixedConditionsStrategyImpl } from './get-flowIds-flow-mixed-conditions-strategy-impl';
-import { checkAndMapFlowOrderBy } from './utils';
+import { mapFlowOrderBy } from './utils';
 
 @Service()
 export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
@@ -83,7 +83,7 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     };
 
     // check and map orderBy to be from entity 'flow'
-    const orderByFlow = checkAndMapFlowOrderBy(orderBy);
+    const orderByFlow = mapFlowOrderBy(orderBy);
 
     // Obtain flows and flowCount based on flowIDs from filtered flowObjects
     // and flow conditions
@@ -140,5 +140,19 @@ export class FlowObjectFiltersStrategy implements FlowSearchStrategy {
     throw new Error(
       'No strategy found for flowObjectsConditions and flowCategoryConditions'
     );
+  }
+
+  searchV2(
+    _models: Database,
+    _databaseConnection: any,
+    _limit: number,
+    _orderBy: any,
+    _cursorCondition: any,
+    _flowFilters: any,
+    _flowObjectFilters: any,
+    _flowCategoryFilters: any,
+    _filterByPendingFlows?: boolean
+  ): Promise<FlowSearchStrategyResponse> {
+    throw new Error('Method not implemented.');
   }
 }

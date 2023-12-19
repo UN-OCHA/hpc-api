@@ -21,7 +21,11 @@ export default class FlowResolver {
     @Args(() => SearchFlowsArgs, { validate: false })
     args: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    return await this.flowSearchService.search(context.models, args);
+    return await this.flowSearchService.searchV2(
+      context.models,
+      context.connection,
+      args
+    );
   }
 
   @Query(() => FlowSearchTotalAmountResult)
