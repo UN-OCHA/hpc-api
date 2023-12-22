@@ -87,7 +87,13 @@ export class PlanService {
 
         const plansPerFlow = plansMap.get(flowId)!;
 
-        if (!plansPerFlow.some((plan) => plan.id === plan.id)) {
+        if (
+          !plansPerFlow.some(
+            (plan) =>
+              plan.id === plan.id &&
+              plan.direction === planFlowObject.refDirection
+          )
+        ) {
           const planMapped = this.mapPlansToFlowPlans(
             plan,
             planVersion[0],

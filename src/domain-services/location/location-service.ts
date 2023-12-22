@@ -58,7 +58,12 @@ export class LocationService {
 
       if (location) {
         const locationsPerFlow = locationsMap.get(flowId)!;
-        if (!locationsPerFlow.some((loc) => loc.id === location.id)) {
+        if (
+          !locationsPerFlow.some(
+            (loc) =>
+              loc.id === location.id && loc.direction === locFO.refDirection
+          )
+        ) {
           const locationMapped = this.mapLocationsToFlowLocations(
             location,
             locFO

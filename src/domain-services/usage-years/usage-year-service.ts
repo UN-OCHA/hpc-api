@@ -32,7 +32,13 @@ export class UsageYearService {
 
       if (usageYear) {
         const usageYearsPerFlow = usageYearsMap.get(flowId)!;
-        if (!usageYearsPerFlow.some((uYear) => uYear.year === usageYear.year)) {
+        if (
+          !usageYearsPerFlow.some(
+            (uYear) =>
+              uYear.year === usageYear.year &&
+              uYear.direction === usageYearFO.refDirection
+          )
+        ) {
           const usageYearMapped = this.mapUsageYearsToFlowUsageYears(
             usageYear,
             usageYearFO.refDirection
