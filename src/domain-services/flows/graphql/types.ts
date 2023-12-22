@@ -57,6 +57,42 @@ export class BaseFlow extends BaseType {
 
   @Field({ nullable: false })
   restricted: boolean;
+
+  @Field(() => String, { nullable: true })
+  flowDate: string | null;
+
+  @Field(() => String, { nullable: true })
+  decisionDate: string | null;
+
+  @Field(() => String, { nullable: true })
+  firstReportedDate: string | null;
+
+  @Field(() => String, { nullable: true })
+  budgetYear: string | null;
+
+  @Field(() => String, { nullable: true })
+  exchangeRate: string | null;
+
+  @Field(() => String, { nullable: true })
+  origAmount: string | null;
+
+  @Field(() => String, { nullable: true })
+  origCurrency: string | null;
+
+  @Field(() => String, { nullable: true })
+  description: string | null;
+
+  @Field(() => String, { nullable: true })
+  notes: string | null;
+
+  @Field(() => String, { nullable: true })
+  versionStartDate: string | null;
+
+  @Field(() => String, { nullable: true })
+  versionEndDate: string | null;
+
+  @Field(() => Boolean, { nullable: true })
+  newMoney: boolean | null;
 }
 
 @ObjectType()
@@ -110,12 +146,6 @@ export class Flow extends BaseFlow {
 
   @Field(() => [Number], { nullable: false })
   parentIDs: number[];
-
-  @Field(() => String, { nullable: true })
-  origAmount: string | null;
-
-  @Field(() => String, { nullable: true })
-  origCurrency: string | null;
 
   @Field(() => [FlowExternalReference], { nullable: false })
   externalReferences: FlowExternalReference[];
