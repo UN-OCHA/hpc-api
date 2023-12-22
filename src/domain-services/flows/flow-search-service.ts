@@ -930,6 +930,25 @@ export class FlowSearchService {
       updatedAt: flow.updatedAt.toISOString(),
       activeStatus: flow.activeStatus,
       restricted: flow.restricted,
+      flowDate: flow.flowDate ? flow.flowDate.toISOString() : null,
+      decisionDate: flow.decisionDate ? flow.decisionDate.toISOString() : null,
+      firstReportedDate: flow.firstReportedDate
+        ? flow.firstReportedDate.toISOString()
+        : null,
+      budgetYear: flow.budgetYear,
+      exchangeRate: flow.exchangeRate ? flow.exchangeRate.toString() : null,
+      origAmount: flow.origAmount ? flow.origAmount.toString() : null,
+      origCurrency: flow.origCurrency ? flow.origCurrency.toString() : null,
+      description: flow.description,
+      notes: flow.notes,
+      versionStartDate: flow.versionStartDate
+        ? flow.versionStartDate.toISOString()
+        : null,
+      versionEndDate: flow.versionEndDate
+        ? flow.versionEndDate.toISOString()
+        : null,
+      newMoney: flow.newMoney,
+
       // Optional fields
       categories,
       organizations,
@@ -938,8 +957,7 @@ export class FlowSearchService {
       usageYears,
       childIDs,
       parentIDs,
-      origAmount: flow.origAmount ? flow.origAmount.toString() : null,
-      origCurrency: flow.origCurrency ? flow.origCurrency.toString() : null,
+
       externalReferences,
       reportDetails,
       parkedParentSource,
