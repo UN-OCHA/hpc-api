@@ -64,18 +64,47 @@ export class Flow extends BaseFlow {
   @Field(() => [Category], { nullable: false })
   categories: Category[];
 
+  // Organizations
   @Field(() => [Organization], { nullable: false })
   organizations: Organization[];
 
+  @Field(() => [Organization], { nullable: false })
+  sourceOrganizations: Organization[];
+
+  @Field(() => [Organization], { nullable: false })
+  destinationOrganizations: Organization[];
+
+  // Plans
   @Field(() => [BasePlan], { nullable: false })
   plans: BasePlan[];
 
+  @Field(() => [BasePlan], { nullable: false })
+  sourcePlans: BasePlan[];
+
+  @Field(() => [BasePlan], { nullable: false })
+  destinationPlans: BasePlan[];
+
+  // Locations
   @Field(() => [BaseLocation], { nullable: false })
   locations: BaseLocation[];
 
+  @Field(() => [BaseLocation], { nullable: false })
+  sourceLocations: BaseLocation[];
+
+  @Field(() => [BaseLocation], { nullable: false })
+  destinationLocations: BaseLocation[];
+
+  // UsageYears
   @Field(() => [UsageYear], { nullable: false })
   usageYears: UsageYear[];
 
+  @Field(() => [UsageYear], { nullable: false })
+  sourceUsageYears: UsageYear[];
+
+  @Field(() => [UsageYear], { nullable: false })
+  destinationUsageYears: UsageYear[];
+
+  // Nested fields
   @Field(() => [Number], { nullable: false })
   childIDs: number[];
 

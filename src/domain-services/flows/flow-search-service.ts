@@ -896,7 +896,40 @@ export class FlowSearchService {
       externalReferences,
       reportDetails,
       parkedParentSource,
+
+      // Separate nested fields by source and destination
+      // Source
+      sourceUsageYears: this.mapNestedPropertyByDirection(usageYears, 'source'),
+      sourceLocations: this.mapNestedPropertyByDirection(locations, 'source'),
+      sourcePlans: this.mapNestedPropertyByDirection(plans, 'source'),
+      sourceOrganizations: this.mapNestedPropertyByDirection(
+        organizations,
+        'source'
+      ),
+      // Destination
+      destinationUsageYears: this.mapNestedPropertyByDirection(
+        usageYears,
+        'destination'
+      ),
+      destinationLocations: this.mapNestedPropertyByDirection(
+        locations,
+        'destination'
+      ),
+      destinationPlans: this.mapNestedPropertyByDirection(plans, 'destination'),
+      destinationOrganizations: this.mapNestedPropertyByDirection(
+        organizations,
+        'destination'
+      ),
     };
+  }
+
+  private mapNestedPropertyByDirection(
+    nestedProperty: any[],
+    direction: string
+  ) {
+    return nestedProperty.filter(
+      (nestedProperty) => nestedProperty.direction === direction
+    );
   }
 
   async searchTotalAmount(
