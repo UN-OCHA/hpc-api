@@ -1,6 +1,7 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import type Knex from 'knex';
 import { Service } from 'typedi';
 import { type SortOrder } from '../../utils/graphql/pagination';
@@ -195,7 +196,7 @@ export class FlowSearchService {
             categories
           );
 
-        let parkedParentSource: FlowParkedParentSource[] = [];
+        let parkedParentSource: FlowParkedParentSource | null = null;
         if (flow.activeStatus && flowLink.length > 0) {
           parkedParentSource = await this.getParketParents(
             flow,
@@ -496,8 +497,10 @@ export class FlowSearchService {
             categories
           );
 
-        let parkedParentSource: FlowParkedParentSource[] = [];
-        if (flow.activeStatus && flowLink.length > 0) {
+        let parkedParentSource: FlowParkedParentSource | null = null;
+        const shouldLookAfterParentSource =
+          flow.activeStatus && flowLink.length > 0;
+        if (shouldLookAfterParentSource) {
           parkedParentSource = await this.getParketParents(
             flow,
             flowLink,
@@ -772,47 +775,91 @@ export class FlowSearchService {
     }
   }
 
+  // TODO: refactor this method
+  // Move to a proper service and simplify the logic
+  // and the queries
   private async getParketParents(
     flow: any,
     flowLink: any[],
     models: Database
-  ): Promise<any> {
-    const flowLinksDepth0 = flowLink.filter((flowLink) => flowLink.depth === 0);
+  ): Promise<FlowParkedParentSource | null> {
+    const flowLinksParentsIDs = flowLink
+      .filter(
+        (flowLink) =>
+          flowLink.parentID !== flow.id && flowLink.childID === flow.id
+      )
+      .map((flowLink) => flowLink.parentID.valueOf());
 
-    const flowLinksParent = flowLinksDepth0.filter(
-      (flowLink) => flowLink.parentID === flow.id
-    );
+    if (flowLinksParentsIDs.length === 0) {
+      return null;
+    }
 
-    const categories = await models.category.find({
+    const parkedCategory = await models.category.findOne({
       where: {
         group: 'flowType',
-        name: 'parked',
+        name: 'Parked',
       },
     });
 
-    const categoriesIDs = categories.map((category) => category.id);
+    const parentFlows: number[] = [];
 
-    const categoryRef = await models.categoryRef.find({
-      where: {
-        categoryID: {
-          [Op.IN]: categoriesIDs,
+    for (const flowLinkParentID of flowLinksParentsIDs) {
+      const parkedParentCategoryRef = await models.categoryRef.find({
+        where: {
+          categoryID: parkedCategory?.id,
+          versionID: flow.versionID,
+          objectID: flowLinkParentID,
+          objectType: 'flow',
         },
-        versionID: flow.versionID,
-      },
-    });
-
-    const parentFlows = flowLinksParent
-      .filter((flowLink) => {
-        return categoryRef.some(
-          (categoryRef) =>
-            categoryRef.objectID.valueOf() === flowLink.parentID.valueOf()
-        );
-      })
-      .map((flowLink) => {
-        return flowLink.parentID.valueOf();
       });
 
-    return parentFlows;
+      if (parkedParentCategoryRef && parkedParentCategoryRef.length > 0) {
+        parentFlows.push(flowLinkParentID);
+      }
+    }
+
+    const parkedParentFlowObjectsOrganizationSource = [];
+
+    for (const parentFlow of parentFlows) {
+      const parkedParentOrganizationFlowObject =
+        await models.flowObject.findOne({
+          where: {
+            flowID: createBrandedValue(parentFlow),
+            objectType: 'organization',
+            refDirection: 'source',
+            versionID: flow.versionID,
+          },
+        });
+      parkedParentFlowObjectsOrganizationSource.push(
+        parkedParentOrganizationFlowObject
+      );
+    }
+
+    const parkedParentOrganizations = await models.organization.find({
+      where: {
+        id: {
+          [Op.IN]: parkedParentFlowObjectsOrganizationSource.map((flowObject) =>
+            createBrandedValue(flowObject?.objectID)
+          ),
+        },
+      },
+    });
+
+    const mappedParkedParentOrganizations: FlowParkedParentSource = {
+      organization: [],
+      orgName: [],
+    };
+
+    for (const parkedParentOrganization of parkedParentOrganizations) {
+      mappedParkedParentOrganizations.organization.push(
+        parkedParentOrganization.id.valueOf()
+      );
+      mappedParkedParentOrganizations.orgName.push(
+        parkedParentOrganization.name
+      );
+    }
+
+    return mappedParkedParentOrganizations;
   }
 
   private buildCursorCondition(
@@ -872,7 +919,7 @@ export class FlowSearchService {
     parentIDs: number[],
     externalReferences: any[],
     reportDetails: any[],
-    parkedParentSource: FlowParkedParentSource[]
+    parkedParentSource: FlowParkedParentSource | null
   ): Flow {
     return {
       // Mandatory fields

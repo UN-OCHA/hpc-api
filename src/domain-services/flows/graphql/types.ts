@@ -123,8 +123,8 @@ export class Flow extends BaseFlow {
   @Field(() => [ReportDetail], { nullable: false })
   reportDetails: ReportDetail[];
 
-  @Field(() => [FlowParkedParentSource], { nullable: false })
-  parkedParentSource: FlowParkedParentSource[];
+  @Field(() => FlowParkedParentSource, { nullable: true })
+  parkedParentSource: FlowParkedParentSource | null;
 }
 
 @ObjectType()
