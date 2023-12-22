@@ -27,6 +27,9 @@ export class SearchFlowsFilters {
 
   @Field({ name: 'legacyID', nullable: true })
   legacyId: number;
+
+  @Field({ nullable: true })
+  restricted: boolean;
 }
 
 @InputType()
