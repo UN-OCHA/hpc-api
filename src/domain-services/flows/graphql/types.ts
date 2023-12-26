@@ -39,6 +39,9 @@ export class FlowParkedParentSource {
 
   @Field(() => [String], { nullable: false })
   orgName: string[];
+
+  @Field(() => [String], { nullable: false })
+  abbreviation: string[];
 }
 
 @ObjectType()

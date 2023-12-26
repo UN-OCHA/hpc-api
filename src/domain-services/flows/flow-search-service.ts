@@ -366,8 +366,14 @@ export class FlowSearchService {
     databaseConnection: Knex,
     filters: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    const { limit, nextPageCursor, prevPageCursor, sortField, sortOrder } =
-      filters;
+    const {
+      limit,
+      nextPageCursor,
+      prevPageCursor,
+      sortField,
+      sortOrder,
+      includeChildrenOfParkedFlows: shouldIncludeChildrenOfParkedFlows,
+    } = filters;
 
     const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
 
@@ -499,7 +505,8 @@ export class FlowSearchService {
 
         let parkedParentSource: FlowParkedParentSource | null = null;
         const shouldLookAfterParentSource =
-          flow.activeStatus && flowLink.length > 0;
+          flowLink.length > 0 && shouldIncludeChildrenOfParkedFlows;
+
         if (shouldLookAfterParentSource) {
           parkedParentSource = await this.getParketParents(
             flow,
@@ -848,6 +855,7 @@ export class FlowSearchService {
     const mappedParkedParentOrganizations: FlowParkedParentSource = {
       organization: [],
       orgName: [],
+      abbreviation: [],
     };
 
     for (const parkedParentOrganization of parkedParentOrganizations) {
@@ -856,6 +864,9 @@ export class FlowSearchService {
       );
       mappedParkedParentOrganizations.orgName.push(
         parkedParentOrganization.name
+      );
+      mappedParkedParentOrganizations.abbreviation.push(
+        parkedParentOrganization.abbreviation ?? ''
       );
     }
 
