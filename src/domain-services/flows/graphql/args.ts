@@ -5,31 +5,33 @@ import { type FlowSortField } from './types';
 @InputType()
 export class SearchFlowsFilters {
   @Field(() => [Number], { nullable: true })
-  id: number[];
+  id: number[] | null;
 
-  @Field({ nullable: true })
-  activeStatus: boolean;
+  @Field(() => Boolean, { nullable: true })
+  activeStatus: boolean | null;
 
-  @Field({ nullable: true })
-  status: 'commitment' | 'paid' | 'pledged';
+  @Field(() => String, { nullable: true })
+  status: 'commitment' | 'paid' | 'pledged' | null;
 
-  @Field({ nullable: true })
-  type: 'carryover' | 'parked' | 'pass_through' | 'standard';
+  @Field(() => String, { nullable: true })
+  type: 'carryover' | 'parked' | 'pass_through' | 'standard' | null;
 
-  @Field({ nullable: true })
-  amountUSD: number;
+  @Field(() => Number, { nullable: true })
+  amountUSD: number | null;
 
-  @Field({ name: 'reporterRefCode', nullable: true })
-  reporterReferenceCode: number;
+  @Field(() => Number, { name: 'reporterRefCode', nullable: true })
+  reporterReferenceCode: number | null;
 
-  @Field({ name: 'sourceSystemID', nullable: true })
-  sourceSystemId: number;
+  @Field(() => Number, { name: 'sourceSystemID', nullable: true })
+  sourceSystemId: number | null;
 
-  @Field({ name: 'legacyID', nullable: true })
-  legacyId: number;
+  @Field(() => Number, { name: 'legacyID', nullable: true })
+  legacyId: number | null;
 
-  @Field({ nullable: true })
-  restricted: boolean;
+  @Field(() => Boolean, { nullable: true })
+  restricted: boolean | null;
+
+  constructor() {}
 }
 
 @InputType()

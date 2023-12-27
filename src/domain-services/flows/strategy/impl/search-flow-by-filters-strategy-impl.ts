@@ -279,8 +279,11 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       };
     }
 
-    let rawOrderBy = undefined;
-    let orderByFlow = undefined;
+    let rawOrderBy: string = '';
+    let orderByFlow: {
+      column: any;
+      order: any;
+    } = { column: 'updatedAt', order: 'DESC' };
     if (isSortByEntity) {
       rawOrderBy = `array_position(ARRAY[${sortByFlowIDs.join(',')}], "id")`;
     } else {
