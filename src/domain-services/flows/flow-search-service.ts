@@ -21,11 +21,11 @@ import { ReportDetailService } from '../report-details/report-detail-service';
 import { type UsageYear } from '../usage-years/grpahql/types';
 import { UsageYearService } from '../usage-years/usage-year-service';
 import {
+  SearchFlowsFilters,
   type FlowCategory,
   type FlowObjectFilters,
   type SearchFlowsArgs,
   type SearchFlowsArgsNonPaginated,
-  type SearchFlowsFilters,
 } from './graphql/args';
 import {
   type Flow,
@@ -612,7 +612,7 @@ export class FlowSearchService {
       !isFilterByPendingFlowsDefined;
 
     if (isOrderByEntityFlow && (isNoFilterDefined || isFlowFiltersOnly)) {
-      // use onlyFlowFiltersStrategy
+      // Use onlyFlowFiltersStrategy
       return this.onlyFlowFiltersStrategy;
     }
 
@@ -825,7 +825,7 @@ export class FlowSearchService {
       }
     }
 
-    const parkedParentFlowObjectsOrganizationSource = [];
+    const parkedParentFlowObjectsOrganizationSource: FlowObject[] = [];
 
     for (const parentFlow of parentFlows) {
       const parkedParentOrganizationFlowObject =
@@ -837,16 +837,19 @@ export class FlowSearchService {
             versionID: flow.versionID,
           },
         });
-      parkedParentFlowObjectsOrganizationSource.push(
-        parkedParentOrganizationFlowObject
-      );
+
+      if (parkedParentOrganizationFlowObject) {
+        parkedParentFlowObjectsOrganizationSource.push(
+          parkedParentOrganizationFlowObject
+        );
+      }
     }
 
     const parkedParentOrganizations = await models.organization.find({
       where: {
         id: {
           [Op.IN]: parkedParentFlowObjectsOrganizationSource.map((flowObject) =>
-            createBrandedValue(flowObject?.objectID)
+            createBrandedValue((flowObject as FlowObject)?.objectID)
           ),
         },
       },
@@ -1012,12 +1015,19 @@ export class FlowSearchService {
     models: Database,
     args: SearchFlowsArgsNonPaginated
   ): Promise<FlowSearchTotalAmountResult> {
+    let { flowFilters } = args;
     const {
-      flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
       pending: isPendingFlows,
     } = args;
+
+    if (!flowFilters) {
+      flowFilters = new SearchFlowsFilters();
+      flowFilters.activeStatus = true;
+    } else if (!flowFilters.activeStatus) {
+      flowFilters.activeStatus = true;
+    }
 
     const { strategy, conditions } = this.determineStrategy(
       flowFilters,
