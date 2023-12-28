@@ -634,6 +634,11 @@ export class FlowSearchService {
       // column: 'organizations.source.name'
       // or in the format:
       // column: 'flow.updatedAt'
+      // or in the format:
+      // column: 'planVersion.source.name'
+      // in this last case, we need to look after the capitalized letter
+      // that will indicate the entity
+      // and the whole word will be the subEntity
       const struct = orderBy.column.split('.');
 
       if (struct.length === 2) {
@@ -642,12 +647,32 @@ export class FlowSearchService {
       } else if (struct.length === 3) {
         orderBy.column = struct[2];
         orderBy.direction = struct[1] as FlowNestedDirection;
-        orderBy.entity = struct[0];
+
+        // We need to look after the capitalized letter
+        // that will indicate the entity
+        // and the whole word will be the subEntity
+        // Capitalized letter will never be the first letter
+        const entity = this.getSubstringUntilCapital(struct[0]);
+        orderBy.entity = entity;
+
+        if (entity === struct[0]) {
+          orderBy.subEntity = struct[0];
+        }
       }
     }
 
     return orderBy;
   }
+
+  getSubstringUntilCapital(inputString: string): string {
+    for (let i = 0; i < inputString.length; i++) {
+      if (inputString[i] === inputString[i].toUpperCase()) {
+        return inputString.substring(0, i);
+      }
+    }
+    return inputString; // Return inputString if no capital letter is found
+  }
+
   prepareFlowConditions(flowFilters: SearchFlowsFilters): any {
     let flowConditions = {};
 

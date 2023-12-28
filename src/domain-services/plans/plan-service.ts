@@ -74,32 +74,26 @@ export class PlanService {
         },
       });
 
-      const planFlowObject = plansFO.find(
-        (planFO) => planFO.objectID === plan.id
-      );
-
-      if (planVersion.length && planFlowObject) {
-        const flowId = planFlowObject && planFlowObject.flowID;
-
-        if (!plansMap.has(flowId)) {
-          plansMap.set(flowId, []);
-        }
-
-        const plansPerFlow = plansMap.get(flowId)!;
-
-        if (
-          !plansPerFlow.some(
-            (plan) =>
-              plan.id === plan.id &&
-              plan.direction === planFlowObject.refDirection
-          )
-        ) {
-          const planMapped = this.mapPlansToFlowPlans(
-            plan,
-            planVersion[0],
-            planFlowObject?.refDirection ?? null
-          );
-          plansPerFlow.push(planMapped);
+      for (const planFO of plansFO) {
+        if (planFO.objectID === plan.id) {
+          const flowId = planFO.flowID;
+          if (!plansMap.has(flowId)) {
+            plansMap.set(flowId, []);
+          }
+          const plansPerFlow = plansMap.get(flowId)!;
+          if (
+            !plansPerFlow.some(
+              (plan) =>
+                plan.id === plan.id && plan.direction === planFO.refDirection
+            )
+          ) {
+            const planMapped = this.mapPlansToFlowPlans(
+              plan,
+              planVersion[0],
+              planFO?.refDirection ?? null
+            );
+            plansPerFlow.push(planMapped);
+          }
         }
       }
     }
