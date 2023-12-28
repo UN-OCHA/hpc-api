@@ -35,21 +35,20 @@ export class FlowService {
     orderBy: FlowOrderBy,
     limit: number
   ): Promise<FlowId[]> {
-    const entity = orderBy.entity;
+    const entity = orderBy.subEntity ?? orderBy.entity;
 
     // Get the entity list
     const mappedOrderBy = mapFlowOrderBy(orderBy);
     const entityList = await dbConnection
       .queryBuilder()
-      .select('id')
+      .select(orderBy.subEntity ? `${orderBy.subEntity}Id` : 'id')
       .from(entity)
       .orderBy(mappedOrderBy.column, mappedOrderBy.order);
 
     const entityIDs = entityList.map((entity) => entity.id);
-
     // Get the flowIDs from the entity list
     // using the flow-object relation
-    const entityCondKey = entity.toString() as unknown as FlowObjectType;
+    const entityCondKey = orderBy.entity as unknown as FlowObjectType;
 
     const query = dbConnection
       .queryBuilder()
@@ -59,10 +58,10 @@ export class FlowService {
       .andWhere('objectType', entityCondKey)
       .andWhere('refDirection', orderBy.direction!)
       .orderByRaw(`array_position(ARRAY[${entityIDs.join(',')}], "objectID")`)
+      .orderBy('flowID', orderBy.order)
       .limit(limit);
 
     const flowIDs = await query;
-
     return flowIDs.map((flowID) => flowID.flowID);
   }
 }

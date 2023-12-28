@@ -3,7 +3,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import type Knex from 'knex';
 import { Service } from 'typedi';
-import { type FlowService } from '../../flow-service';
+import { FlowService } from '../../flow-service';
 import {
   type FlowCategory,
   type FlowObjectFilters,
@@ -94,8 +94,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowIDsFromCategoryFilters.push(...flowIDsFromCategoryStrategy.flowIDs);
     }
 
-    // After that, we need to check if we need to filter by flowObjects
-    // if so, we need to obtain the flowIDs from the flowObjects
+    // After that, if we need to filter by flowObjects
+    // Obtain the flowIDs from the flowObjects
     const isFilterByFlowObjects = flowObjectFilters?.length > 0;
 
     const flowIDsFromObjectFilters: FlowId[] = [];
@@ -110,118 +110,94 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowIDsFromObjectFilters.push(...flowIDsFromObjectStrategy.flowIDs);
     }
 
-    // Apply only filter conditions but not cursor conditions
-    let countConditions = {};
+    // We need to have two conditions, one for the search and one for the count
+    // 'countConditions' => Apply only filter conditions but not cursor conditions
+    // 'searchConditions' => Apply both filter and cursor conditions
+    const { countConditions, searchConditions } = this.buildConditions(
+      {
+        isFilterByFlowObjects,
+        isFilterByCategory,
+        willSearchPendingFlows: searchPendingFlows,
+        isSearchByPendingDefined,
+      },
+      {
+        flowIDsFromCategoryFilters,
+        flowIDsFromObjectFilters,
+        flowFilters,
+      }
+    );
 
-    // Combine cursor condition with flow conditions
-    let searchConditions = { ...cursorCondition };
+    let rawOrderBy: string = '';
+    let orderByFlow:
+      | {
+          column: any;
+          order: any;
+        }
+      | undefined = { column: 'updatedAt', order: 'DESC' };
+    if (isSortByEntity) {
+      rawOrderBy = `array_position(ARRAY[${sortByFlowIDs.join(',')}], "id")`;
+      orderByFlow = undefined;
+    } else {
+      orderByFlow = mapFlowOrderBy(orderBy);
+    }
+
+    const [flows, countRes] = await Promise.all([
+      this.flowService.getFlows(
+        models,
+        searchConditions,
+        orderByFlow,
+        limit,
+        rawOrderBy
+      ),
+      this.flowService.getFlowsCount(models, countConditions),
+    ]);
+
+    // Map count result query to count object
+    const countObject = mapCountResultToCountObject(countRes);
+
+    return { flows, count: countObject.count };
+  }
+  buildConditions(
+    decisionArgs: {
+      isFilterByFlowObjects: boolean;
+      isFilterByCategory: boolean;
+      willSearchPendingFlows: boolean | undefined;
+      isSearchByPendingDefined: boolean;
+    },
+    filterArgs: {
+      flowIDsFromCategoryFilters: FlowId[];
+      flowIDsFromObjectFilters: FlowId[];
+      flowFilters: any | undefined;
+    }
+  ): { countConditions: any; searchConditions: any } {
+    const {
+      isFilterByFlowObjects,
+      isFilterByCategory,
+      willSearchPendingFlows,
+      isSearchByPendingDefined,
+    } = decisionArgs;
+    const {
+      flowIDsFromCategoryFilters,
+      flowIDsFromObjectFilters,
+      flowFilters,
+    } = filterArgs;
+    let countConditions: any = {};
+    let searchConditions: any = {};
 
     // Check if we have flowIDs from flowObjects and flowCategoryFilters
     // if so, we need to filter by those flowIDs
-    if (isFilterByFlowObjects && isFilterByCategory) {
-      if (searchPendingFlows === true) {
-        // We need to combine the flowIDs from flowObjects and flowCategoryFilters
-        // to have the least amount of flowIDs to filter
-        const setOfFlowIDs = new Set([
-          ...flowIDsFromCategoryFilters,
-          ...flowIDsFromObjectFilters,
-        ]);
-        const flowIDsFromFilteredFlowObjects = [...setOfFlowIDs];
-        searchConditions = {
-          ...searchConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.IN]: flowIDsFromFilteredFlowObjects,
-              },
-            },
-          ],
-        };
-        countConditions = {
-          ...countConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.IN]: flowIDsFromFilteredFlowObjects,
-              },
-            },
-          ],
-        };
-      } else {
-        searchConditions = {
-          ...searchConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.NOT_IN]: flowIDsFromCategoryFilters,
-                [Op.IN]: flowIDsFromObjectFilters,
-              },
-            },
-          ],
-        };
-        countConditions = {
-          ...countConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.NOT_IN]: flowIDsFromCategoryFilters,
-                [Op.IN]: flowIDsFromObjectFilters,
-              },
-            },
-          ],
-        };
-      }
-    } else if (isFilterByCategory && isSearchByPendingDefined) {
-      if (searchPendingFlows === true) {
-        searchConditions = {
-          ...searchConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.IN]: flowIDsFromCategoryFilters,
-              },
-            },
-          ],
-        };
-        countConditions = {
-          ...countConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.IN]: flowIDsFromCategoryFilters,
-              },
-            },
-          ],
-        };
-      } else {
-        searchConditions = {
-          ...searchConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.NOT_IN]: flowIDsFromCategoryFilters,
-              },
-            },
-          ],
-        };
-        countConditions = {
-          ...countConditions,
-          [Cond.AND]: [
-            {
-              id: {
-                [Op.NOT_IN]: flowIDsFromCategoryFilters,
-              },
-            },
-          ],
-        };
-      }
-    } else if (isFilterByCategory && !isSearchByPendingDefined) {
+    if (
+      (isFilterByFlowObjects || isFilterByCategory) &&
+      isSearchByPendingDefined
+    ) {
+      const deduplicatedFlowIDs = [...new Set(flowIDsFromCategoryFilters)];
+
       searchConditions = {
         ...searchConditions,
         [Cond.AND]: [
           {
             id: {
-              [Op.IN]: flowIDsFromCategoryFilters,
+              [Op.IN]: deduplicatedFlowIDs,
             },
           },
         ],
@@ -231,7 +207,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         [Cond.AND]: [
           {
             id: {
-              [Op.IN]: flowIDsFromCategoryFilters,
+              [Op.IN]: deduplicatedFlowIDs,
             },
           },
         ],
@@ -257,6 +233,34 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           },
         ],
       };
+    } else if (isFilterByCategory || isSearchByPendingDefined) {
+      const idCondition = isSearchByPendingDefined
+        ? willSearchPendingFlows
+          ? Op.IN
+          : Op.NOT_IN
+        : Op.IN;
+
+      searchConditions = {
+        ...searchConditions,
+        [Cond.AND]: [
+          {
+            id: {
+              [idCondition]: flowIDsFromCategoryFilters,
+            },
+          },
+        ],
+      };
+
+      countConditions = {
+        ...countConditions,
+        [Cond.AND]: [
+          {
+            id: {
+              idCondition: flowIDsFromCategoryFilters,
+            },
+          },
+        ],
+      };
     }
 
     // After adding the where clauses form the filters
@@ -278,33 +282,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         [Cond.AND]: [flowConditions ?? {}],
       };
     }
-
-    let rawOrderBy: string = '';
-    let orderByFlow: {
-      column: any;
-      order: any;
-    } = { column: 'updatedAt', order: 'DESC' };
-    if (isSortByEntity) {
-      rawOrderBy = `array_position(ARRAY[${sortByFlowIDs.join(',')}], "id")`;
-    } else {
-      orderByFlow = mapFlowOrderBy(orderBy);
-    }
-
-    // Temporal
-    const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(
-        models,
-        searchConditions,
-        orderByFlow,
-        limit,
-        rawOrderBy
-      ),
-      this.flowService.getFlowsCount(models, countConditions),
-    ]);
-
-    // Map count result query to count object
-    const countObject = mapCountResultToCountObject(countRes);
-
-    return { flows, count: countObject.count };
+    return { countConditions, searchConditions };
   }
 }
