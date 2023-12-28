@@ -12,27 +12,18 @@ export interface FlowSearchStrategyResponse {
   count: number;
 }
 
-export interface FlowSearchStrategy {
-  search(
-    flowConditions:
-      | Map<string, any>
-      | { conditionsMap: Map<string, any>; flowCategoryFilters: any },
-    models: Database,
-    orderBy?: any,
-    limit?: number,
-    cursorCondition?: any,
-    filterByPendingFlows?: boolean
-  ): Promise<FlowSearchStrategyResponse>;
+export interface FlowSearchArgs {
+  models: Database;
+  databaseConnection: Knex;
+  flowFilters: SearchFlowsFilters;
+  flowObjectFilters: FlowObjectFilters[];
+  flowCategoryFilters: FlowCategory[];
+  limit?: number;
+  orderBy?: any;
+  cursorCondition?: any;
+  searchPendingFlows?: boolean;
+}
 
-  searchV2(
-    models: Database,
-    databaseConnection: Knex,
-    limit: number,
-    orderBy: any,
-    cursorCondition: any | undefined,
-    flowFilters: SearchFlowsFilters,
-    flowObjectFilters: FlowObjectFilters[],
-    flowCategoryFilters: FlowCategory[],
-    searchPendingFlows: boolean | undefined
-  ): Promise<FlowSearchStrategyResponse>;
+export interface FlowSearchStrategy {
+  search(args: FlowSearchArgs): Promise<FlowSearchStrategyResponse>;
 }
