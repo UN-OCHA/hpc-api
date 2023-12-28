@@ -41,7 +41,6 @@ import {
   type FlowOrderBy,
 } from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
-import { FlowObjectFiltersStrategy } from './strategy/impl/flow-object-conditions-strategy-impl';
 import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy-impl';
 import { SearchFlowByFiltersStrategy } from './strategy/impl/search-flow-by-filters-strategy-impl';
 
@@ -49,7 +48,6 @@ import { SearchFlowByFiltersStrategy } from './strategy/impl/search-flow-by-filt
 export class FlowSearchService {
   constructor(
     private readonly onlyFlowFiltersStrategy: OnlyFlowFiltersStrategy,
-    private readonly flowObjectFiltersStrategy: FlowObjectFiltersStrategy,
     private readonly searchFlowByFiltersStrategy: SearchFlowByFiltersStrategy,
     private readonly organizationService: OrganizationService,
     private readonly locationService: LocationService,
@@ -64,305 +62,6 @@ export class FlowSearchService {
 
   async search(
     models: Database,
-    filters: SearchFlowsArgs
-  ): Promise<FlowSearchResult> {
-    const {
-      limit,
-      nextPageCursor,
-      prevPageCursor,
-      sortField,
-      sortOrder,
-      pending: isPendingFlows,
-    } = filters;
-
-    const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
-
-    const { flowFilters, flowObjectFilters, flowCategoryFilters } = filters;
-
-    const cursorCondition = this.buildCursorCondition(
-      prevPageCursor,
-      nextPageCursor,
-      orderBy
-    );
-
-    // Determine strategy of how to search for flows
-    const { strategy, conditions } = this.determineStrategy(
-      flowFilters,
-      flowObjectFilters,
-      flowCategoryFilters,
-      isPendingFlows
-    );
-
-    // Fetch one more item to check for hasNextPage
-    const limitComputed = limit + 1;
-
-    // Obtain flows and its count based on the strategy selected
-    const { flows, count } = await strategy.search(
-      conditions,
-      models,
-      orderBy,
-      limitComputed,
-      cursorCondition,
-      isPendingFlows
-    );
-
-    // Remove the extra item used to check hasNextPage
-    const hasNextPage = flows.length > limit;
-    if (hasNextPage) {
-      flows.pop();
-    }
-
-    const flowIds: FlowId[] = [];
-    const flowWithVersion: Map<FlowId, number[]> = new Map<FlowId, number[]>();
-
-    // Obtain flow IDs and flow version IDs
-    for (const flow of flows) {
-      flowIds.push(flow.id);
-      if (!flowWithVersion.has(flow.id)) {
-        flowWithVersion.set(flow.id, []);
-      }
-      const flowVersionIDs = flowWithVersion.get(flow.id)!;
-      flowVersionIDs.push(flow.versionID);
-    }
-
-    // Obtain external references and flow objects in parallel
-    const [externalReferencesMap, flowObjects] = await Promise.all([
-      this.externalReferenceService.getExternalReferencesForFlows(
-        flowIds,
-        models
-      ),
-      this.flowObjectService.getFlowObjectByFlowId(models, flowIds),
-    ]);
-
-    // Map flow objects to their respective arrays
-    const organizationsFO: FlowObject[] = [];
-    const locationsFO: FlowObject[] = [];
-    const plansFO: FlowObject[] = [];
-    const usageYearsFO: FlowObject[] = [];
-
-    this.groupByFlowObjectType(
-      flowObjects,
-      organizationsFO,
-      locationsFO,
-      plansFO,
-      usageYearsFO
-    );
-
-    // Obtain flow links
-    const flowLinksMap = await this.flowLinkService.getFlowLinksForFlows(
-      flowIds,
-      models
-    );
-
-    // Perform all nested queries in parallel
-    const [
-      categoriesMap,
-      organizationsMap,
-      locationsMap,
-      plansMap,
-      usageYearsMap,
-      reportDetailsMap,
-    ] = await Promise.all([
-      this.categoryService.getCategoriesForFlows(flowWithVersion, models),
-      this.organizationService.getOrganizationsForFlows(
-        organizationsFO,
-        models
-      ),
-      this.locationService.getLocationsForFlows(locationsFO, models),
-      this.planService.getPlansForFlows(plansFO, models),
-      this.usageYearService.getUsageYearsForFlows(usageYearsFO, models),
-      this.reportDetailService.getReportDetailsForFlows(flowIds, models),
-    ]);
-
-    const items = await Promise.all(
-      flows.map(async (flow) => {
-        const flowLink = flowLinksMap.get(flow.id) ?? [];
-
-        // Categories Map follows the structure:
-        // flowID: { versionID: [categories]}
-        // So we need to get the categories for the flow version
-        const categories =
-          categoriesMap.get(flow.id)!.get(flow.versionID) ?? [];
-        const organizations = organizationsMap.get(flow.id) ?? [];
-        const locations = locationsMap.get(flow.id) ?? [];
-        const plans = plansMap.get(flow.id) ?? [];
-        const usageYears = usageYearsMap.get(flow.id) ?? [];
-        const externalReferences = externalReferencesMap.get(flow.id) ?? [];
-        const reportDetails = reportDetailsMap.get(flow.id) ?? [];
-
-        const reportDetailsWithChannel =
-          this.reportDetailService.addChannelToReportDetails(
-            reportDetails,
-            categories
-          );
-
-        let parkedParentSource: FlowParkedParentSource | null = null;
-        if (flow.activeStatus && flowLink.length > 0) {
-          parkedParentSource = await this.getParketParents(
-            flow,
-            flowLink,
-            models
-          );
-        }
-
-        const childIDs: number[] =
-          (flowLinksMap
-            .get(flow.id)
-            ?.filter(
-              (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
-            )
-            .map((flowLink) => flowLink.childID.valueOf()) as number[]) ?? [];
-
-        const parentIDs: number[] =
-          (flowLinksMap
-            .get(flow.id)
-            ?.filter(
-              (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
-            )
-            .map((flowLink) => flowLink.parentID.valueOf()) as number[]) ?? [];
-
-        return this.buildFlowDTO(
-          flow,
-          categories,
-          organizations,
-          locations,
-          plans,
-          usageYears,
-          childIDs,
-          parentIDs,
-          externalReferences,
-          reportDetailsWithChannel,
-          parkedParentSource
-        );
-      })
-    );
-
-    // Sort items
-    // FIXME: this sorts the page, not the whole result set
-    items.sort((a: Flow, b: Flow) => {
-      const entityKey = orderBy.entity as keyof Flow;
-
-      const nestedA = a[entityKey];
-      const nestedB = b[entityKey];
-
-      if (nestedA && nestedB) {
-        if (orderBy.direction) {
-          // This means the orderBy came in the format:
-          // column: 'nestedEntity.direction.property'
-          // So we need to get the entry of the nested entity
-          // which its direction matches the orderBy direction
-          // and sort by the property using the orderBy order
-
-          // Fisrt, check if the nestedEntity is trusy an Array
-          if (!Array.isArray(nestedA)) {
-            return 0;
-          }
-          if (!Array.isArray(nestedB)) {
-            return 0;
-          }
-
-          // Now we ensure both properties are arrays
-          // we can assume that the nestedEntity is one of the following:
-          // organizations, locations, plans, usageYears
-          const directionEntityA = nestedA as unknown as
-            | Organization[]
-            | BaseLocation[]
-            | BasePlan[]
-            | UsageYear[];
-          const directionEntityB = nestedB as unknown as
-            | Organization[]
-            | BaseLocation[]
-            | BasePlan[]
-            | UsageYear[];
-
-          // Then we find the entry of the nestedEntity that matches the orderBy direction
-          const nestedEntityA = directionEntityA.find(
-            (nestedEntity: any) => orderBy.direction === nestedEntity.direction
-          );
-          const nestedEntityB = directionEntityB.find(
-            (nestedEntity: any) => orderBy.direction === nestedEntity.direction
-          );
-
-          // After, we need to check there is an entry that matches the orderBy direction
-          // if not, we return 0
-          if (!nestedEntityA) {
-            return 0;
-          }
-          if (!nestedEntityB) {
-            return 0;
-          }
-
-          // Now we can sort by the property using the orderBy order
-          const propertyA =
-            nestedEntityA[orderBy.column as keyof typeof nestedEntityA];
-          const propertyB =
-            nestedEntityB[orderBy.column as keyof typeof nestedEntityB];
-
-          // Finally, we check that the property is defined
-          // and if so - we sort by the property using the orderBy order
-          if (propertyA && propertyB) {
-            if (orderBy.order === 'asc') {
-              return propertyA > propertyB ? 1 : -1;
-            }
-            return propertyA < propertyB ? 1 : -1;
-          }
-        }
-        // Since there is no direction expecified in the orderBy
-        // we can assume that the nestedEntity is one of the following:
-        // childIDs, parentIDs, externalReferences, reportDetails, parkedParentSource, categories
-        // and we can sort by the property using the orderBy order
-        const propertyA = nestedA[orderBy.column as keyof typeof nestedA];
-        const propertyB = nestedB[orderBy.column as keyof typeof nestedB];
-
-        // Finally, we check that the property is defined
-        // and if so - we sort by the property using the orderBy order
-        if (propertyA && propertyB) {
-          if (orderBy.order === 'asc') {
-            return propertyA > propertyB ? 1 : -1;
-          }
-          return propertyA < propertyB ? 1 : -1;
-        }
-      }
-
-      return 0;
-    });
-
-    const isOrderByForFlows = orderBy.entity === 'flow';
-    const firstItem = items[0];
-    const prevPageCursorEntity = isOrderByForFlows
-      ? firstItem
-      : firstItem[orderBy.entity as keyof typeof firstItem];
-    const prevPageCursorValue = prevPageCursorEntity
-      ? prevPageCursorEntity[
-          orderBy.column as keyof typeof prevPageCursorEntity
-        ] ?? ''
-      : '';
-
-    const lastItem = items.at(-1);
-    const nextPageCursorEntity = isOrderByForFlows
-      ? lastItem
-      : lastItem![orderBy.entity as keyof typeof lastItem];
-    const nextPageCursorValue = nextPageCursorEntity
-      ? nextPageCursorEntity[
-          orderBy.column as keyof typeof nextPageCursorEntity
-        ]?.toString() ?? ''
-      : '';
-
-    return {
-      flows: items,
-      hasNextPage: limit <= flows.length,
-      hasPreviousPage: nextPageCursor !== undefined,
-      prevPageCursor: prevPageCursorValue,
-      nextPageCursor: nextPageCursorValue,
-      pageSize: flows.length,
-      sortField: `${orderBy.entity}.${orderBy.column}` as FlowSortField,
-      sortOrder: sortOrder ?? 'desc',
-      total: count,
-    };
-  }
-
-  async searchV2(
-    models: Database,
     databaseConnection: Knex,
     filters: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
@@ -372,7 +71,7 @@ export class FlowSearchService {
       prevPageCursor,
       sortField,
       sortOrder,
-      includeChildrenOfParkedFlows: shouldIncludeChildrenOfParkedFlows,
+      shouldIncludeChildrenOfParkedFlows,
     } = filters;
 
     const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
@@ -386,7 +85,7 @@ export class FlowSearchService {
 
     // Once we've gathered all the filters, we need to determine the strategy
     // to use in order to obtain the flowIDs
-    const strategy: FlowSearchStrategy = this.determineStrategyV2(
+    const strategy: FlowSearchStrategy = this.determineStrategy(
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
@@ -401,7 +100,7 @@ export class FlowSearchService {
       orderBy
     );
 
-    const { flows, count } = await strategy.searchV2(
+    const { flows, count } = await strategy.search({
       models,
       databaseConnection,
       limit,
@@ -410,8 +109,8 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
-      isPendingFlows
-    );
+      searchPendingFlows: isPendingFlows,
+    });
 
     // Remove the extra item used to check hasNextPage
     const hasNextPage = flows.length > limit;
@@ -581,12 +280,12 @@ export class FlowSearchService {
     };
   }
 
-  determineStrategyV2(
+  determineStrategy(
     flowFilters: SearchFlowsFilters,
     flowObjectFilters: FlowObjectFilters[],
     flowCategoryFilters: FlowCategory[],
     isPendingFlows: boolean,
-    orderBy: FlowOrderBy
+    orderBy?: FlowOrderBy
   ) {
     // If there are no filters (flowFilters, flowObjectFilters, flowCategoryFilters or pending)
     // and there is no sortByEntity (orderBy.entity === 'flow')
@@ -594,7 +293,7 @@ export class FlowSearchService {
     // If there are no sortByEntity (orderBy.entity === 'flow')
     // but flowFilters only
     // use onlyFlowFiltersStrategy
-    const isOrderByEntityFlow = orderBy.entity === 'flow';
+    const isOrderByEntityFlow = orderBy?.entity === 'flow';
     const isFlowFiltersDefined = flowFilters !== undefined;
     const isFlowObjectFiltersDefined = flowObjectFilters !== undefined;
     const isFlowCategoryFiltersDefined = flowCategoryFilters !== undefined;
@@ -723,68 +422,6 @@ export class FlowSearchService {
     }
 
     return flowObjectsConditions;
-  }
-
-  determineStrategy(
-    flowFilters: SearchFlowsFilters,
-    flowObjectFilters: FlowObjectFilters[],
-    flowCategoryFilters: FlowCategory[],
-    isFilterByPendingFlows: boolean
-  ): { strategy: FlowSearchStrategy; conditions: any } {
-    const isFlowFilterDefined = flowFilters !== undefined;
-    const isFlowObjectFilterDefined = flowObjectFilters !== undefined;
-    const isFlowObjectFiltersNotEmpty =
-      isFlowObjectFilterDefined && flowObjectFilters.length !== 0;
-
-    const isFlowCategoryFilterDefined = flowCategoryFilters !== undefined;
-    const isFlowCategoryFilterNotEmpty =
-      isFlowCategoryFilterDefined && flowCategoryFilters.length !== 0;
-
-    const isFilterByPendingFlowsDefined = isFilterByPendingFlows !== undefined;
-    if (
-      (!isFlowFilterDefined &&
-        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
-        !isFlowCategoryFilterNotEmpty &&
-        !isFilterByPendingFlowsDefined) ||
-      (isFlowFilterDefined &&
-        (!isFlowObjectFilterDefined || !isFlowObjectFiltersNotEmpty) &&
-        !isFlowCategoryFilterNotEmpty &&
-        !isFilterByPendingFlowsDefined)
-    ) {
-      const flowConditions = this.prepareFlowConditions(flowFilters);
-      return {
-        strategy: this.onlyFlowFiltersStrategy,
-        conditions: flowConditions,
-      };
-    } else if (
-      isFlowObjectFiltersNotEmpty ||
-      isFlowCategoryFilterNotEmpty ||
-      isFilterByPendingFlowsDefined
-    ) {
-      const flowConditions = this.prepareFlowConditions(flowFilters);
-      const flowObjectConditions =
-        this.prepareFlowObjectConditions(flowObjectFilters);
-
-      return {
-        strategy: this.flowObjectFiltersStrategy,
-        conditions: {
-          conditionsMap: this.buildConditionsMap(
-            flowConditions,
-            flowObjectConditions
-          ),
-          flowCategoryFilters,
-        },
-      };
-    }
-
-    throw new Error('Invalid combination of flowFilters and flowObjectFilters');
-  }
-
-  private buildConditionsMap(flowConditions: any, flowObjectConditions: any) {
-    const conditionsMap = new Map();
-    conditionsMap.set('flowObjects', flowObjectConditions);
-    conditionsMap.set('flow', flowConditions);
-    return conditionsMap;
   }
 
   private groupByFlowObjectType(
@@ -1038,6 +675,7 @@ export class FlowSearchService {
 
   async searchTotalAmount(
     models: Database,
+    databaseConnection: Knex,
     args: SearchFlowsArgsNonPaginated
   ): Promise<FlowSearchTotalAmountResult> {
     let { flowFilters } = args;
@@ -1054,21 +692,23 @@ export class FlowSearchService {
       flowFilters.activeStatus = true;
     }
 
-    const { strategy, conditions } = this.determineStrategy(
+    // Once we've gathered all the filters, we need to determine the strategy
+    // to use in order to obtain the flowIDs
+    const strategy: FlowSearchStrategy = this.determineStrategy(
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
       isPendingFlows
     );
 
-    const { flows, count } = await strategy.search(
-      conditions,
+    const { flows, count } = await strategy.search({
       models,
-      undefined,
-      undefined,
-      undefined,
-      isPendingFlows
-    );
+      databaseConnection,
+      flowFilters,
+      flowObjectFilters,
+      flowCategoryFilters,
+      searchPendingFlows: isPendingFlows,
+    });
 
     const flowsAmountUSD: Array<string | number> = flows.map(
       (flow) => flow.amountUSD
@@ -1087,9 +727,14 @@ export class FlowSearchService {
 
   async searchBatches(
     models: Database,
+    databaseConnection: Knex,
     args: SearchFlowsArgs
   ): Promise<FlowSearchResultNonPaginated> {
-    const flowSearchResponse = await this.search(models, args);
+    const flowSearchResponse = await this.search(
+      models,
+      databaseConnection,
+      args
+    );
 
     const flows: Flow[] = flowSearchResponse.flows;
 
@@ -1100,7 +745,11 @@ export class FlowSearchService {
 
     let nextFlowSearchResponse: FlowSearchResult;
     while (hasNextPage) {
-      nextFlowSearchResponse = await this.search(models, nextArgs);
+      nextFlowSearchResponse = await this.search(
+        models,
+        databaseConnection,
+        nextArgs
+      );
 
       flows.push(...nextFlowSearchResponse.flows);
 

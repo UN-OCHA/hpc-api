@@ -1,16 +1,9 @@
-import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import type Knex from 'knex';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
 import {
-  type FlowCategory,
-  type FlowObjectFilters,
-  type SearchFlowsFilters,
-} from '../../graphql/args';
-import { type FlowOrderBy } from '../../model';
-import {
+  type FlowSearchArgs,
   type FlowSearchStrategy,
   type FlowSearchStrategyResponse,
 } from '../flow-search-strategy';
@@ -32,28 +25,18 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     private readonly getFlowIdsFromObjectConditions: GetFlowIdsFromObjectConditionsStrategyImpl
   ) {}
 
-  search(
-    _flowConditions: any,
-    _models: Database,
-    _orderBy?: any,
-    _limit?: number,
-    _cursorCondition?: any,
-    _filterByPendingFlows?: boolean
-  ): Promise<FlowSearchStrategyResponse> {
-    throw new Error('Method not implemented.');
-  }
+  async search(args: FlowSearchArgs): Promise<FlowSearchStrategyResponse> {
+    const {
+      models,
+      databaseConnection,
+      flowFilters,
+      flowObjectFilters,
+      flowCategoryFilters,
+      orderBy,
+      limit,
+      searchPendingFlows: isSearchPendingFlows,
+    } = args;
 
-  async searchV2(
-    models: Database,
-    databaseConnection: Knex,
-    limit: number,
-    orderBy: FlowOrderBy,
-    cursorCondition: any | undefined,
-    flowFilters: SearchFlowsFilters,
-    flowObjectFilters: FlowObjectFilters[],
-    flowCategoryFilters: FlowCategory[],
-    searchPendingFlows: boolean | undefined
-  ): Promise<FlowSearchStrategyResponse> {
     // First, we need to check if we need to sort by a certain entity
     // and if so, we need to map the orderBy to be from that entity
     // obtain the entities relation to the flow
@@ -76,7 +59,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // Now we need to check if we need to filter by category
     // if it's using the shorcut 'pending'
     // or if there are any flowCategoryFilters
-    const isSearchByPendingDefined = searchPendingFlows !== undefined;
+    const isSearchByPendingDefined = isSearchPendingFlows !== undefined;
 
     const isFilterByCategory =
       isSearchByPendingDefined || flowCategoryFilters?.length > 0;
@@ -89,7 +72,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           models,
           new Map(),
           flowCategoryFilters ?? [],
-          searchPendingFlows
+          isSearchPendingFlows
         );
       flowIDsFromCategoryFilters.push(...flowIDsFromCategoryStrategy.flowIDs);
     }
@@ -117,7 +100,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       {
         isFilterByFlowObjects,
         isFilterByCategory,
-        willSearchPendingFlows: searchPendingFlows,
+        willSearchPendingFlows: isSearchPendingFlows,
         isSearchByPendingDefined,
       },
       {

@@ -3,6 +3,36 @@ import { PaginationArgs } from '../../../utils/graphql/pagination';
 import { type FlowSortField } from './types';
 
 @InputType()
+export class FlowStatusFilters {
+  @Field(() => Boolean, { nullable: true })
+  pending: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  commitment: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  paid: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  pledged: boolean | null;
+}
+
+@InputType()
+export class FlowTypeFilters {
+  @Field(() => Boolean, { nullable: true })
+  carryover: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  parked: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  pass_through: boolean | null;
+
+  @Field(() => Boolean, { nullable: true })
+  standard: boolean | null;
+}
+
+@InputType()
 export class SearchFlowsFilters {
   @Field(() => [Number], { nullable: true })
   id: number[] | null;
@@ -80,8 +110,8 @@ export class SearchFlowsArgs extends PaginationArgs<FlowSortField> {
   @Field(() => [FlowObjectFilters], { nullable: true })
   flowObjectFilters: FlowObjectFilters[];
 
-  @Field({ nullable: true })
-  includeChildrenOfParkedFlows: boolean;
+  @Field({ name: 'includeChildrenOfParkedFlows', nullable: true })
+  shouldIncludeChildrenOfParkedFlows: boolean;
 
   @Field(() => [FlowCategory], { nullable: true })
   flowCategoryFilters: FlowCategory[];
@@ -98,8 +128,8 @@ export class SearchFlowsArgsNonPaginated {
   @Field(() => [FlowObjectFilters], { nullable: true })
   flowObjectFilters: FlowObjectFilters[];
 
-  @Field({ nullable: true })
-  includeChildrenOfParkedFlows: boolean;
+  @Field({ name: 'includeChildrenOfParkedFlows', nullable: true })
+  shouldIncludeChildrenOfParkedFlows: boolean;
 
   @Field(() => [FlowCategory], { nullable: true })
   flowCategoryFilters: FlowCategory[];

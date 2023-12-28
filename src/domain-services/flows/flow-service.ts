@@ -33,7 +33,7 @@ export class FlowService {
     models: Database,
     dbConnection: Knex,
     orderBy: FlowOrderBy,
-    limit: number
+    limit?: number
   ): Promise<FlowId[]> {
     const entity = orderBy.subEntity ?? orderBy.entity;
 
@@ -58,8 +58,11 @@ export class FlowService {
       .andWhere('objectType', entityCondKey)
       .andWhere('refDirection', orderBy.direction!)
       .orderByRaw(`array_position(ARRAY[${entityIDs.join(',')}], "objectID")`)
-      .orderBy('flowID', orderBy.order)
-      .limit(limit);
+      .orderBy('flowID', orderBy.order);
+
+    if (limit) {
+      query.limit(limit);
+    }
 
     const flowIDs = await query;
     return flowIDs.map((flowID) => flowID.flowID);
