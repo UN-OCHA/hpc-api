@@ -1,10 +1,10 @@
-import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
 import {
   type FlowIDSearchStrategy,
+  type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
 import { mapFlowObjectConditionsToWhereClause } from './utils';
@@ -16,11 +16,11 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
   constructor(private readonly flowObjectService: FlowObjectService) {}
 
   async search(
-    models: Database,
-    flowObjectsConditions: Map<string, Map<string, number[]>>
+    args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
+    const { models, flowObjectsConditions } = args;
     const flowObjectWhere = mapFlowObjectConditionsToWhereClause(
-      flowObjectsConditions
+      flowObjectsConditions!
     );
 
     const flowIDsFromFilteredFlowObjects: FlowId[] = [];

@@ -42,18 +42,17 @@ export function mapFlowObjectConditionsToWhereClause(
 }
 
 export function mapFlowCategoryConditionsToWhereClause(
-  filterByPendingFlows: boolean | undefined,
+  shortcutFilter: any | null,
   flowCategoryConditions: FlowCategory[]
 ) {
   let whereClause = {};
 
-  if (filterByPendingFlows !== undefined) {
+  const shortcutsWhereClause = shortcutFilter ? shortcutFilter.where : null;
+  if (shortcutsWhereClause) {
     whereClause = {
-      group: 'inactiveReason',
-      name: 'Pending review',
+      [Cond.OR]: [shortcutsWhereClause],
     };
   }
-
   if (flowCategoryConditions.length > 0) {
     // Map category filters
     // getting Id when possible

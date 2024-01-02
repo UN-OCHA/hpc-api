@@ -81,7 +81,35 @@ export class FlowSearchService {
       flowObjectFilters,
       flowCategoryFilters,
       pending: isPendingFlows,
+      commitment: isCommitmentFlows,
+      paid: isPaidFlows,
+      pledged: isPledgedFlows,
+      carryover: isCarryoverFlows,
+      parked: isParkedFlows,
+      pass_through: isPassThroughFlows,
+      standard: isStandardFlows,
     } = filters;
+
+    // Validate the shortcut filters
+    // There must be only one shortcut filter
+    // if only one is defined
+    // return an object like
+    // { {where:{
+    // group: 'inactiveReason',
+    // name: 'Pending review',
+    // }, operation: 'IN'} }
+    // if more than one is defined
+    // throw an error
+    const shortcutFilter = this.validateShortcutFilters(
+      isPendingFlows,
+      isCommitmentFlows,
+      isPaidFlows,
+      isPledgedFlows,
+      isCarryoverFlows,
+      isParkedFlows,
+      isPassThroughFlows,
+      isStandardFlows
+    );
 
     // Once we've gathered all the filters, we need to determine the strategy
     // to use in order to obtain the flowIDs
@@ -89,7 +117,7 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
-      isPendingFlows,
+      shortcutFilter,
       orderBy
     );
 
@@ -109,7 +137,8 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
-      searchPendingFlows: isPendingFlows,
+      // shortcuts for categories
+      shortcutFilter,
     });
 
     // Remove the extra item used to check hasNextPage
@@ -280,11 +309,63 @@ export class FlowSearchService {
     };
   }
 
+  /**
+   * This method validates that only one shortcut filter is defined
+   * and returns the shortcut filter defined with the operation
+   * IN if is true or NOT IN if is false
+   *
+   * @param isPendingFlows
+   * @param isCommitmentFlows
+   * @param isPaidFlows
+   * @param isPledgedFlows
+   * @param isCarryoverFlows
+   * @param isParkedFlows
+   * @param isPassThroughFlows
+   * @param isStandardFlows
+   * @returns { category: String, operation: Op.IN | Op.NOT_IN}
+   */
+  validateShortcutFilters(
+    isPendingFlows: boolean,
+    isCommitmentFlows: boolean,
+    isPaidFlows: boolean,
+    isPledgedFlows: boolean,
+    isCarryoverFlows: boolean,
+    isParkedFlows: boolean,
+    isPassThroughFlows: boolean,
+    isStandardFlows: boolean
+  ) {
+    const filters = [
+      { flag: isPendingFlows, category: 'Pending', group: 'inactiveReason' },
+      { flag: isCommitmentFlows, category: 'Commitment', group: 'flowStatus' },
+      { flag: isPaidFlows, category: 'Paid', group: 'flowStatus' },
+      { flag: isPledgedFlows, category: 'Pledged', group: 'flowStatus' },
+      { flag: isCarryoverFlows, category: 'Carryover', group: 'flowType' },
+      { flag: isParkedFlows, category: 'Parked', group: 'flowType' },
+      { flag: isPassThroughFlows, category: 'Pass Through', group: 'flowType' },
+      { flag: isStandardFlows, category: 'Standard', group: 'flowType' },
+    ];
+
+    const shortcutFilters = filters
+      .filter((filter) => filter.flag)
+      .map((filter) => ({
+        where: { group: filter.group, name: filter.category },
+        operation: filter.flag ? Op.IN : Op.NOT_IN,
+      }));
+
+    if (shortcutFilters.length > 1) {
+      throw new Error(
+        'Only one shortcut filter can be defined at the same time'
+      );
+    }
+
+    return shortcutFilters.length === 1 ? shortcutFilters[0] : null;
+  }
+
   determineStrategy(
     flowFilters: SearchFlowsFilters,
     flowObjectFilters: FlowObjectFilters[],
     flowCategoryFilters: FlowCategory[],
-    isPendingFlows: boolean,
+    shortcutFilter: any | null,
     orderBy?: FlowOrderBy
   ) {
     // If there are no filters (flowFilters, flowObjectFilters, flowCategoryFilters or pending)
@@ -297,18 +378,20 @@ export class FlowSearchService {
     const isFlowFiltersDefined = flowFilters !== undefined;
     const isFlowObjectFiltersDefined = flowObjectFilters !== undefined;
     const isFlowCategoryFiltersDefined = flowCategoryFilters !== undefined;
-    const isFilterByPendingFlowsDefined = isPendingFlows !== undefined;
+    // Shortcuts fot categories
+    const isFilterByShortcutsDefined = shortcutFilter !== null;
 
     const isNoFilterDefined =
       !isFlowFiltersDefined &&
       !isFlowObjectFiltersDefined &&
       !isFlowCategoryFiltersDefined &&
-      !isFilterByPendingFlowsDefined;
+      !isFilterByShortcutsDefined;
+
     const isFlowFiltersOnly =
       isFlowFiltersDefined &&
       !isFlowObjectFiltersDefined &&
       !isFlowCategoryFiltersDefined &&
-      !isFilterByPendingFlowsDefined;
+      !isFilterByShortcutsDefined;
 
     if (isOrderByEntityFlow && (isNoFilterDefined || isFlowFiltersOnly)) {
       // Use onlyFlowFiltersStrategy
@@ -683,6 +766,13 @@ export class FlowSearchService {
       flowObjectFilters,
       flowCategoryFilters,
       pending: isPendingFlows,
+      commitment: isCommitmentFlows,
+      paid: isPaidFlows,
+      pledged: isPledgedFlows,
+      carryover: isCarryoverFlows,
+      parked: isParkedFlows,
+      pass_through: isPassThroughFlows,
+      standard: isStandardFlows,
     } = args;
 
     if (!flowFilters) {
@@ -692,13 +782,31 @@ export class FlowSearchService {
       flowFilters.activeStatus = true;
     }
 
+    // Validate the shortcut filters
+    // There must be only one shortcut filter
+    // if only one is defined
+    // return an object like
+    // { category: 'Parked', operation: 'IN' }
+    // if more than one is defined
+    // throw an error
+    const shortcutFilter = this.validateShortcutFilters(
+      isPendingFlows,
+      isCommitmentFlows,
+      isPaidFlows,
+      isPledgedFlows,
+      isCarryoverFlows,
+      isParkedFlows,
+      isPassThroughFlows,
+      isStandardFlows
+    );
+
     // Once we've gathered all the filters, we need to determine the strategy
     // to use in order to obtain the flowIDs
     const strategy: FlowSearchStrategy = this.determineStrategy(
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
-      isPendingFlows
+      shortcutFilter
     );
 
     const { flows, count } = await strategy.search({
@@ -707,7 +815,8 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
-      searchPendingFlows: isPendingFlows,
+      // shortcuts for categories
+      shortcutFilter,
     });
 
     const flowsAmountUSD: Array<string | number> = flows.map(

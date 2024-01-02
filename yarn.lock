@@ -1624,9 +1624,9 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@unocha/hpc-api-core@github:UN-OCHA/hpc-api-core#3a3030ee83ad77e5fd7c40238d5ecabe1e6c7da9":
+"@unocha/hpc-api-core@github:UN-OCHA/hpc-api-core#e298382f38848370c6daa0ac86b2016eddbef356":
   version "7.0.0"
-  resolved "https://codeload.github.com/UN-OCHA/hpc-api-core/tar.gz/3a3030ee83ad77e5fd7c40238d5ecabe1e6c7da9"
+  resolved "https://codeload.github.com/UN-OCHA/hpc-api-core/tar.gz/e298382f38848370c6daa0ac86b2016eddbef356"
   dependencies:
     "@types/lodash" "^4.14.194"
     "@types/node-fetch" "2.6.3"

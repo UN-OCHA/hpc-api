@@ -21,7 +21,7 @@ export interface FlowSearchArgs {
   limit?: number;
   orderBy?: any;
   cursorCondition?: any;
-  searchPendingFlows?: boolean;
+  shortcutFilter: any;
 }
 
 export interface FlowSearchStrategy {

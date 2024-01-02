@@ -3,36 +3,6 @@ import { PaginationArgs } from '../../../utils/graphql/pagination';
 import { type FlowSortField } from './types';
 
 @InputType()
-export class FlowStatusFilters {
-  @Field(() => Boolean, { nullable: true })
-  pending: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  commitment: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  paid: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  pledged: boolean | null;
-}
-
-@InputType()
-export class FlowTypeFilters {
-  @Field(() => Boolean, { nullable: true })
-  carryover: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  parked: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  pass_through: boolean | null;
-
-  @Field(() => Boolean, { nullable: true })
-  standard: boolean | null;
-}
-
-@InputType()
 export class SearchFlowsFilters {
   @Field(() => [Number], { nullable: true })
   id: number[] | null;
@@ -116,8 +86,29 @@ export class SearchFlowsArgs extends PaginationArgs<FlowSortField> {
   @Field(() => [FlowCategory], { nullable: true })
   flowCategoryFilters: FlowCategory[];
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   pending: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  commitment: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  paid: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  pledged: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  carryover: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  parked: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  pass_through: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  standard: boolean;
 }
 
 @ArgsType()
@@ -134,6 +125,27 @@ export class SearchFlowsArgsNonPaginated {
   @Field(() => [FlowCategory], { nullable: true })
   flowCategoryFilters: FlowCategory[];
 
-  @Field({ nullable: true })
+  @Field(() => Boolean, { nullable: true })
   pending: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  commitment: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  paid: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  pledged: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  carryover: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  parked: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  pass_through: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  standard: boolean;
 }

@@ -1,13 +1,12 @@
-import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { CategoryService } from '../../../categories/category-service';
-import { type FlowCategory } from '../../graphql/args';
 import {
   type FlowIDSearchStrategy,
+  type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
 import { mapFlowCategoryConditionsToWhereClause } from './utils';
@@ -19,14 +18,13 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
   constructor(private readonly categoryService: CategoryService) {}
 
   async search(
-    models: Database,
-    _flowObjectsConditions: Map<string, Map<string, number[]>>,
-    flowCategoryConditions: FlowCategory[],
-    filterByPendingFlows: boolean | undefined
+    args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
+    const { models, flowCategoryConditions, shortcutFilter } = args;
+
     const whereClause = mapFlowCategoryConditionsToWhereClause(
-      filterByPendingFlows,
-      flowCategoryConditions
+      shortcutFilter,
+      flowCategoryConditions!
     );
 
     const categories = await this.categoryService.findCategories(
