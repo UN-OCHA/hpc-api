@@ -34,7 +34,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowCategoryFilters,
       orderBy,
       limit,
-      searchPendingFlows: isSearchPendingFlows,
+      cursorCondition,
+      shortcutFilter,
     } = args;
 
     // First, we need to check if we need to sort by a certain entity
@@ -57,24 +58,29 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     }
 
     // Now we need to check if we need to filter by category
-    // if it's using the shorcut 'pending'
+    // if it's using any of the shorcuts
     // or if there are any flowCategoryFilters
-    const isSearchByPendingDefined = isSearchPendingFlows !== undefined;
+    const isSearchByCategoryShotcut = shortcutFilter !== null;
 
     const isFilterByCategory =
-      isSearchByPendingDefined || flowCategoryFilters?.length > 0;
+      isSearchByCategoryShotcut || flowCategoryFilters?.length > 0;
 
     const flowIDsFromCategoryFilters: FlowId[] = [];
 
     if (isFilterByCategory) {
-      const flowIDsFromCategoryStrategy: FlowIdSearchStrategyResponse =
-        await this.getFlowIdsFromCategoryConditions.search(
+      const { flowIDs }: FlowIdSearchStrategyResponse =
+        await this.getFlowIdsFromCategoryConditions.search({
           models,
-          new Map(),
-          flowCategoryFilters ?? [],
-          isSearchPendingFlows
-        );
-      flowIDsFromCategoryFilters.push(...flowIDsFromCategoryStrategy.flowIDs);
+          flowCategoryConditions: flowCategoryFilters ?? [],
+          shortcutFilter,
+          flowObjectsConditions: undefined,
+        });
+      // Since there can be many flowIDs returned
+      // This can cause 'Maximum call stack size exceeded' error
+      // When using the spread operator - a workaround is to use push fot each element
+      for (const flowID of flowIDs) {
+        flowIDsFromCategoryFilters.push(flowID);
+      }
     }
 
     // After that, if we need to filter by flowObjects
@@ -86,10 +92,10 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       const flowObjectConditionsMap =
         mapFlowObjectConditions(flowObjectFilters);
       const flowIDsFromObjectStrategy: FlowIdSearchStrategyResponse =
-        await this.getFlowIdsFromObjectConditions.search(
+        await this.getFlowIdsFromObjectConditions.search({
           models,
-          flowObjectConditionsMap
-        );
+          flowObjectsConditions: flowObjectConditionsMap,
+        });
       flowIDsFromObjectFilters.push(...flowIDsFromObjectStrategy.flowIDs);
     }
 
@@ -100,26 +106,25 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       {
         isFilterByFlowObjects,
         isFilterByCategory,
-        willSearchPendingFlows: isSearchPendingFlows,
-        isSearchByPendingDefined,
+        shortcutFilter,
       },
       {
         flowIDsFromCategoryFilters,
         flowIDsFromObjectFilters,
         flowFilters,
+        cursorCondition,
       }
     );
 
-    let rawOrderBy: string = '';
+    let rawOrderBy: string | undefined;
     let orderByFlow:
       | {
           column: any;
           order: any;
         }
-      | undefined = { column: 'updatedAt', order: 'DESC' };
+      | undefined;
     if (isSortByEntity) {
       rawOrderBy = `array_position(ARRAY[${sortByFlowIDs.join(',')}], "id")`;
-      orderByFlow = undefined;
     } else {
       orderByFlow = mapFlowOrderBy(orderBy);
     }
@@ -140,39 +145,34 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     return { flows, count: countObject.count };
   }
+
   buildConditions(
     decisionArgs: {
       isFilterByFlowObjects: boolean;
       isFilterByCategory: boolean;
-      willSearchPendingFlows: boolean | undefined;
-      isSearchByPendingDefined: boolean;
+      shortcutFilter: any | null;
     },
     filterArgs: {
       flowIDsFromCategoryFilters: FlowId[];
       flowIDsFromObjectFilters: FlowId[];
       flowFilters: any | undefined;
+      cursorCondition: any | undefined;
     }
   ): { countConditions: any; searchConditions: any } {
-    const {
-      isFilterByFlowObjects,
-      isFilterByCategory,
-      willSearchPendingFlows,
-      isSearchByPendingDefined,
-    } = decisionArgs;
+    const { isFilterByFlowObjects, isFilterByCategory, shortcutFilter } =
+      decisionArgs;
     const {
       flowIDsFromCategoryFilters,
       flowIDsFromObjectFilters,
       flowFilters,
+      cursorCondition,
     } = filterArgs;
     let countConditions: any = {};
     let searchConditions: any = {};
 
     // Check if we have flowIDs from flowObjects and flowCategoryFilters
     // if so, we need to filter by those flowIDs
-    if (
-      (isFilterByFlowObjects || isFilterByCategory) &&
-      isSearchByPendingDefined
-    ) {
+    if ((isFilterByFlowObjects || isFilterByCategory) && shortcutFilter) {
       const deduplicatedFlowIDs = [...new Set(flowIDsFromCategoryFilters)];
 
       searchConditions = {
@@ -216,12 +216,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           },
         ],
       };
-    } else if (isFilterByCategory || isSearchByPendingDefined) {
-      const idCondition = isSearchByPendingDefined
-        ? willSearchPendingFlows
-          ? Op.IN
-          : Op.NOT_IN
-        : Op.IN;
+    } else if (isFilterByCategory || shortcutFilter) {
+      const idCondition = shortcutFilter ? shortcutFilter.operation : Op.IN;
 
       searchConditions = {
         ...searchConditions,
@@ -262,6 +258,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       // Combine cursor condition with flow conditions
       searchConditions = {
         ...searchConditions,
+        ...cursorCondition,
         [Cond.AND]: [flowConditions ?? {}],
       };
     }

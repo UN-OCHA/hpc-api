@@ -6,13 +6,15 @@ export interface FlowIdSearchStrategyResponse {
   flowIDs: FlowId[];
 }
 
+export interface FlowIdSearchStrategyArgs {
+  models: Database;
+  flowObjectsConditions?: Map<string, Map<string, number[]>>;
+  flowCategoryConditions?: FlowCategory[];
+  shortcutFilter?: any | null;
+}
+
 export interface FlowIDSearchStrategy {
-  search(
-    models: Database,
-    flowObjectsConditions: Map<string, Map<string, number[]>>,
-    flowCategoryConditions: FlowCategory[],
-    filterByPendingFlows?: boolean
-  ): Promise<FlowIdSearchStrategyResponse>;
+  search(args: FlowIdSearchStrategyArgs): Promise<FlowIdSearchStrategyResponse>;
 
   generateWhereClause(
     flowIds: FlowId[],
