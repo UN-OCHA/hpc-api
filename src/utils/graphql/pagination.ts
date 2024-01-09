@@ -1,6 +1,6 @@
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import { ArgsType, Field, ObjectType } from 'type-graphql';
+import { ArgsType, Field, Int, ObjectType } from 'type-graphql';
 
 export type SortOrder = 'asc' | 'desc';
 
@@ -16,11 +16,11 @@ export class PageInfo<TSortFields extends string> {
   @Field({ nullable: false })
   hasPreviousPage: boolean;
 
-  @Field({ nullable: false })
-  prevPageCursor: string;
+  @Field(() => Int, { nullable: false })
+  prevPageCursor: number;
 
-  @Field({ nullable: false })
-  nextPageCursor: string;
+  @Field(() => Int, { nullable: false })
+  nextPageCursor: number;
 
   @Field({ nullable: false })
   pageSize: number;
@@ -70,11 +70,11 @@ export class PaginationArgs<TSortFields extends string> {
   @Field({ nullable: false })
   limit: number;
 
-  @Field({ nullable: true })
-  nextPageCursor: string;
+  @Field(() => Int, { nullable: true })
+  nextPageCursor: number;
 
-  @Field({ nullable: true })
-  prevPageCursor: string;
+  @Field(() => Int, { nullable: true })
+  prevPageCursor: number;
 
   @Field(() => String, { nullable: true })
   sortField: TSortFields;

@@ -1,27 +1,25 @@
-import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import type Knex from 'knex';
 import { Service } from 'typedi';
 import { type FlowObjectType } from '../flow-object/model';
-import { type FlowOrderBy } from './model';
-import { mapFlowOrderBy } from './strategy/impl/utils';
+import { GetFlowsArgs, UniqueFlowEntity, type FlowOrderBy } from './model';
+import {
+  mapFlowOrderBy,
+  removeDuplicatesUniqueFlowEntities,
+} from './strategy/impl/utils';
 
 @Service()
 export class FlowService {
   constructor() {}
 
-  async getFlows(
-    models: Database,
-    conditions: any,
-    orderBy?: any,
-    limit?: number,
-    rawOrderBy?: string
-  ) {
+  async getFlows(args: GetFlowsArgs) {
+    const { models, conditions, offset, orderBy, limit } = args;
+
     return await models.flow.find({
       orderBy,
       limit,
       where: conditions,
-      orderByRaw: rawOrderBy,
+      offset,
     });
   }
 
@@ -34,7 +32,7 @@ export class FlowService {
     dbConnection: Knex,
     orderBy: FlowOrderBy,
     limit?: number
-  ): Promise<FlowId[]> {
+  ): Promise<UniqueFlowEntity[]> {
     const entity = orderBy.subEntity ?? orderBy.entity;
 
     // Get the entity list
@@ -52,7 +50,7 @@ export class FlowService {
 
     const query = dbConnection
       .queryBuilder()
-      .select('flowID')
+      .select('flowID', 'versionID')
       .from('flowObject')
       .whereIn('objectID', entityIDs)
       .andWhere('objectType', entityCondKey)
@@ -65,6 +63,11 @@ export class FlowService {
     }
 
     const flowIDs = await query;
-    return flowIDs.map((flowID) => flowID.flowID);
+    const mapFlowsToUniqueFlowEntities = flowIDs.map((flowID) => ({
+      id: flowID.flowID,
+      versionID: flowID.versionID,
+    }));
+
+    return removeDuplicatesUniqueFlowEntities(mapFlowsToUniqueFlowEntities);
   }
 }

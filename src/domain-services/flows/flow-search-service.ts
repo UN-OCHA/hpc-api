@@ -90,17 +90,10 @@ export class FlowSearchService {
       standard: isStandardFlows,
     } = filters;
 
-    // Validate the shortcut filters
-    // There must be only one shortcut filter
-    // if only one is defined
     // return an object like
-    // { {where:{
-    // group: 'inactiveReason',
-    // name: 'Pending review',
-    // }, operation: 'IN'} }
-    // if more than one is defined
-    // throw an error
-    const shortcutFilter = this.validateShortcutFilters(
+    // { name: 'Pending review',
+    // operation: 'IN'} []
+    const shortcutFilter = this.mapShortcutFilters(
       isPendingFlows,
       isCommitmentFlows,
       isPaidFlows,
@@ -122,18 +115,20 @@ export class FlowSearchService {
     );
 
     // Build cursor condition
-    const cursorCondition = this.buildCursorCondition(
-      prevPageCursor,
-      nextPageCursor,
-      orderBy
-    );
+    // const cursorCondition = this.buildCursorCondition(
+    //   prevPageCursor,
+    //   nextPageCursor,
+    //   orderBy
+    // );
+
+    const offset = nextPageCursor ?? prevPageCursor ?? 0;
 
     const { flows, count } = await strategy.search({
       models,
       databaseConnection,
       limit,
       orderBy,
-      cursorCondition,
+      offset,
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
@@ -275,33 +270,33 @@ export class FlowSearchService {
       })
     );
 
-    const isOrderByForFlows = orderBy.entity === 'flow';
-    const firstItem = items[0];
-    const prevPageCursorEntity = isOrderByForFlows
-      ? firstItem
-      : firstItem[orderBy.entity as keyof typeof firstItem];
-    const prevPageCursorValue = prevPageCursorEntity
-      ? prevPageCursorEntity[
-          orderBy.column as keyof typeof prevPageCursorEntity
-        ] ?? ''
-      : '';
+    // const isOrderByForFlows = orderBy.entity === 'flow';
+    // const firstItem = items[0];
+    // const prevPageCursorEntity = isOrderByForFlows
+    //   ? firstItem
+    //   : firstItem[orderBy.entity as keyof typeof firstItem];
+    // const prevPageCursorValue = prevPageCursorEntity
+    //   ? prevPageCursorEntity[
+    //       orderBy.column as keyof typeof prevPageCursorEntity
+    //     ] ?? ''
+    //   : '';
 
-    const lastItem = items.at(-1);
-    const nextPageCursorEntity = isOrderByForFlows
-      ? lastItem
-      : lastItem![orderBy.entity as keyof typeof lastItem];
-    const nextPageCursorValue = nextPageCursorEntity
-      ? nextPageCursorEntity[
-          orderBy.column as keyof typeof nextPageCursorEntity
-        ]?.toString() ?? ''
-      : '';
+    // const lastItem = items.at(-1);
+    // const nextPageCursorEntity = isOrderByForFlows
+    //   ? lastItem
+    //   : lastItem![orderBy.entity as keyof typeof lastItem];
+    // const nextPageCursorValue = nextPageCursorEntity
+    //   ? nextPageCursorEntity[
+    //       orderBy.column as keyof typeof nextPageCursorEntity
+    //     ]?.toString() ?? ''
+    //   : '';
 
     return {
       flows: items,
       hasNextPage: limit <= flows.length,
       hasPreviousPage: nextPageCursor !== undefined,
-      prevPageCursor: prevPageCursorValue,
-      nextPageCursor: nextPageCursorValue,
+      prevPageCursor: nextPageCursor ?? 0,
+      nextPageCursor: nextPageCursor ? nextPageCursor + limit : limit,
       pageSize: flows.length,
       sortField: `${orderBy.entity}.${orderBy.column}` as FlowSortField,
       sortOrder: sortOrder ?? 'desc',
@@ -310,8 +305,7 @@ export class FlowSearchService {
   }
 
   /**
-   * This method validates that only one shortcut filter is defined
-   * and returns the shortcut filter defined with the operation
+   * This method returns the shortcut filter defined with the operation
    * IN if is true or NOT IN if is false
    *
    * @param isPendingFlows
@@ -322,9 +316,9 @@ export class FlowSearchService {
    * @param isParkedFlows
    * @param isPassThroughFlows
    * @param isStandardFlows
-   * @returns { category: String, operation: Op.IN | Op.NOT_IN}
+   * @returns [{ category: String, operation: Op.IN | Op.NOT_IN}]
    */
-  validateShortcutFilters(
+  mapShortcutFilters(
     isPendingFlows: boolean,
     isCommitmentFlows: boolean,
     isPaidFlows: boolean,
@@ -335,30 +329,24 @@ export class FlowSearchService {
     isStandardFlows: boolean
   ) {
     const filters = [
-      { flag: isPendingFlows, category: 'Pending', group: 'inactiveReason' },
-      { flag: isCommitmentFlows, category: 'Commitment', group: 'flowStatus' },
-      { flag: isPaidFlows, category: 'Paid', group: 'flowStatus' },
-      { flag: isPledgedFlows, category: 'Pledged', group: 'flowStatus' },
-      { flag: isCarryoverFlows, category: 'Carryover', group: 'flowType' },
-      { flag: isParkedFlows, category: 'Parked', group: 'flowType' },
-      { flag: isPassThroughFlows, category: 'Pass Through', group: 'flowType' },
-      { flag: isStandardFlows, category: 'Standard', group: 'flowType' },
+      { flag: isPendingFlows, category: 'Pending' },
+      { flag: isCommitmentFlows, category: 'Commitment' },
+      { flag: isPaidFlows, category: 'Paid' },
+      { flag: isPledgedFlows, category: 'Pledged' },
+      { flag: isCarryoverFlows, category: 'Carryover' },
+      { flag: isParkedFlows, category: 'Parked' },
+      { flag: isPassThroughFlows, category: 'Pass Through' },
+      { flag: isStandardFlows, category: 'Standard' },
     ];
 
     const shortcutFilters = filters
-      .filter((filter) => filter.flag)
+      .filter((filter) => filter.flag !== undefined)
       .map((filter) => ({
-        where: { group: filter.group, name: filter.category },
+        category: filter.category,
         operation: filter.flag ? Op.IN : Op.NOT_IN,
       }));
 
-    if (shortcutFilters.length > 1) {
-      throw new Error(
-        'Only one shortcut filter can be defined at the same time'
-      );
-    }
-
-    return shortcutFilters.length === 1 ? shortcutFilters[0] : null;
+    return shortcutFilters;
   }
 
   determineStrategy(
@@ -789,7 +777,7 @@ export class FlowSearchService {
     // { category: 'Parked', operation: 'IN' }
     // if more than one is defined
     // throw an error
-    const shortcutFilter = this.validateShortcutFilters(
+    const shortcutFilter = this.mapShortcutFilters(
       isPendingFlows,
       isCommitmentFlows,
       isPaidFlows,

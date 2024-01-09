@@ -1,15 +1,19 @@
 import { type CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { CategoryService } from '../../../categories/category-service';
+import { UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
-import { mapFlowCategoryConditionsToWhereClause } from './utils';
+import {
+  mapFlowCategoryConditionsToWhereClause,
+  removeDuplicatesUniqueFlowEntities,
+} from './utils';
 
 @Service()
 export class GetFlowIdsFromCategoryConditionsStrategyImpl
@@ -17,40 +21,158 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
 {
   constructor(private readonly categoryService: CategoryService) {}
 
+  private readonly categoryIDsMap: Map<string, number> = new Map([
+    ['Pending', 45],
+    ['Pledge', 46],
+    ['Commitment', 47],
+    ['Paid', 48],
+    ['Standard', 133],
+    ['Pass through', 136],
+    ['Carryover', 137],
+    ['Parked', 1252],
+  ]);
+
   async search(
     args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
-    const { models, flowCategoryConditions, shortcutFilter } = args;
+    const {
+      models,
+      flowCategoryConditions,
+      shortcutFilter,
+      databaseConnection,
+    } = args;
+
+    const categoriesIds: CategoryId[] = [];
 
     const whereClause = mapFlowCategoryConditionsToWhereClause(
-      shortcutFilter,
       flowCategoryConditions!
     );
 
-    const categories = await this.categoryService.findCategories(
-      models,
-      whereClause
+    if (whereClause) {
+      const categories = await this.categoryService.findCategories(
+        models,
+        whereClause
+      );
+
+      categories.map((category) => category.id);
+    }
+
+    // Add category IDs from shortcut filter
+    // to the list of category IDs IN or NOT_IN
+    const categoriesIdsFromShortcutFilterIN: CategoryId[] = [];
+    const categoriesIdsFromShortcutFilterNOTIN: CategoryId[] = [];
+
+    if (shortcutFilter) {
+      for (const shortcut of shortcutFilter) {
+        const shortcutCategoryID = this.categoryIDsMap.get(shortcut.category);
+        if (shortcutCategoryID) {
+          if (shortcut.operation === Op.IN) {
+            categoriesIdsFromShortcutFilterIN.push(
+              createBrandedValue(shortcutCategoryID)
+            );
+          } else {
+            categoriesIdsFromShortcutFilterNOTIN.push(
+              createBrandedValue(shortcutCategoryID)
+            );
+          }
+        }
+      }
+    }
+
+    let query = databaseConnection
+      .queryBuilder()
+      .distinct('objectID', 'versionID')
+      .select('objectID', 'versionID')
+      .from('categoryRef');
+
+    if (categoriesIds.length > 0) {
+      query = query
+        .orWhere('categoryID', 'IN', categoriesIds)
+        .andWhere('objectType', 'flow');
+    }
+
+    if (categoriesIdsFromShortcutFilterIN.length > 0) {
+      query = query
+        .orWhere('categoryID', 'IN', categoriesIdsFromShortcutFilterIN)
+        .andWhere('objectType', 'flow');
+    }
+
+    if (categoriesIdsFromShortcutFilterNOTIN.length > 0) {
+      query = query
+        .orWhere('categoryID', 'NOT IN', categoriesIdsFromShortcutFilterNOTIN)
+        .andWhere('objectType', 'flow');
+    }
+
+    const flows = await query;
+    console.log('flows', flows.length);
+    const mapFlows: UniqueFlowEntity[] = flows.map(
+      (flow) =>
+        ({
+          id: flow.objectID,
+          versionID: flow.versionID,
+        }) as UniqueFlowEntity
     );
 
-    const categoriesIds: CategoryId[] = categories.map(
-      (category) => category.id
-    );
+    return { flows: mapFlows };
+    // const whereClauseCategoryRef = {
+    //   [Cond.OR]: [
+    //     categoriesIds.length > 0
+    //       ? {
+    //           [Cond.AND]: [
+    //             {
+    //               categoryID: {
+    //                 [Op.IN]: categoriesIds,
+    //               },
+    //             },
+    //             { objectType: 'flow' },
+    //           ],
+    //         }
+    //       : {},
+    //     categoriesIdsFromShortcutFilterIN.length > 0
+    //       ? {
+    //           [Cond.AND]: [
+    //             {
+    //               categoryID: {
+    //                 [Op.IN]: categoriesIdsFromShortcutFilterIN,
+    //               },
+    //             },
+    //             { objectType: 'flow' },
+    //           ],
+    //         }
+    //       : {},
+    //     categoriesIdsFromShortcutFilterNOTIN.length > 0
+    //       ? {
+    //           [Cond.AND]: [
+    //             {
+    //               categoryID: {
+    //                 [Op.NOT_IN]: categoriesIdsFromShortcutFilterNOTIN,
+    //               },
+    //             },
+    //             { objectType: 'flow' },
+    //           ],
+    //         }
+    //       : {},
+    //   ],
+    // };
 
-    const categoryRefs = await this.categoryService.findCategoryRefs(models, {
-      categoryID: {
-        [Op.IN]: categoriesIds,
-      },
-      objectType: 'flow',
-    });
+    // const categoryRefs = await this.categoryService.findCategoryRefs(
+    //   models,
+    //   whereClauseCategoryRef
+    // );
 
     // Map category refs to flow IDs
     // keep only unique values
     // and return the list of flow IDs
-    const flowIds = [
-      ...new Set(categoryRefs.map((categoryRef) => categoryRef.objectID)),
-    ].map((flowId) => createBrandedValue(flowId));
+    // const mapFlowsToUniqueFlowEntities = categoryRefs.map((categoryRef) => {
+    //   return {
+    //     id: categoryRef.objectID,
+    //     versionID: categoryRef.versionID,
+    //   } as UniqueFlowEntity;
+    // })
 
-    return { flowIDs: flowIds };
+    // const flows = removeDuplicatesUniqueFlowEntities(mapFlowsToUniqueFlowEntities);
+
+    // return { flows };
   }
 
   generateWhereClause(

@@ -1,16 +1,19 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import Knex from 'knex';
 import { type FlowCategory } from '../graphql/args';
+import { type UniqueFlowEntity } from '../model';
 
 export interface FlowIdSearchStrategyResponse {
-  flowIDs: FlowId[];
+  flows: UniqueFlowEntity[];
 }
 
 export interface FlowIdSearchStrategyArgs {
+  databaseConnection: Knex;
   models: Database;
   flowObjectsConditions?: Map<string, Map<string, number[]>>;
   flowCategoryConditions?: FlowCategory[];
-  shortcutFilter?: any | null;
+  shortcutFilter?: any[] | null;
 }
 
 export interface FlowIDSearchStrategy {

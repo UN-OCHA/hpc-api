@@ -2,6 +2,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
+import { UniqueFlowEntity } from '../../model';
 import {
   type FlowSearchArgs,
   type FlowSearchStrategy,
@@ -11,10 +12,13 @@ import { type FlowIdSearchStrategyResponse } from '../flowID-search-strategy';
 import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow-category-conditions-strategy-impl';
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
+  intersectUniqueFlowEntities,
   mapCountResultToCountObject,
   mapFlowObjectConditions,
   mapFlowOrderBy,
+  mergeUniqueEntities,
   prepareFlowConditions,
+  sortEntitiesByReferenceList,
 } from './utils';
 
 @Service()
@@ -34,7 +38,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowCategoryFilters,
       orderBy,
       limit,
-      cursorCondition,
+      offset,
       shortcutFilter,
     } = args;
 
@@ -44,10 +48,10 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // to be able to sort the flows using the entity
     const isSortByEntity = orderBy && orderBy.entity !== 'flow';
 
-    const sortByFlowIDs: FlowId[] = [];
+    const sortByFlowIDs: UniqueFlowEntity[] = [];
     if (isSortByEntity) {
       // Get the flowIDs using the orderBy entity
-      const flowIDsFromSortingEntity: FlowId[] =
+      const flowIDsFromSortingEntity: UniqueFlowEntity[] =
         await this.flowService.getFlowIDsFromEntity(
           models,
           databaseConnection,
@@ -55,6 +59,27 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           limit
         );
       sortByFlowIDs.push(...flowIDsFromSortingEntity);
+    } else {
+      // In this case we fetch the list of flows from the database
+      // using the orderBy
+      // We can also filter by flowFilters
+      const flowConditions = prepareFlowConditions(flowFilters);
+
+      const flowsToSort = await this.flowService.getFlows({
+        models,
+        conditions: flowConditions,
+        orderBy: { column: orderBy.column, order: orderBy.order },
+      });
+
+      const flowIDsFromSortingEntity: UniqueFlowEntity[] = flowsToSort.map(
+        (flow) => ({ id: flow.id, versionID: flow.versionID })
+      );
+      // Since there can be many flowIDs returned
+      // This can cause 'Maximum call stack size exceeded' error
+      // When using the spread operator - a workaround is to use push fot each element
+      for (const flow of flowIDsFromSortingEntity) {
+        sortByFlowIDs.push(flow);
+      }
     }
 
     // Now we need to check if we need to filter by category
@@ -65,11 +90,12 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const isFilterByCategory =
       isSearchByCategoryShotcut || flowCategoryFilters?.length > 0;
 
-    const flowIDsFromCategoryFilters: FlowId[] = [];
+    const flowsFromCategoryFilters: UniqueFlowEntity[] = [];
 
     if (isFilterByCategory) {
-      const { flowIDs }: FlowIdSearchStrategyResponse =
+      const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromCategoryConditions.search({
+          databaseConnection,
           models,
           flowCategoryConditions: flowCategoryFilters ?? [],
           shortcutFilter,
@@ -78,8 +104,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
       // When using the spread operator - a workaround is to use push fot each element
-      for (const flowID of flowIDs) {
-        flowIDsFromCategoryFilters.push(flowID);
+      for (const flow of flows) {
+        flowsFromCategoryFilters.push(flow);
       }
     }
 
@@ -87,181 +113,84 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // Obtain the flowIDs from the flowObjects
     const isFilterByFlowObjects = flowObjectFilters?.length > 0;
 
-    const flowIDsFromObjectFilters: FlowId[] = [];
+    const flowsFromObjectFilters: UniqueFlowEntity[] = [];
     if (isFilterByFlowObjects) {
       const flowObjectConditionsMap =
         mapFlowObjectConditions(flowObjectFilters);
-      const flowIDsFromObjectStrategy: FlowIdSearchStrategyResponse =
+      const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromObjectConditions.search({
+          databaseConnection,
           models,
           flowObjectsConditions: flowObjectConditionsMap,
         });
-      flowIDsFromObjectFilters.push(...flowIDsFromObjectStrategy.flowIDs);
+      flowsFromObjectFilters.push(...flows);
     }
 
-    // We need to have two conditions, one for the search and one for the count
-    // 'countConditions' => Apply only filter conditions but not cursor conditions
-    // 'searchConditions' => Apply both filter and cursor conditions
-    const { countConditions, searchConditions } = this.buildConditions(
-      {
-        isFilterByFlowObjects,
-        isFilterByCategory,
-        shortcutFilter,
-      },
-      {
-        flowIDsFromCategoryFilters,
-        flowIDsFromObjectFilters,
-        flowFilters,
-        cursorCondition,
+    // Lastly, we need to check if we need to filter by flow
+    // And if we didn't did it before when sorting by entity
+    // if so, we need to obtain the flowIDs from the flowFilters
+    const isFilterByFlow = flowFilters !== undefined;
+
+    const flowsFromFlowFilters: UniqueFlowEntity[] = [];
+    if (isSortByEntity && isFilterByFlow) {
+      const flowConditions = prepareFlowConditions(flowFilters);
+      const flows = await this.flowService.getFlows({
+        models,
+        conditions: flowConditions,
+        orderBy: { column: orderBy.column, order: orderBy.order },
+      });
+      for (const flow of flows) {
+        flowsFromFlowFilters.push({ id: flow.id, versionID: flow.versionID });
       }
+    }
+
+    // We need to intersect the flowIDs from the flowObjects, flowCategoryFilters and flowFilters
+    // to obtain the flowIDs that match all the filters
+    const deduplicatedFlows: UniqueFlowEntity[] = intersectUniqueFlowEntities(
+      flowsFromCategoryFilters,
+      flowsFromObjectFilters,
+      flowsFromFlowFilters,
+      sortByFlowIDs
     );
 
-    let rawOrderBy: string | undefined;
-    let orderByFlow:
-      | {
-          column: any;
-          order: any;
-        }
-      | undefined;
-    if (isSortByEntity) {
-      rawOrderBy = `array_position(ARRAY[${sortByFlowIDs.join(',')}], "id")`;
-    } else {
-      orderByFlow = mapFlowOrderBy(orderBy);
-    }
+    // Obtain the count of the flows that match the filters
+    const count = deduplicatedFlows.length;
 
-    const [flows, countRes] = await Promise.all([
-      this.flowService.getFlows(
-        models,
-        searchConditions,
-        orderByFlow,
-        limit,
-        rawOrderBy
-      ),
-      this.flowService.getFlowsCount(models, countConditions),
-    ]);
+    // After obtaining the count, we need to obtain the flows
+    // that match the filters
+    // First we are going to sort the deduplicated flows
+    // using the sortByFlowIDs if there are any
+    const sortedFlows: UniqueFlowEntity[] = sortEntitiesByReferenceList(
+      deduplicatedFlows,
+      sortByFlowIDs
+    );
 
-    // Map count result query to count object
-    const countObject = mapCountResultToCountObject(countRes);
+    // Then we are going to slice the flows using the limit and offset
+    const reducedFlows: UniqueFlowEntity[] = sortedFlows.slice(
+      offset,
+      offset! + limit!
+    );
 
-    return { flows, count: countObject.count };
+    // Once the list of elements is reduced, we need to build the conditions
+    const searchConditions = this.buildConditions(reducedFlows);
+
+    const flows = await this.flowService.getFlows({
+      models,
+      conditions: searchConditions,
+      limit,
+      orderBy: { column: orderBy.column, order: orderBy.order },
+    });
+
+    return { flows, count };
   }
 
-  buildConditions(
-    decisionArgs: {
-      isFilterByFlowObjects: boolean;
-      isFilterByCategory: boolean;
-      shortcutFilter: any | null;
-    },
-    filterArgs: {
-      flowIDsFromCategoryFilters: FlowId[];
-      flowIDsFromObjectFilters: FlowId[];
-      flowFilters: any | undefined;
-      cursorCondition: any | undefined;
-    }
-  ): { countConditions: any; searchConditions: any } {
-    const { isFilterByFlowObjects, isFilterByCategory, shortcutFilter } =
-      decisionArgs;
-    const {
-      flowIDsFromCategoryFilters,
-      flowIDsFromObjectFilters,
-      flowFilters,
-      cursorCondition,
-    } = filterArgs;
-    let countConditions: any = {};
-    let searchConditions: any = {};
+  buildConditions(uniqueFlowEntities: UniqueFlowEntity[]): any {
+    const whereClauses = uniqueFlowEntities.map((flow) => ({
+      [Cond.AND]: [{ id: flow.id }, { versionID: flow.versionID }],
+    }));
 
-    // Check if we have flowIDs from flowObjects and flowCategoryFilters
-    // if so, we need to filter by those flowIDs
-    if ((isFilterByFlowObjects || isFilterByCategory) && shortcutFilter) {
-      const deduplicatedFlowIDs = [...new Set(flowIDsFromCategoryFilters)];
-
-      searchConditions = {
-        ...searchConditions,
-        [Cond.AND]: [
-          {
-            id: {
-              [Op.IN]: deduplicatedFlowIDs,
-            },
-          },
-        ],
-      };
-      countConditions = {
-        ...countConditions,
-        [Cond.AND]: [
-          {
-            id: {
-              [Op.IN]: deduplicatedFlowIDs,
-            },
-          },
-        ],
-      };
-    } else if (isFilterByFlowObjects) {
-      searchConditions = {
-        ...searchConditions,
-        [Cond.AND]: [
-          {
-            id: {
-              [Op.IN]: flowIDsFromObjectFilters,
-            },
-          },
-        ],
-      };
-      countConditions = {
-        ...countConditions,
-        [Cond.AND]: [
-          {
-            id: {
-              [Op.IN]: flowIDsFromObjectFilters,
-            },
-          },
-        ],
-      };
-    } else if (isFilterByCategory || shortcutFilter) {
-      const idCondition = shortcutFilter ? shortcutFilter.operation : Op.IN;
-
-      searchConditions = {
-        ...searchConditions,
-        [Cond.AND]: [
-          {
-            id: {
-              [idCondition]: flowIDsFromCategoryFilters,
-            },
-          },
-        ],
-      };
-
-      countConditions = {
-        ...countConditions,
-        [Cond.AND]: [
-          {
-            id: {
-              idCondition: flowIDsFromCategoryFilters,
-            },
-          },
-        ],
-      };
-    }
-
-    // After adding the where clauses form the filters
-    // we need to add the conditions from the flow entity filters
-    // if there are any
-    if (flowFilters) {
-      // Map flowConditions to where clause
-      const flowConditions = prepareFlowConditions(flowFilters);
-
-      // Combine conditions from flowObjects FlowIDs and flow conditions
-      countConditions = {
-        ...countConditions,
-        [Cond.AND]: [flowConditions ?? {}],
-      };
-
-      // Combine cursor condition with flow conditions
-      searchConditions = {
-        ...searchConditions,
-        ...cursorCondition,
-        [Cond.AND]: [flowConditions ?? {}],
-      };
-    }
-    return { countConditions, searchConditions };
+    return {
+      [Cond.OR]: whereClauses,
+    };
   }
 }

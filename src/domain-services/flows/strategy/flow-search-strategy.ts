@@ -18,10 +18,10 @@ export interface FlowSearchArgs {
   flowFilters: SearchFlowsFilters;
   flowObjectFilters: FlowObjectFilters[];
   flowCategoryFilters: FlowCategory[];
-  limit?: number;
-  orderBy?: any;
-  cursorCondition?: any;
   shortcutFilter: any;
+  limit?: number;
+  offset?: number;
+  orderBy?: any;
 }
 
 export interface FlowSearchStrategy {
