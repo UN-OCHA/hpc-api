@@ -5,6 +5,7 @@ import {
   type FlowObjectFilters,
   type SearchFlowsFilters,
 } from '../../graphql/args';
+import { UniqueFlowEntity } from '../../model';
 
 /*
  * Map structure:
@@ -42,18 +43,10 @@ export function mapFlowObjectConditionsToWhereClause(
 }
 
 export function mapFlowCategoryConditionsToWhereClause(
-  shortcutFilter: any | null,
   flowCategoryConditions: FlowCategory[]
 ) {
-  let whereClause = {};
-
-  const shortcutsWhereClause = shortcutFilter ? shortcutFilter.where : null;
-  if (shortcutsWhereClause) {
-    whereClause = {
-      [Cond.OR]: [shortcutsWhereClause],
-    };
-  }
   if (flowCategoryConditions.length > 0) {
+    let whereClause = {};
     // Map category filters
     // getting Id when possible
     // or name and group otherwise
@@ -102,9 +95,10 @@ export function mapFlowCategoryConditionsToWhereClause(
         ],
       };
     }
+    return whereClause;
   }
 
-  return whereClause;
+  return undefined;
 }
 
 export function mergeFlowIDsFromFilteredFlowObjectsAndFlowCategories(
@@ -216,4 +210,97 @@ export function mapFlowObjectConditions(
   }
 
   return flowObjectsConditions;
+}
+
+export function mergeUniqueEntities(
+  listA: UniqueFlowEntity[],
+  listB: UniqueFlowEntity[]
+): UniqueFlowEntity[] {
+  const entityMap = new Map<string, UniqueFlowEntity>();
+
+  for (const entity of listA.concat(listB)) {
+    const key = `${entity.id}_${entity.versionID}`;
+    if (!entityMap.has(key)) {
+      entityMap.set(key, entity);
+    }
+  }
+
+  return Array.from(entityMap.values());
+}
+
+export function intersectUniqueFlowEntities(
+  ...lists: UniqueFlowEntity[][]
+): UniqueFlowEntity[] {
+  // If any of the lists is empty, remove it
+  lists = lists.filter((list) => list.length > 0);
+
+  if (lists.length === 0) return [];
+
+  if (lists.length === 1) return lists[0];
+
+  // Helper function to create a string key for comparison
+  const createKey = (entity: UniqueFlowEntity) =>
+    `${entity.id}_${entity.versionID}`;
+
+  // Convert the first list into a set for efficient lookup
+  const initialSet = new Set(lists[0].map(createKey));
+
+  // Intersect the remaining lists with the initial set
+  for (let i = 1; i < lists.length; i++) {
+    const currentSet = new Set(lists[i].map(createKey));
+    for (let key of initialSet) {
+      if (!currentSet.has(key)) {
+        initialSet.delete(key);
+      }
+    }
+  }
+
+  // Convert the keys back to UniqueFlowEntity objects
+  return Array.from(initialSet).map((key) => {
+    const [id, versionID] = key.split('_').map(Number);
+    return { id, versionID } as UniqueFlowEntity;
+  });
+}
+
+export function sortEntitiesByReferenceList(
+  entities: UniqueFlowEntity[],
+  referenceList: UniqueFlowEntity[]
+): UniqueFlowEntity[] {
+  // Create a map for quick lookup of index positions in referenceList
+  const indexMap = new Map<string, number>();
+  referenceList.forEach((entity, index) => {
+    const key = `${entity.id}_${entity.versionID}`;
+    indexMap.set(key, index);
+  });
+
+  // Sort the entities array based on the order in referenceList
+  return entities.sort((a, b) => {
+    const keyA = `${a.id}_${a.versionID}`;
+    const keyB = `${b.id}_${b.versionID}`;
+    const indexA = indexMap.get(keyA);
+    const indexB = indexMap.get(keyB);
+
+    if (indexA !== undefined && indexB !== undefined) {
+      return indexA - indexB;
+    } else if (indexA !== undefined) {
+      return -1; // Prefer elements found in referenceList
+    } else {
+      return 1;
+    }
+  });
+}
+
+export function removeDuplicatesUniqueFlowEntities(
+  entities: UniqueFlowEntity[]
+): UniqueFlowEntity[] {
+  const uniqueEntities = new Map<string, UniqueFlowEntity>();
+
+  entities.forEach((entity) => {
+    const key = `${entity.id}_${entity.versionID}`;
+    if (!uniqueEntities.has(key)) {
+      uniqueEntities.set(key, entity);
+    }
+  });
+
+  return Array.from(uniqueEntities.values());
 }

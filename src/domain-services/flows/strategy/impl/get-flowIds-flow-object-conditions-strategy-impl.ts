@@ -2,6 +2,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
+import { UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
@@ -23,18 +24,18 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
       flowObjectsConditions!
     );
 
-    const flowIDsFromFilteredFlowObjects: FlowId[] = [];
-    const tempFlowIDs: FlowId[][] = await Promise.all(
+    const flowsFromFilteredFlowObjects: UniqueFlowEntity[] = [];
+    const tempFlowIDs: UniqueFlowEntity[][] = await Promise.all(
       flowObjectWhere.map((whereClause) =>
-        this.flowObjectService.getFlowIdsFromFlowObjects(models, whereClause)
+        this.flowObjectService.getFlowFromFlowObjects(models, whereClause)
       )
     );
 
     // Flatten array of arrays keeping only values present in all arrays
     const flowIDs = tempFlowIDs.flat();
-    flowIDsFromFilteredFlowObjects.push(...new Set(flowIDs));
+    flowsFromFilteredFlowObjects.push(...new Set(flowIDs));
 
-    return { flowIDs: flowIDsFromFilteredFlowObjects };
+    return { flows: flowsFromFilteredFlowObjects };
   }
 
   generateWhereClause(flowIds: FlowId[]) {
