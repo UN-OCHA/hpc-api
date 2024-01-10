@@ -104,7 +104,6 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     }
 
     const flows = await query;
-    console.log('flows', flows.length);
     const mapFlows: UniqueFlowEntity[] = flows.map(
       (flow) =>
         ({
@@ -114,65 +113,6 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     );
 
     return { flows: mapFlows };
-    // const whereClauseCategoryRef = {
-    //   [Cond.OR]: [
-    //     categoriesIds.length > 0
-    //       ? {
-    //           [Cond.AND]: [
-    //             {
-    //               categoryID: {
-    //                 [Op.IN]: categoriesIds,
-    //               },
-    //             },
-    //             { objectType: 'flow' },
-    //           ],
-    //         }
-    //       : {},
-    //     categoriesIdsFromShortcutFilterIN.length > 0
-    //       ? {
-    //           [Cond.AND]: [
-    //             {
-    //               categoryID: {
-    //                 [Op.IN]: categoriesIdsFromShortcutFilterIN,
-    //               },
-    //             },
-    //             { objectType: 'flow' },
-    //           ],
-    //         }
-    //       : {},
-    //     categoriesIdsFromShortcutFilterNOTIN.length > 0
-    //       ? {
-    //           [Cond.AND]: [
-    //             {
-    //               categoryID: {
-    //                 [Op.NOT_IN]: categoriesIdsFromShortcutFilterNOTIN,
-    //               },
-    //             },
-    //             { objectType: 'flow' },
-    //           ],
-    //         }
-    //       : {},
-    //   ],
-    // };
-
-    // const categoryRefs = await this.categoryService.findCategoryRefs(
-    //   models,
-    //   whereClauseCategoryRef
-    // );
-
-    // Map category refs to flow IDs
-    // keep only unique values
-    // and return the list of flow IDs
-    // const mapFlowsToUniqueFlowEntities = categoryRefs.map((categoryRef) => {
-    //   return {
-    //     id: categoryRef.objectID,
-    //     versionID: categoryRef.versionID,
-    //   } as UniqueFlowEntity;
-    // })
-
-    // const flows = removeDuplicatesUniqueFlowEntities(mapFlowsToUniqueFlowEntities);
-
-    // return { flows };
   }
 
   generateWhereClause(

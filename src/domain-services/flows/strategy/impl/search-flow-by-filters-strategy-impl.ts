@@ -1,8 +1,7 @@
-import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
-import { UniqueFlowEntity } from '../../model';
+import { FlowEntity, UniqueFlowEntity } from '../../model';
 import {
   type FlowSearchArgs,
   type FlowSearchStrategy,
@@ -13,10 +12,8 @@ import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
   intersectUniqueFlowEntities,
-  mapCountResultToCountObject,
   mapFlowObjectConditions,
   mapFlowOrderBy,
-  mergeUniqueEntities,
   prepareFlowConditions,
   sortEntitiesByReferenceList,
 } from './utils';
@@ -63,30 +60,32 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       // In this case we fetch the list of flows from the database
       // using the orderBy
       // We can also filter by flowFilters
-      const flowConditions = prepareFlowConditions(flowFilters);
+      const orderByForFlow = mapFlowOrderBy(orderBy);
 
-      const flowsToSort = await this.flowService.getFlows({
-        models,
-        conditions: flowConditions,
-        orderBy: { column: orderBy.column, order: orderBy.order },
+      const flowsToSort: UniqueFlowEntity[] = await this.flowService.getFlowsAsUniqueFlowEntity({
+        databaseConnection,
+        conditions: flowFilters,
+        orderBy: orderByForFlow,
       });
 
-      const flowIDsFromSortingEntity: UniqueFlowEntity[] = flowsToSort.map(
-        (flow) => ({ id: flow.id, versionID: flow.versionID })
-      );
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
       // When using the spread operator - a workaround is to use push fot each element
-      for (const flow of flowIDsFromSortingEntity) {
-        sortByFlowIDs.push(flow);
+      // also, we need to map the FlowEntity to UniqueFlowEntity
+      for (const flow of flowsToSort) {
+        const uniqueFlowEntity: UniqueFlowEntity = {
+          id: flow.id,
+          versionID: flow.versionID,
+        };
+        sortByFlowIDs.push(uniqueFlowEntity);
       }
     }
 
     // Now we need to check if we need to filter by category
     // if it's using any of the shorcuts
     // or if there are any flowCategoryFilters
-    const isSearchByCategoryShotcut = shortcutFilter !== null;
-
+    const isSearchByCategoryShotcut = shortcutFilter !== null && shortcutFilter.length > 0;
+    
     const isFilterByCategory =
       isSearchByCategoryShotcut || flowCategoryFilters?.length > 0;
 
@@ -101,6 +100,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           shortcutFilter,
           flowObjectsConditions: undefined,
         });
+
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
       // When using the spread operator - a workaround is to use push fot each element
@@ -123,7 +123,13 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           models,
           flowObjectsConditions: flowObjectConditionsMap,
         });
-      flowsFromObjectFilters.push(...flows);
+
+      // Since there can be many flowIDs returned
+      // This can cause 'Maximum call stack size exceeded' error
+      // When using the spread operator - a workaround is to use push fot each element
+      for (const flow of flows) {
+        flowsFromObjectFilters.push(flow);
+      }
     }
 
     // Lastly, we need to check if we need to filter by flow
@@ -134,13 +140,22 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const flowsFromFlowFilters: UniqueFlowEntity[] = [];
     if (isSortByEntity && isFilterByFlow) {
       const flowConditions = prepareFlowConditions(flowFilters);
-      const flows = await this.flowService.getFlows({
+      const flows: FlowEntity[] = await this.flowService.getFlows({
         models,
         conditions: flowConditions,
         orderBy: { column: orderBy.column, order: orderBy.order },
       });
+
+      // Since there can be many flowIDs returned
+      // This can cause 'Maximum call stack size exceeded' error
+      // When using the spread operator - a workaround is to use push fot each element
+      // also, we need to map the FlowEntity to UniqueFlowEntity
       for (const flow of flows) {
-        flowsFromFlowFilters.push({ id: flow.id, versionID: flow.versionID });
+        const uniqueFlowEntity: UniqueFlowEntity = {
+          id: flow.id,
+          versionID: flow.versionID,
+        };
+        sortByFlowIDs.push(uniqueFlowEntity);
       }
     }
 
@@ -165,6 +180,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       sortByFlowIDs
     );
 
+
     // Then we are going to slice the flows using the limit and offset
     const reducedFlows: UniqueFlowEntity[] = sortedFlows.slice(
       offset,
@@ -174,11 +190,12 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // Once the list of elements is reduced, we need to build the conditions
     const searchConditions = this.buildConditions(reducedFlows);
 
+    const orderByForFlow = mapFlowOrderBy(orderBy);
+
     const flows = await this.flowService.getFlows({
       models,
       conditions: searchConditions,
-      limit,
-      orderBy: { column: orderBy.column, order: orderBy.order },
+      orderBy: orderByForFlow,
     });
 
     return { flows, count };
