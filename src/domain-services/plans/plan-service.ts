@@ -112,6 +112,19 @@ export class PlanService {
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
       direction: direction ?? '',
+      startDate: planVersion.startDate.toISOString(),
+      endDate: planVersion.endDate.toISOString(),
+      comments: planVersion.comments,
+      isForHPCProjects: planVersion.isForHPCProjects,
+      code: planVersion.code,
+      customLocationCode: planVersion.customLocationCode,
+      currentReportingPeriodId: planVersion.currentReportingPeriodId,
+      currentVersion: planVersion.currentVersion,
+      latestVersion: planVersion.latestVersion,
+      latestTaggedVersion: planVersion.latestTaggedVersion,
+      lastPublishedReportingPeriodId:
+        planVersion.lastPublishedReportingPeriodId,
+      clusterSelectionType: planVersion.clusterSelectionType,
     };
   }
 }

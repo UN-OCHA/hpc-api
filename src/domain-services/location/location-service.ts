@@ -78,13 +78,22 @@ export class LocationService {
   private mapLocationsToFlowLocations(
     location: InstanceDataOfModel<Database['location']>,
     locationFO: InstanceDataOfModel<Database['flowObject']>
-  ) {
+  ): BaseLocation {
     return {
       id: location.id,
       name: location.name,
       direction: locationFO.refDirection,
       createdAt: location.createdAt.toISOString(),
       updatedAt: location.updatedAt.toISOString(),
+      adminLevel: location.adminLevel,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      parentId: location.parentId,
+      iso3: location.iso3,
+      status: location.status,
+      validOn: location.validOn,
+      itosSync: location.itosSync,
+      pcode: location.pcode,
     };
   }
 }
