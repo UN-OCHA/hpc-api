@@ -1,6 +1,6 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
-import { Field, ID, Int, ObjectType, registerEnumType } from 'type-graphql';
+import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import { BaseType } from '../../../utils/graphql/base-types';
 
 export enum LocationStatus {
@@ -25,7 +25,7 @@ export default class Location extends BaseType {
   @MaxLength(255)
   name?: string;
 
-  @Field(() => Int)
+  @Field(() => Number)
   adminLevel: number; // Accidentally optional
 
   @Field({ nullable: true })
@@ -34,7 +34,7 @@ export default class Location extends BaseType {
   @Field({ nullable: true })
   longitude?: number;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Number, { nullable: true })
   parentId?: number;
 
   @Field({ nullable: true })
@@ -47,7 +47,7 @@ export default class Location extends BaseType {
   @Field(() => LocationStatus)
   status?: LocationStatus; // Accidentally optional
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => Number, { nullable: true })
   validOn?: number;
 
   @Field({ defaultValue: true })
@@ -56,12 +56,42 @@ export default class Location extends BaseType {
 
 @ObjectType()
 export class BaseLocation extends BaseType {
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   id: number;
 
-  @Field(() => String, { nullable: false })
+  @Field(() => String, { nullable: true })
   name: string | null;
 
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   direction: string;
+
+  @Field({ nullable: true })
+  externalId?: string;
+
+  @Field(() => Number)
+  adminLevel: number | null; // Accidentally optional
+
+  @Field(() => Number, { nullable: true })
+  latitude: number | null;
+
+  @Field(() => Number, { nullable: true })
+  longitude: number | null;
+
+  @Field(() => Number, { nullable: true })
+  parentId: number | null;
+
+  @Field(() => String, { nullable: true })
+  iso3: string | null;
+
+  @Field(() => String, { nullable: true })
+  pcode: string | null;
+
+  @Field(() => String)
+  status: string | null; // Accidentally optional
+
+  @Field(() => Number, { nullable: true })
+  validOn: string | number | null;
+
+  @Field({ defaultValue: true })
+  itosSync: boolean; // Accidentally optional
 }

@@ -59,6 +59,15 @@ export class OrganizationService {
       createdAt: organization.createdAt.toISOString(),
       updatedAt: organization.updatedAt.toISOString(),
       abbreviation: organization.abbreviation,
+      url: organization.url,
+      parentID: organization.parentID,
+      nativeName: organization.nativeName,
+      comments: organization.comments,
+      collectiveInd: organization.collectiveInd,
+      active: organization.active,
+      newOrganisationId: organization.newOrganisationId,
+      verified: organization.verified,
+      notes: organization.notes,
     };
   }
 }
