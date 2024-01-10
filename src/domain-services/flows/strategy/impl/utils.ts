@@ -6,6 +6,7 @@ import {
   type SearchFlowsFilters,
 } from '../../graphql/args';
 import { UniqueFlowEntity } from '../../model';
+import Knex from 'knex';
 
 /*
  * Map structure:
@@ -303,4 +304,28 @@ export function removeDuplicatesUniqueFlowEntities(
   });
 
   return Array.from(uniqueEntities.values());
+}
+
+export function applySearchFilters(query: Knex.QueryBuilder, filters: SearchFlowsFilters): Knex.QueryBuilder {
+  // Check if 'id' filter is defined and apply it
+  if (filters.id !== null && filters.id !== undefined) {
+    query.whereIn('id', filters.id);
+  }
+
+  // Check if 'activeStatus' filter is defined and apply it
+  if (filters.activeStatus !== null && filters.activeStatus !== undefined) {
+    query.andWhere('activeStatus', filters.activeStatus);
+  }
+
+  // Check if 'amountUSD' filter is defined and apply it
+  if (filters.amountUSD !== null && filters.amountUSD !== undefined) {
+    query.andWhere('amountUSD', filters.amountUSD);
+  }
+
+  // Check if 'restricted' filter is defined and apply it
+  if (filters.restricted !== null && filters.restricted !== undefined) {
+    query.andWhere('restricted', filters.restricted);
+  }
+
+  return query;
 }

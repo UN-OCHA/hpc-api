@@ -4,6 +4,7 @@ import { Service } from 'typedi';
 import { type FlowObjectType } from '../flow-object/model';
 import { GetFlowsArgs, UniqueFlowEntity, type FlowOrderBy } from './model';
 import {
+  applySearchFilters,
   mapFlowOrderBy,
   removeDuplicatesUniqueFlowEntities,
 } from './strategy/impl/utils';
@@ -15,12 +16,36 @@ export class FlowService {
   async getFlows(args: GetFlowsArgs) {
     const { models, conditions, offset, orderBy, limit } = args;
 
-    return await models.flow.find({
+    return await models!.flow.find({
       orderBy,
       limit,
       where: conditions,
       offset,
     });
+  }
+
+  async getFlowsAsUniqueFlowEntity(args: GetFlowsArgs): Promise<UniqueFlowEntity[]> {
+    const { databaseConnection, orderBy, conditions } = args;
+
+    let query = databaseConnection!.queryBuilder()
+    .distinct('id', 'versionID', orderBy.column) // Include orderBy.column in the distinct selection
+    .select('id', 'versionID')
+    .from('flow')
+    .whereNull('deletedAt')
+    .orderBy(orderBy.column, orderBy.order);
+    
+    if(conditions) {
+      query = applySearchFilters(query, conditions);
+    }
+
+    const flows = await query;
+
+    const mapFlowsToUniqueFlowEntities = flows.map((flow) => ({
+      id: flow.id,
+      versionID: flow.versionID,
+    }));
+
+    return mapFlowsToUniqueFlowEntities;
   }
 
   async getFlowsCount(models: Database, conditions: any) {

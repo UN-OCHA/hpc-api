@@ -2,6 +2,7 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type SortOrder } from '../../utils/graphql/pagination';
+import Knex from 'knex';
 
 export type FlowEntity = InstanceDataOfModel<Database['flow']>;
 
@@ -21,7 +22,8 @@ export type FlowOrderBy = {
 export type FlowNestedDirection = 'source' | 'destination';
 
 export type GetFlowsArgs = {
-  models: Database;
+  models?: Database;
+  databaseConnection?: Knex;
   conditions: any;
   offset?: number;
   orderBy?: any;
