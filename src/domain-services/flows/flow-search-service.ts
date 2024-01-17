@@ -426,11 +426,11 @@ export class FlowSearchService {
         orderBy.column = struct[2];
         orderBy.direction = struct[1] as FlowNestedDirection;
 
-        // We need to look after the capitalized letter
-        // that will indicate the entity
-        // and the whole word will be the subEntity
-        // Capitalized letter will never be the first letter
-        const entity = this.getSubstringUntilCapital(struct[0]);
+        // We need to look after the '-' character
+        // [0] will indicate the entity
+        // and [1] will be the subEntity
+        const splitted = struct[0].split('-');
+        const entity = splitted[0];
         orderBy.entity = entity;
 
         if (entity === struct[0]) {
@@ -440,15 +440,6 @@ export class FlowSearchService {
     }
 
     return orderBy;
-  }
-
-  getSubstringUntilCapital(inputString: string): string {
-    for (let i = 0; i < inputString.length; i++) {
-      if (inputString[i] === inputString[i].toUpperCase()) {
-        return inputString.substring(0, i);
-      }
-    }
-    return inputString; // Return inputString if no capital letter is found
   }
 
   prepareFlowConditions(flowFilters: SearchFlowsFilters): any {
