@@ -3,6 +3,7 @@ import type Knex from 'knex';
 import {
   type FlowCategory,
   type FlowObjectFilters,
+  type NestedFlowFilters,
   type SearchFlowsFilters,
 } from '../graphql/args';
 import { type FlowEntity } from '../model';
@@ -18,6 +19,7 @@ export interface FlowSearchArgs {
   flowFilters: SearchFlowsFilters;
   flowObjectFilters: FlowObjectFilters[];
   flowCategoryFilters: FlowCategory[];
+  nestedFlowFilters: NestedFlowFilters;
   shortcutFilter: any;
   limit?: number;
   offset?: number;

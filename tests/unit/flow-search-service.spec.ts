@@ -17,12 +17,7 @@ describe('FlowSearchService', () => {
       const flowFilters = new SearchFlowsFilters();
       flowFilters.id = [1];
       flowFilters.activeStatus = true;
-      flowFilters.status = 'commitment';
-      flowFilters.type = 'carryover';
       flowFilters.amountUSD = 1000;
-      flowFilters.reporterReferenceCode = 123;
-      flowFilters.sourceSystemId = 456;
-      flowFilters.legacyId = 789;
 
       const result = flowSearchService.prepareFlowConditions(flowFilters);
 

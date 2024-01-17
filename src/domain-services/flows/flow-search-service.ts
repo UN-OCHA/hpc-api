@@ -24,6 +24,7 @@ import {
   SearchFlowsFilters,
   type FlowCategory,
   type FlowObjectFilters,
+  type NestedFlowFilters,
   type SearchFlowsArgs,
   type SearchFlowsArgsNonPaginated,
 } from './graphql/args';
@@ -72,6 +73,7 @@ export class FlowSearchService {
       sortField,
       sortOrder,
       shouldIncludeChildrenOfParkedFlows,
+      nestedFlowFilters,
     } = filters;
 
     const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
@@ -110,6 +112,7 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
+      nestedFlowFilters,
       shortcutFilter,
       orderBy
     );
@@ -132,6 +135,7 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
+      nestedFlowFilters,
       // shortcuts for categories
       shortcutFilter,
     });
@@ -353,10 +357,11 @@ export class FlowSearchService {
     flowFilters: SearchFlowsFilters,
     flowObjectFilters: FlowObjectFilters[],
     flowCategoryFilters: FlowCategory[],
+    nestedFlowFilters: NestedFlowFilters,
     shortcutFilter: any | null,
     orderBy?: FlowOrderBy
   ) {
-    // If there are no filters (flowFilters, flowObjectFilters, flowCategoryFilters or pending)
+    // If there are no filters (flowFilters, flowObjectFilters, flowCategoryFilters, nestedFlowFilters or shortcutFilter)
     // and there is no sortByEntity (orderBy.entity === 'flow')
     // use onlyFlowFiltersStrategy
     // If there are no sortByEntity (orderBy.entity === 'flow')
@@ -366,6 +371,7 @@ export class FlowSearchService {
     const isFlowFiltersDefined = flowFilters !== undefined;
     const isFlowObjectFiltersDefined = flowObjectFilters !== undefined;
     const isFlowCategoryFiltersDefined = flowCategoryFilters !== undefined;
+    const isNestedFlowFiltersDefined = nestedFlowFilters !== undefined;
     // Shortcuts fot categories
     const isFilterByShortcutsDefined = shortcutFilter !== null;
 
@@ -373,13 +379,15 @@ export class FlowSearchService {
       !isFlowFiltersDefined &&
       !isFlowObjectFiltersDefined &&
       !isFlowCategoryFiltersDefined &&
-      !isFilterByShortcutsDefined;
+      !isFilterByShortcutsDefined &&
+      !isNestedFlowFiltersDefined;
 
     const isFlowFiltersOnly =
       isFlowFiltersDefined &&
       !isFlowObjectFiltersDefined &&
       !isFlowCategoryFiltersDefined &&
-      !isFilterByShortcutsDefined;
+      !isFilterByShortcutsDefined &&
+      !isNestedFlowFiltersDefined;
 
     if (isOrderByEntityFlow && (isNoFilterDefined || isFlowFiltersOnly)) {
       // Use onlyFlowFiltersStrategy
@@ -761,6 +769,7 @@ export class FlowSearchService {
       parked: isParkedFlows,
       pass_through: isPassThroughFlows,
       standard: isStandardFlows,
+      nestedFlowFilters,
     } = args;
 
     if (!flowFilters) {
@@ -794,6 +803,7 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
+      nestedFlowFilters,
       shortcutFilter
     );
 
@@ -803,6 +813,7 @@ export class FlowSearchService {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
+      nestedFlowFilters,
       // shortcuts for categories
       shortcutFilter,
     });

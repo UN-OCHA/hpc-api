@@ -4,7 +4,6 @@ import Context from '../../Context';
 import { FlowSearchService } from '../flow-search-service';
 import { SearchFlowsArgs, SearchFlowsArgsNonPaginated } from './args';
 import {
-  BaseFlow,
   Flow,
   FlowSearchResult,
   FlowSearchResultNonPaginated,

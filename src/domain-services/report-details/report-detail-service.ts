@@ -2,8 +2,10 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type Category } from '../categories/graphql/types';
+import { type UniqueFlowEntity } from '../flows/model';
 import { type ReportDetail } from './graphql/types';
 @Service()
 export class ReportDetailService {
@@ -80,5 +82,58 @@ export class ReportDetailService {
       }
     }
     return reportDetails;
+  }
+
+  async getUniqueFlowIDsFromReportDetailsByReporterReferenceCode(
+    models: Database,
+    reporterReferenceCodes: string[]
+  ): Promise<UniqueFlowEntity[]> {
+    const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
+      await models.reportDetail.find({
+        where: {
+          refCode: {
+            [Op.IN]: reporterReferenceCodes,
+          },
+        },
+      });
+
+    const flowIDs: UniqueFlowEntity[] = [];
+
+    for (const reportDetail of reportDetails) {
+      flowIDs.push(this.mapReportDetailToUniqueFlowEntity(reportDetail));
+    }
+
+    return flowIDs;
+  }
+
+  async getUniqueFlowIDsFromReportDetailsBySourceID(
+    models: Database,
+    sourceIDs: string[]
+  ): Promise<UniqueFlowEntity[]> {
+    const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
+      await models.reportDetail.find({
+        where: {
+          sourceID: {
+            [Op.IN]: sourceIDs,
+          },
+        },
+      });
+
+    const flowIDs: UniqueFlowEntity[] = [];
+
+    for (const reportDetail of reportDetails) {
+      flowIDs.push(this.mapReportDetailToUniqueFlowEntity(reportDetail));
+    }
+
+    return flowIDs;
+  }
+
+  private mapReportDetailToUniqueFlowEntity(
+    reportDetail: InstanceDataOfModel<Database['reportDetail']>
+  ): UniqueFlowEntity {
+    return {
+      id: createBrandedValue(reportDetail.flowID),
+      versionID: reportDetail.versionID,
+    };
   }
 }

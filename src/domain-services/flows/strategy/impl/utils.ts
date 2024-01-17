@@ -1,12 +1,12 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import type Knex from 'knex';
 import {
   type FlowCategory,
   type FlowObjectFilters,
   type SearchFlowsFilters,
 } from '../../graphql/args';
-import { UniqueFlowEntity } from '../../model';
-import Knex from 'knex';
+import { type UniqueFlowEntity } from '../../model';
 
 /*
  * Map structure:
@@ -99,7 +99,7 @@ export function mapFlowCategoryConditionsToWhereClause(
     return whereClause;
   }
 
-  return undefined;
+  return {};
 }
 
 export function mergeFlowIDsFromFilteredFlowObjectsAndFlowCategories(
@@ -219,14 +219,14 @@ export function mergeUniqueEntities(
 ): UniqueFlowEntity[] {
   const entityMap = new Map<string, UniqueFlowEntity>();
 
-  for (const entity of listA.concat(listB)) {
+  for (const entity of [...listA, ...listB]) {
     const key = `${entity.id}_${entity.versionID}`;
     if (!entityMap.has(key)) {
       entityMap.set(key, entity);
     }
   }
 
-  return Array.from(entityMap.values());
+  return [...entityMap.values()];
 }
 
 export function intersectUniqueFlowEntities(
@@ -235,9 +235,13 @@ export function intersectUniqueFlowEntities(
   // If any of the lists is empty, remove it
   lists = lists.filter((list) => list.length > 0);
 
-  if (lists.length === 0) return [];
+  if (lists.length === 0) {
+    return [];
+  }
 
-  if (lists.length === 1) return lists[0];
+  if (lists.length === 1) {
+    return lists[0];
+  }
 
   // Helper function to create a string key for comparison
   const createKey = (entity: UniqueFlowEntity) =>
@@ -249,7 +253,7 @@ export function intersectUniqueFlowEntities(
   // Intersect the remaining lists with the initial set
   for (let i = 1; i < lists.length; i++) {
     const currentSet = new Set(lists[i].map(createKey));
-    for (let key of initialSet) {
+    for (const key of initialSet) {
       if (!currentSet.has(key)) {
         initialSet.delete(key);
       }
@@ -257,7 +261,7 @@ export function intersectUniqueFlowEntities(
   }
 
   // Convert the keys back to UniqueFlowEntity objects
-  return Array.from(initialSet).map((key) => {
+  return [...initialSet].map((key) => {
     const [id, versionID] = key.split('_').map(Number);
     return { id, versionID } as UniqueFlowEntity;
   });
@@ -269,10 +273,10 @@ export function sortEntitiesByReferenceList(
 ): UniqueFlowEntity[] {
   // Create a map for quick lookup of index positions in referenceList
   const indexMap = new Map<string, number>();
-  referenceList.forEach((entity, index) => {
+  for (const [index, entity] of referenceList.entries()) {
     const key = `${entity.id}_${entity.versionID}`;
     indexMap.set(key, index);
-  });
+  }
 
   // Sort the entities array based on the order in referenceList
   return entities.sort((a, b) => {
@@ -285,9 +289,8 @@ export function sortEntitiesByReferenceList(
       return indexA - indexB;
     } else if (indexA !== undefined) {
       return -1; // Prefer elements found in referenceList
-    } else {
-      return 1;
     }
+    return 1;
   });
 }
 
@@ -296,17 +299,20 @@ export function removeDuplicatesUniqueFlowEntities(
 ): UniqueFlowEntity[] {
   const uniqueEntities = new Map<string, UniqueFlowEntity>();
 
-  entities.forEach((entity) => {
+  for (const entity of entities) {
     const key = `${entity.id}_${entity.versionID}`;
     if (!uniqueEntities.has(key)) {
       uniqueEntities.set(key, entity);
     }
-  });
+  }
 
-  return Array.from(uniqueEntities.values());
+  return [...uniqueEntities.values()];
 }
 
-export function applySearchFilters(query: Knex.QueryBuilder, filters: SearchFlowsFilters): Knex.QueryBuilder {
+export function applySearchFilters(
+  query: Knex.QueryBuilder,
+  filters: SearchFlowsFilters
+): Knex.QueryBuilder {
   // Check if 'id' filter is defined and apply it
   if (filters.id !== null && filters.id !== undefined) {
     query.whereIn('id', filters.id);

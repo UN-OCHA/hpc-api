@@ -1,19 +1,15 @@
 import { type CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
-import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { CategoryService } from '../../../categories/category-service';
-import { UniqueFlowEntity } from '../../model';
+import { type UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
-import {
-  mapFlowCategoryConditionsToWhereClause,
-  removeDuplicatesUniqueFlowEntities,
-} from './utils';
+import { mapFlowCategoryConditionsToWhereClause } from './utils';
 
 @Service()
 export class GetFlowIdsFromCategoryConditionsStrategyImpl
@@ -21,7 +17,10 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
 {
   constructor(private readonly categoryService: CategoryService) {}
 
-  private readonly categoryIDsMap: Map<string, number> = new Map([
+  private readonly categoryIDsMap: Map<string, number> = new Map<
+    string,
+    number
+  >([
     ['Pending', 45],
     ['Pledge', 46],
     ['Commitment', 47],
@@ -79,7 +78,7 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
       }
     }
 
-    let query = databaseConnection
+    let query = databaseConnection!
       .queryBuilder()
       .distinct('objectID', 'versionID')
       .select('objectID', 'versionID')
@@ -113,18 +112,5 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     );
 
     return { flows: mapFlows };
-  }
-
-  generateWhereClause(
-    flowIds: FlowId[],
-    _conditions: any,
-    filterByPendingFlows: boolean
-  ) {
-    const operation = filterByPendingFlows === true ? Op.IN : Op.NOT_IN;
-    return {
-      id: {
-        [operation]: flowIds,
-      },
-    };
   }
 }

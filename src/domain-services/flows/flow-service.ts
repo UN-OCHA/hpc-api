@@ -2,7 +2,11 @@ import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import type Knex from 'knex';
 import { Service } from 'typedi';
 import { type FlowObjectType } from '../flow-object/model';
-import { GetFlowsArgs, UniqueFlowEntity, type FlowOrderBy } from './model';
+import {
+  type FlowOrderBy,
+  type GetFlowsArgs,
+  type UniqueFlowEntity,
+} from './model';
 import {
   applySearchFilters,
   mapFlowOrderBy,
@@ -24,17 +28,20 @@ export class FlowService {
     });
   }
 
-  async getFlowsAsUniqueFlowEntity(args: GetFlowsArgs): Promise<UniqueFlowEntity[]> {
+  async getFlowsAsUniqueFlowEntity(
+    args: GetFlowsArgs
+  ): Promise<UniqueFlowEntity[]> {
     const { databaseConnection, orderBy, conditions } = args;
 
-    let query = databaseConnection!.queryBuilder()
-    .distinct('id', 'versionID', orderBy.column) // Include orderBy.column in the distinct selection
-    .select('id', 'versionID')
-    .from('flow')
-    .whereNull('deletedAt')
-    .orderBy(orderBy.column, orderBy.order);
-    
-    if(conditions) {
+    let query = databaseConnection!
+      .queryBuilder()
+      .distinct('id', 'versionID', orderBy.column) // Include orderBy.column in the distinct selection
+      .select('id', 'versionID')
+      .from('flow')
+      .whereNull('deletedAt')
+      .orderBy(orderBy.column, orderBy.order);
+
+    if (conditions) {
       query = applySearchFilters(query, conditions);
     }
 

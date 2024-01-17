@@ -1,8 +1,6 @@
-import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
-import { UniqueFlowEntity } from '../../model';
+import { type UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
@@ -36,13 +34,5 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
     flowsFromFilteredFlowObjects.push(...new Set(flowIDs));
 
     return { flows: flowsFromFilteredFlowObjects };
-  }
-
-  generateWhereClause(flowIds: FlowId[]) {
-    return {
-      id: {
-        [Op.IN]: flowIds,
-      },
-    };
   }
 }
