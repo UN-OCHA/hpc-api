@@ -1,7 +1,7 @@
 import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
-import { FlowEntity, UniqueFlowEntity } from '../../model';
+import { type FlowEntity, type UniqueFlowEntity } from '../../model';
 import {
   type FlowSearchArgs,
   type FlowSearchStrategy,
@@ -9,6 +9,7 @@ import {
 } from '../flow-search-strategy';
 import { type FlowIdSearchStrategyResponse } from '../flowID-search-strategy';
 import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow-category-conditions-strategy-impl';
+import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-from-nested-flow-filters-strategy-impl';
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
   intersectUniqueFlowEntities,
@@ -23,7 +24,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
   constructor(
     private readonly flowService: FlowService,
     private readonly getFlowIdsFromCategoryConditions: GetFlowIdsFromCategoryConditionsStrategyImpl,
-    private readonly getFlowIdsFromObjectConditions: GetFlowIdsFromObjectConditionsStrategyImpl
+    private readonly getFlowIdsFromObjectConditions: GetFlowIdsFromObjectConditionsStrategyImpl,
+    private readonly getFlowIdsFromNestedFlowFilters: GetFlowIdsFromNestedFlowFiltersStrategyImpl
   ) {}
 
   async search(args: FlowSearchArgs): Promise<FlowSearchStrategyResponse> {
@@ -33,6 +35,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
+      nestedFlowFilters,
       orderBy,
       limit,
       offset,
@@ -62,11 +65,12 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       // We can also filter by flowFilters
       const orderByForFlow = mapFlowOrderBy(orderBy);
 
-      const flowsToSort: UniqueFlowEntity[] = await this.flowService.getFlowsAsUniqueFlowEntity({
-        databaseConnection,
-        conditions: flowFilters,
-        orderBy: orderByForFlow,
-      });
+      const flowsToSort: UniqueFlowEntity[] =
+        await this.flowService.getFlowsAsUniqueFlowEntity({
+          databaseConnection,
+          conditions: flowFilters,
+          orderBy: orderByForFlow,
+        });
 
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
@@ -81,11 +85,32 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       }
     }
 
+    // We need to fetch the flowIDs by the nestedFlowFilters
+    // if there are any
+    const isFilterByNestedFilters = nestedFlowFilters !== undefined;
+    const flowIDsFromNestedFlowFilters: UniqueFlowEntity[] = [];
+
+    if (isFilterByNestedFilters) {
+      const { flows }: FlowIdSearchStrategyResponse =
+        await this.getFlowIdsFromNestedFlowFilters.search({
+          models,
+          nestedFlowFilters,
+        });
+
+      // Since there can be many flowIDs returned
+      // This can cause 'Maximum call stack size exceeded' error
+      // When using the spread operator - a workaround is to use push fot each element
+      for (const flow of flows) {
+        flowIDsFromNestedFlowFilters.push(flow);
+      }
+    }
+
     // Now we need to check if we need to filter by category
     // if it's using any of the shorcuts
     // or if there are any flowCategoryFilters
-    const isSearchByCategoryShotcut = shortcutFilter !== null && shortcutFilter.length > 0;
-    
+    const isSearchByCategoryShotcut =
+      shortcutFilter !== null && shortcutFilter.length > 0;
+
     const isFilterByCategory =
       isSearchByCategoryShotcut || flowCategoryFilters?.length > 0;
 
@@ -165,7 +190,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowsFromCategoryFilters,
       flowsFromObjectFilters,
       flowsFromFlowFilters,
-      sortByFlowIDs
+      sortByFlowIDs,
+      flowIDsFromNestedFlowFilters
     );
 
     // Obtain the count of the flows that match the filters
@@ -179,7 +205,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       deduplicatedFlows,
       sortByFlowIDs
     );
-
 
     // Then we are going to slice the flows using the limit and offset
     const reducedFlows: UniqueFlowEntity[] = sortedFlows.slice(

@@ -10,26 +10,25 @@ export class SearchFlowsFilters {
   @Field(() => Boolean, { nullable: true })
   activeStatus: boolean | null;
 
-  @Field(() => String, { nullable: true })
-  status: 'commitment' | 'paid' | 'pledged' | null;
-
-  @Field(() => String, { nullable: true })
-  type: 'carryover' | 'parked' | 'pass_through' | 'standard' | null;
-
   @Field(() => Number, { nullable: true })
   amountUSD: number | null;
 
-  @Field(() => Number, { name: 'reporterRefCode', nullable: true })
-  reporterReferenceCode: number | null;
-
-  @Field(() => Number, { name: 'sourceSystemID', nullable: true })
-  sourceSystemId: number | null;
-
-  @Field(() => Number, { name: 'legacyID', nullable: true })
-  legacyId: number | null;
-
   @Field(() => Boolean, { nullable: true })
   restricted: boolean | null;
+
+  constructor() {}
+}
+
+@InputType()
+export class NestedFlowFilters {
+  @Field(() => String, { name: 'reporterRefCode', nullable: true })
+  reporterReferenceCodes: string[] | null;
+
+  @Field(() => Number, { name: 'sourceSystemID', nullable: true })
+  sourceIDs: string[] | null;
+
+  @Field(() => Number, { name: 'legacyID', nullable: true })
+  legacyId: number[] | null;
 
   constructor() {}
 }
@@ -80,6 +79,9 @@ export class SearchFlowsArgs extends PaginationArgs<FlowSortField> {
   @Field(() => [FlowObjectFilters], { nullable: true })
   flowObjectFilters: FlowObjectFilters[];
 
+  @Field(() => NestedFlowFilters, { nullable: true })
+  nestedFlowFilters: NestedFlowFilters;
+
   @Field({ name: 'includeChildrenOfParkedFlows', nullable: true })
   shouldIncludeChildrenOfParkedFlows: boolean;
 
@@ -118,6 +120,9 @@ export class SearchFlowsArgsNonPaginated {
 
   @Field(() => [FlowObjectFilters], { nullable: true })
   flowObjectFilters: FlowObjectFilters[];
+
+  @Field(() => NestedFlowFilters, { nullable: true })
+  nestedFlowFilters: NestedFlowFilters;
 
   @Field({ name: 'includeChildrenOfParkedFlows', nullable: true })
   shouldIncludeChildrenOfParkedFlows: boolean;
