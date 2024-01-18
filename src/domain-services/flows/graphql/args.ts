@@ -15,22 +15,18 @@ export class SearchFlowsFilters {
 
   @Field(() => Boolean, { nullable: true })
   restricted: boolean | null;
-
-  constructor() {}
 }
 
 @InputType()
 export class NestedFlowFilters {
-  @Field(() => String, { name: 'reporterRefCode', nullable: true })
+  @Field(() => [String], { nullable: true })
   reporterReferenceCodes: string[] | null;
 
-  @Field(() => Number, { name: 'sourceSystemID', nullable: true })
+  @Field(() => [String], { nullable: true })
   sourceIDs: string[] | null;
 
-  @Field(() => Number, { name: 'legacyID', nullable: true })
-  legacyId: number[] | null;
-
-  constructor() {}
+  @Field(() => [Number], { nullable: true })
+  legacyIDs: number[] | null;
 }
 
 @InputType()

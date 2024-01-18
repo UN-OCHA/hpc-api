@@ -95,6 +95,7 @@ export class ReportDetailService {
             [Op.IN]: reporterReferenceCodes,
           },
         },
+        skipValidation: true,
       });
 
     const flowIDs: UniqueFlowEntity[] = [];
@@ -117,6 +118,7 @@ export class ReportDetailService {
             [Op.IN]: sourceIDs,
           },
         },
+        skipValidation: true,
       });
 
     const flowIDs: UniqueFlowEntity[] = [];
