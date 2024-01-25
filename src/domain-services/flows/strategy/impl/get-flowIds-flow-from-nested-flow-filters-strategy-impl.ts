@@ -24,30 +24,25 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
     const flowsLegacyId: UniqueFlowEntity[] = [];
 
     // Get the flowIDs using 'reporterReferenceCode'
-    if (
-      nestedFlowFilters?.reporterReferenceCodes &&
-      nestedFlowFilters?.reporterReferenceCodes.length > 0
-    ) {
+    if (nestedFlowFilters?.reporterRefCode) {
       flowsReporterReferenceCode =
         await this.reportDetailService.getUniqueFlowIDsFromReportDetailsByReporterReferenceCode(
           models,
-          nestedFlowFilters.reporterReferenceCodes
+          nestedFlowFilters.reporterRefCode
         );
     }
 
     // Get the flowIDs using 'sourceSystemID'
-    if (
-      nestedFlowFilters?.sourceIDs &&
-      nestedFlowFilters?.sourceIDs.length > 0
-    ) {
+    if (nestedFlowFilters?.sourceSystemID) {
       flowsSourceSystemId =
         await this.reportDetailService.getUniqueFlowIDsFromReportDetailsBySourceID(
           models,
-          nestedFlowFilters.sourceIDs
+          nestedFlowFilters.sourceSystemID
         );
     }
 
     // TODO: Get the flowIDs using 'legacyID'
+    // TODO: create model for that
     // if(nestedFlowFilters?.legacyId) {
     //   flowsLegacyId = await this.flowService.getFlowIDsFromSourceSystemID(
     //     models,

@@ -4,7 +4,6 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { type Category } from '../categories/graphql/types';
 import { type UniqueFlowEntity } from '../flows/model';
 import { type ReportDetail } from './graphql/types';
 @Service()
@@ -70,30 +69,14 @@ export class ReportDetailService {
     };
   }
 
-  addChannelToReportDetails(
-    reportDetails: ReportDetail[],
-    categories: Category[]
-  ) {
-    for (const reportDetail of reportDetails) {
-      const category = categories.find((cat) => cat.group === 'reportChannel');
-
-      if (category) {
-        reportDetail.channel = category.name;
-      }
-    }
-    return reportDetails;
-  }
-
   async getUniqueFlowIDsFromReportDetailsByReporterReferenceCode(
     models: Database,
-    reporterReferenceCodes: string[]
+    reporterRefCode: string
   ): Promise<UniqueFlowEntity[]> {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
-          refCode: {
-            [Op.IN]: reporterReferenceCodes,
-          },
+          refCode: reporterRefCode,
         },
         skipValidation: true,
       });
@@ -109,14 +92,12 @@ export class ReportDetailService {
 
   async getUniqueFlowIDsFromReportDetailsBySourceID(
     models: Database,
-    sourceIDs: string[]
+    sourceID: string
   ): Promise<UniqueFlowEntity[]> {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
-          sourceID: {
-            [Op.IN]: sourceIDs,
-          },
+          sourceID: sourceID,
         },
         skipValidation: true,
       });
