@@ -225,9 +225,9 @@ export class FlowSearchService {
         const reportDetails = reportDetailsMap.get(flow.id) ?? [];
 
         const reportDetailsWithChannel =
-          this.reportDetailService.addChannelToReportDetails(
-            reportDetails,
-            categories
+          await this.categoryService.addChannelToReportDetails(
+            models,
+            reportDetails
           );
 
         let parkedParentSource: FlowParkedParentSource | null = null;
