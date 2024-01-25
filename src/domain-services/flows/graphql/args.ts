@@ -19,14 +19,14 @@ export class SearchFlowsFilters {
 
 @InputType()
 export class NestedFlowFilters {
-  @Field(() => [String], { nullable: true })
-  reporterReferenceCodes: string[] | null;
+  @Field(() => String, { nullable: true })
+  reporterRefCode: string | null;
 
-  @Field(() => [String], { nullable: true })
-  sourceIDs: string[] | null;
+  @Field(() => String, { nullable: true })
+  sourceSystemID: string | null;
 
-  @Field(() => [Number], { nullable: true })
-  legacyIDs: number[] | null;
+  @Field(() => Number, { nullable: true })
+  legacyID: number | null;
 }
 
 @InputType()
