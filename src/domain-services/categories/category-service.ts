@@ -1,8 +1,13 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import {
+  Cond,
+  Op,
+  type Condition,
+} from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { Service } from 'typedi';
+import { type ReportDetail } from '../report-details/graphql/types';
 import { type Category } from './graphql/types';
 
 @Service()
@@ -116,5 +121,82 @@ export class CategoryService {
     });
 
     return categoryRef;
+  }
+
+  async addChannelToReportDetails(
+    models: Database,
+    reportDetails: ReportDetail[]
+  ) {
+    const listOfCategoryRefORs = [];
+
+    for (const reportDetail of reportDetails) {
+      const orClause = {
+        objectID: reportDetail.id,
+        objectType: 'reportDetail',
+      };
+
+      listOfCategoryRefORs.push(orClause);
+    }
+
+    const categoriesRef: Array<InstanceDataOfModel<Database['categoryRef']>> =
+      await models.categoryRef.find({
+        where: {
+          [Cond.OR]: listOfCategoryRefORs as Array<
+            Condition<InstanceDataOfModel<Database['categoryRef']>>
+          >,
+        },
+      });
+
+    const mapOfCategoriesAndReportDetails = new Map<number, ReportDetail[]>();
+
+    for (const categoryRef of categoriesRef) {
+      const reportDetail = reportDetails.find(
+        (reportDetail) => reportDetail.id === categoryRef.objectID.valueOf()
+      );
+
+      if (!reportDetail) {
+        continue;
+      }
+
+      if (
+        !mapOfCategoriesAndReportDetails.has(categoryRef.categoryID.valueOf())
+      ) {
+        mapOfCategoriesAndReportDetails.set(
+          categoryRef.categoryID.valueOf(),
+          []
+        );
+      }
+
+      const reportDetailsPerCategory = mapOfCategoriesAndReportDetails.get(
+        categoryRef.categoryID.valueOf()
+      )!;
+      reportDetailsPerCategory.push(reportDetail);
+    }
+
+    const categories: Array<InstanceDataOfModel<Database['category']>> =
+      await models.category.find({
+        where: {
+          id: {
+            [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),
+          },
+        },
+      });
+
+    for (const [
+      category,
+      reportDetails,
+    ] of mapOfCategoriesAndReportDetails.entries()) {
+      const categoryObj = categories.find((cat) => cat.id === category);
+
+      if (!categoryObj) {
+        continue;
+      }
+
+      for (const reportDetail of reportDetails) {
+        reportDetail.channel = categoryObj.name;
+      }
+    }
+
+    return reportDetails;
   }
 }
