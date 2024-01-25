@@ -1,4 +1,5 @@
 import { Service } from 'typedi';
+import { LegacyService } from '../../../legacy/legacy-service';
 import { ReportDetailService } from '../../../report-details/report-detail-service';
 import { type UniqueFlowEntity } from '../../model';
 import {
@@ -12,7 +13,10 @@ import { intersectUniqueFlowEntities } from './utils';
 export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
   implements FlowIDSearchStrategy
 {
-  constructor(private readonly reportDetailService: ReportDetailService) {}
+  constructor(
+    private readonly reportDetailService: ReportDetailService,
+    private readonly legacyService: LegacyService
+  ) {}
 
   async search(
     args: FlowIdSearchStrategyArgs
@@ -41,15 +45,20 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
         );
     }
 
-    // TODO: Get the flowIDs using 'legacyID'
-    // TODO: create model for that
-    // if(nestedFlowFilters?.legacyId) {
-    //   flowsLegacyId = await this.flowService.getFlowIDsFromSourceSystemID(
-    //     models,
-    //     databaseConnection,
-    //     nestedFlowFilters.sourceSystemId
-    //   );
-    // }
+    // Get the flowIDs using 'legacyID'
+    if (nestedFlowFilters?.legacyID) {
+      const flowID = await this.legacyService.getFlowIdFromLegacyId(
+        models,
+        nestedFlowFilters.legacyID
+      );
+
+      if (flowID) {
+        flowsLegacyId.push({
+          id: flowID,
+          versionID: 1,
+        });
+      }
+    }
 
     // Intersect the flowIDs from the nestedFlowFilters
     const flowIDsFromNestedFlowFilters: UniqueFlowEntity[] =
