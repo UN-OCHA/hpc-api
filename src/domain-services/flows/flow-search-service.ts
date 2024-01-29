@@ -117,13 +117,6 @@ export class FlowSearchService {
       orderBy
     );
 
-    // Build cursor condition
-    // const cursorCondition = this.buildCursorCondition(
-    //   prevPageCursor,
-    //   nextPageCursor,
-    //   orderBy
-    // );
-
     const offset = nextPageCursor ?? prevPageCursor ?? 0;
 
     const { flows, count } = await strategy.search({
