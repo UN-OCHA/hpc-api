@@ -58,7 +58,13 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           orderBy,
           limit
         );
-      sortByFlowIDs.push(...flowIDsFromSortingEntity);
+      // Since there can be many flowIDs returned
+      // This can cause 'Maximum call stack size exceeded' error
+      // When using the spread operator - a workaround is to use push fot each element
+      // also, we need to map the FlowEntity to UniqueFlowEntity
+      for (const uniqueFlow of flowIDsFromSortingEntity) {
+        sortByFlowIDs.push(uniqueFlow);
+      }
     } else {
       // In this case we fetch the list of flows from the database
       // using the orderBy

@@ -1,7 +1,7 @@
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import type Knex from 'knex';
 import { Service } from 'typedi';
-import { type FlowObjectType } from '../flow-object/model';
+import { FlowObjectType } from '../flow-object/model';
 import {
   type FlowOrderBy,
   type GetFlowsArgs,
@@ -71,34 +71,56 @@ export class FlowService {
     const mappedOrderBy = mapFlowOrderBy(orderBy);
     const entityList = await dbConnection
       .queryBuilder()
-      .select(orderBy.subEntity ? `${orderBy.subEntity}Id` : 'id')
+      .select(
+        orderBy.subEntity ? `${orderBy.subEntity}Id` : 'id',
+        'flowID',
+        'versionID'
+      )
       .from(entity)
       .orderBy(mappedOrderBy.column, mappedOrderBy.order);
 
-    const entityIDs = entityList.map((entity) => entity.id);
+    let mapFlowsToUniqueFlowEntities;
+
     // Get the flowIDs from the entity list
-    // using the flow-object relation
-    const entityCondKey = orderBy.entity as unknown as FlowObjectType;
+    // using the flow-object relation if the entity is a flow-object
+    const entityCondKey = orderBy.entity as unknown;
 
-    const query = dbConnection
-      .queryBuilder()
-      .select('flowID', 'versionID')
-      .from('flowObject')
-      .whereIn('objectID', entityIDs)
-      .andWhere('objectType', entityCondKey)
-      .andWhere('refDirection', orderBy.direction!)
-      .orderByRaw(`array_position(ARRAY[${entityIDs.join(',')}], "objectID")`)
-      .orderBy('flowID', orderBy.order);
+    // Validate the variable using io-ts
+    const result = FlowObjectType.decode(entityCondKey);
 
-    if (limit) {
-      query.limit(limit);
+    if (result._tag === 'Right') {
+      const entityIDs = entityList.map((entity) => entity.id);
+      const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
+      let query = dbConnection
+        .queryBuilder()
+        .select('flowID', 'versionID')
+        .from('flowObject')
+        .whereIn('objectID', entityIDs)
+        .andWhere('objectType', entityCondKeyFlowObjectType);
+
+      if (orderBy.direction) {
+        query = query.orderBy('refDirection', orderBy.direction);
+      }
+      query = query
+        .orderByRaw(`array_position(ARRAY[${entityIDs.join(',')}], "objectID")`)
+        .orderBy('flowID', orderBy.order);
+
+      if (limit) {
+        query.limit(limit);
+      }
+
+      const flowIDs = await query;
+
+      mapFlowsToUniqueFlowEntities = flowIDs.map((flowID) => ({
+        id: flowID.flowID,
+        versionID: flowID.versionID,
+      }));
+    } else {
+      mapFlowsToUniqueFlowEntities = entityList.map((entity) => ({
+        id: entity.flowID,
+        versionID: entity.versionID,
+      }));
     }
-
-    const flowIDs = await query;
-    const mapFlowsToUniqueFlowEntities = flowIDs.map((flowID) => ({
-      id: flowID.flowID,
-      versionID: flowID.versionID,
-    }));
 
     return removeDuplicatesUniqueFlowEntities(mapFlowsToUniqueFlowEntities);
   }
