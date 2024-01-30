@@ -1,6 +1,7 @@
 import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
+import { type SearchFlowsFilters } from '../../graphql/args';
 import { type FlowEntity, type UniqueFlowEntity } from '../../model';
 import {
   type FlowSearchArgs,
@@ -219,9 +220,9 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     );
 
     // Once the list of elements is reduced, we need to build the conditions
-    const searchConditions = this.buildConditions(reducedFlows);
+    const searchConditions = this.buildConditions(reducedFlows, flowFilters);
 
-    const orderByForFlow = mapFlowOrderBy(orderBy);
+    const orderByForFlow = { column: 'updatedAt', order: 'DESC' };
 
     const flows = await this.flowService.getFlows({
       models,
@@ -232,10 +233,20 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     return { flows, count };
   }
 
-  buildConditions(uniqueFlowEntities: UniqueFlowEntity[]): any {
+  buildConditions(
+    uniqueFlowEntities: UniqueFlowEntity[],
+    flowFilters: SearchFlowsFilters
+  ): any {
     const whereClauses = uniqueFlowEntities.map((flow) => ({
       [Cond.AND]: [{ id: flow.id }, { versionID: flow.versionID }],
     }));
+
+    if (flowFilters) {
+      const flowConditions = prepareFlowConditions(flowFilters);
+      return {
+        [Cond.AND]: [flowConditions, { [Cond.OR]: whereClauses }],
+      };
+    }
 
     return {
       [Cond.OR]: whereClauses,

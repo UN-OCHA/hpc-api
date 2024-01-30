@@ -208,8 +208,8 @@ export class FlowSearchService {
         // Categories Map follows the structure:
         // flowID: { versionID: [categories]}
         // So we need to get the categories for the flow version
-        const categories =
-          categoriesMap.get(flow.id)!.get(flow.versionID) ?? [];
+        const categories = categoriesMap.get(flow.id);
+        const categoriesByVersion = categories?.get(flow.versionID) ?? [];
         const organizations = organizationsMap.get(flow.id) ?? [];
         const locations = locationsMap.get(flow.id) ?? [];
         const plans = plansMap.get(flow.id) ?? [];
@@ -253,7 +253,7 @@ export class FlowSearchService {
 
         return this.buildFlowDTO(
           flow,
-          categories,
+          categoriesByVersion,
           organizations,
           locations,
           plans,
@@ -266,27 +266,6 @@ export class FlowSearchService {
         );
       })
     );
-
-    // const isOrderByForFlows = orderBy.entity === 'flow';
-    // const firstItem = items[0];
-    // const prevPageCursorEntity = isOrderByForFlows
-    //   ? firstItem
-    //   : firstItem[orderBy.entity as keyof typeof firstItem];
-    // const prevPageCursorValue = prevPageCursorEntity
-    //   ? prevPageCursorEntity[
-    //       orderBy.column as keyof typeof prevPageCursorEntity
-    //     ] ?? ''
-    //   : '';
-
-    // const lastItem = items.at(-1);
-    // const nextPageCursorEntity = isOrderByForFlows
-    //   ? lastItem
-    //   : lastItem![orderBy.entity as keyof typeof lastItem];
-    // const nextPageCursorValue = nextPageCursorEntity
-    //   ? nextPageCursorEntity[
-    //       orderBy.column as keyof typeof nextPageCursorEntity
-    //     ]?.toString() ?? ''
-    //   : '';
 
     return {
       flows: items,
@@ -343,7 +322,7 @@ export class FlowSearchService {
         operation: filter.flag ? Op.IN : Op.NOT_IN,
       }));
 
-    return shortcutFilters;
+    return shortcutFilters.length > 0 ? shortcutFilters : null;
   }
 
   determineStrategy(
@@ -360,7 +339,8 @@ export class FlowSearchService {
     // If there are no sortByEntity (orderBy.entity === 'flow')
     // but flowFilters only
     // use onlyFlowFiltersStrategy
-    const isOrderByEntityFlow = orderBy?.entity === 'flow';
+    const isOrderByEntityFlow =
+      orderBy === undefined || orderBy?.entity === 'flow';
     const isFlowFiltersDefined = flowFilters !== undefined;
     const isFlowObjectFiltersDefined = flowObjectFilters !== undefined;
     const isFlowCategoryFiltersDefined = flowCategoryFilters !== undefined;
@@ -764,12 +744,6 @@ export class FlowSearchService {
     }
 
     // Validate the shortcut filters
-    // There must be only one shortcut filter
-    // if only one is defined
-    // return an object like
-    // { category: 'Parked', operation: 'IN' }
-    // if more than one is defined
-    // throw an error
     const shortcutFilter = this.mapShortcutFilters(
       isPendingFlows,
       isCommitmentFlows,

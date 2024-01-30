@@ -142,16 +142,37 @@ export function mergeFlowIDsFromFilteredFlowObjectsAndFlowCategories(
       );
 }
 
-export function mapFlowOrderBy(orderBy: any) {
+export const sortingColumnMapping: Map<string, string> = new Map<
+  string,
+  string
+>([
+  ['reporterRefCode', 'refCode'],
+  ['sourceID', 'sourceID'],
+]);
+
+export function mapFlowOrderBy(orderBy: any): {
+  column: string;
+  order: string;
+} {
   if (!orderBy) {
     return { column: 'updatedAt', order: 'DESC' };
   }
-  let orderByForFlow = { column: orderBy.column, order: orderBy.order };
-  if (orderBy.entity !== 'flow') {
-    orderByForFlow = { column: 'updatedAt', order: 'DESC' };
+
+  if (orderBy.entity === 'flow') {
+    return { column: orderBy.column, order: orderBy.order };
   }
 
-  return orderByForFlow;
+  let columnToSort: string;
+  if (sortingColumnMapping.has(orderBy.column)) {
+    // I don't like this but the compiler is complaining
+    // that columnToSort might be undefined if I don't do this
+    // but it's already checked that the column exists in the map
+    columnToSort = sortingColumnMapping.get(orderBy.column) ?? 'updatedAt';
+  } else {
+    columnToSort = orderBy.column;
+  }
+
+  return { column: columnToSort, order: orderBy.order };
 }
 
 export function prepareFlowConditions(flowFilters: SearchFlowsFilters): any {
