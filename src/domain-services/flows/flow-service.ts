@@ -69,15 +69,6 @@ export class FlowService {
 
     // Get the entity list
     const mappedOrderBy = mapFlowOrderBy(orderBy);
-    const entityList = await dbConnection
-      .queryBuilder()
-      .select(
-        orderBy.subEntity ? `${orderBy.subEntity}Id` : 'id',
-        'flowID',
-        'versionID'
-      )
-      .from(entity)
-      .orderBy(mappedOrderBy.column, mappedOrderBy.order);
 
     let mapFlowsToUniqueFlowEntities;
 
@@ -89,6 +80,13 @@ export class FlowService {
     const result = FlowObjectType.decode(entityCondKey);
 
     if (result._tag === 'Right') {
+      const entityList = await dbConnection
+        .queryBuilder()
+        .select('id')
+        .from(entity)
+        .orderBy(mappedOrderBy.column, mappedOrderBy.order)
+        .orderBy('id', mappedOrderBy.order);
+
       const entityIDs = entityList.map((entity) => entity.id);
       const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
       let query = dbConnection
@@ -116,6 +114,13 @@ export class FlowService {
         versionID: flowID.versionID,
       }));
     } else {
+      const entityList = await dbConnection
+        .queryBuilder()
+        .select(`${orderBy.subEntity}Id`, 'flowID', 'versionID')
+        .from(entity)
+        .orderBy(mappedOrderBy.column, mappedOrderBy.order)
+        .orderBy('id', mappedOrderBy.order);
+
       mapFlowsToUniqueFlowEntities = entityList.map((entity) => ({
         id: entity.flowID,
         versionID: entity.versionID,
