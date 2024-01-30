@@ -743,6 +743,9 @@ export class FlowSearchService {
       flowFilters.activeStatus = true;
     }
 
+    // This filter MUST apply always
+    flowFilters.restricted = false;
+
     // Validate the shortcut filters
     const shortcutFilter = this.mapShortcutFilters(
       isPendingFlows,
