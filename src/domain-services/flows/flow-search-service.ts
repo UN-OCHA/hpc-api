@@ -271,7 +271,7 @@ export class FlowSearchService {
       flows: items,
       hasNextPage: limit <= flows.length,
       hasPreviousPage: nextPageCursor !== undefined,
-      prevPageCursor: nextPageCursor ?? 0,
+      prevPageCursor: nextPageCursor ? nextPageCursor - limit : 0,
       nextPageCursor: nextPageCursor ? nextPageCursor + limit : limit,
       pageSize: flows.length,
       sortField: `${orderBy.entity}.${orderBy.column}` as FlowSortField,
