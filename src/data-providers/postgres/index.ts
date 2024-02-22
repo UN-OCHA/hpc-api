@@ -4,10 +4,10 @@ import { CONFIG } from '../../../config';
 /**
  * Initialize a new Postgres provider
  */
-export async function createDbConnetion() {
+export async function createDbConnetion(connection?: string) {
   const knex = Knex({
     client: 'pg',
-    connection: CONFIG.db.connection,
+    connection: connection ?? CONFIG.db.connection,
     pool: {
       min: CONFIG.db.poolMin,
       max: CONFIG.db.poolMax,

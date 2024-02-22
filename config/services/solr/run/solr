@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+SOLR_HOME=/var/solr/data
+
+CONFDIR=/opt/hpc-solr/confs
+SOLR_CORE=${SOLR_CORE:-fts}
+
+cd ${SOLR_HOME}
+
+if [ -d ${SOLR_HOME}/${SOLR_CORE} ]; then
+    echo "HPC-specific SOLR initialization seems completed. Skipping it."
+    solr-foreground
+else
+    echo "Performing a one time HPC-specific SOLR initialization..."
+    echo "Creating a new solr core..."
+    VERBOSE=yes solr-precreate ${SOLR_CORE} ${CONFDIR}
+    echo "HPC init done!"
+fi

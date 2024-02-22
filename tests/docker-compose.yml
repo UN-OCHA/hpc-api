@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14-alpine3.18
+    container_name: hpc_postgres_test_api
+    ports:
+      - 6432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test
+    volumes:
+      - ./migration/migration.sql:/docker-entrypoint-initdb.d/init.sql
+  solr:
+    image: solr:8.11.2-slim
+    environment:
+      DNSDOCK_NAME: solr
+      DNSDOCK_IMAGE: hpc
+      SOLR_CORE: fts ## take it as env var SOLR_CORE: ${SOLR_CORE}
+    container_name: hpcservice_solr_1_test_api
+    volumes:
+      - '../config/services/solr:/opt/hpc-solr:rw'
+      - '../data/test/hpc/solr_logs:/var/solr/logs:rw'
+      - '../data/test/hpc/solr_backups:/var/solr/data/backups:rw'
+      - '../data/test/hpc/solr:/var/solr/data:rw'
+    entrypoint: /opt/hpc-solr/run/entrypoint
+    user: root
+    ulimits:
+      nofile:
+        soft: 65000
+        hard: 65000
+  hid:
+    image: public.ecr.aws/unocha/nodejs:18-alpine
+    volumes:
+      - ../tools/hid_api_mock:/srv/www
+    environment:
+      PORT: 80
+    hostname: hidapi
+    container_name: test_hidservice_test_api

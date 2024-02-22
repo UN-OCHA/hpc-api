@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+echo "Changing permissions of solr directories"
+chown -R solr:solr /var/solr/data/
+chown -R solr:solr /var/solr/logs/
+
+exec su solr -c "export PATH=$PATH; /opt/hpc-solr/run/solr"

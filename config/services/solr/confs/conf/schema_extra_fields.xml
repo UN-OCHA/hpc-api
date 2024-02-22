@@ -1,0 +1,425 @@
+<dynamicField name="ts_X3b_ar_*" type="text_ar" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_X3b_ar_*" type="text_ar" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tos_X3b_ar_*" type="text_ar" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_X3b_ar_*" type="text_ar" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tus_X3b_ar_*" type="text_unstemmed_ar" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_X3b_ar_*" type="text_unstemmed_ar" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="sort_X3b_ar_*" type="collated_ar" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+<dynamicField name="tcedgestrings_X3b_und_*" type="text_edgenstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedgestrings_*" type="text_edgenstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedgestringm_X3b_und_*" type="text_edgenstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedgestringm_*" type="text_edgenstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocedgestrings_X3b_und_*" type="text_edgenstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocedgestrings_*" type="text_edgenstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocedgestringm_X3b_und_*" type="text_edgenstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tocedgestringm_*" type="text_edgenstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucedgestrings_X3b_und_*" type="text_edgenstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucedgestrings_*" type="text_edgenstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucedgestringm_X3b_und_*" type="text_edgenstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tucedgestringm_*" type="text_edgenstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedges_X3b_und_*" type="text_edge" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedges_*" type="text_edge" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedgem_X3b_und_*" type="text_edge" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcedgem_*" type="text_edge" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocedges_X3b_und_*" type="text_edge" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocedges_*" type="text_edge" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocedgem_X3b_und_*" type="text_edge" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tocedgem_*" type="text_edge" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucedges_X3b_und_*" type="text_edge" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucedges_*" type="text_edge" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucedgem_X3b_und_*" type="text_edge" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tucedgem_*" type="text_edge" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="ts_X3b_en_*" type="text_en" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_X3b_en_*" type="text_en" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tos_X3b_en_*" type="text_en" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_X3b_en_*" type="text_en" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tus_X3b_en_*" type="text_unstemmed_en" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_X3b_en_*" type="text_unstemmed_en" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="sort_X3b_en_*" type="collated_en" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+<dynamicField name="ts_X3b_fr_*" type="text_fr" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_X3b_fr_*" type="text_fr" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tos_X3b_fr_*" type="text_fr" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_X3b_fr_*" type="text_fr" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tus_X3b_fr_*" type="text_unstemmed_fr" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_X3b_fr_*" type="text_unstemmed_fr" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="sort_X3b_fr_*" type="collated_fr" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+<dynamicField name="tcphonetics_X3b_und_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphonetics_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphoneticm_X3b_und_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphoneticm_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocphonetics_X3b_und_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocphonetics_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocphoneticm_X3b_und_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tocphoneticm_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucphonetics_X3b_und_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucphonetics_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucphoneticm_X3b_und_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tucphoneticm_*" type="text_phonetic_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphonetics_X3b_en_*" type="text_phonetic_en" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphoneticm_X3b_en_*" type="text_phonetic_en" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocphonetics_X3b_en_*" type="text_phonetic_en" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocphoneticm_X3b_en_*" type="text_phonetic_en" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucphonetics_X3b_en_*" type="text_phonetic_en" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucphoneticm_X3b_en_*" type="text_phonetic_en" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphonetics_X3b_fr_*" type="text_phonetic_fr" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphoneticm_X3b_fr_*" type="text_phonetic_fr" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocphonetics_X3b_fr_*" type="text_phonetic_fr" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocphoneticm_X3b_fr_*" type="text_phonetic_fr" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucphonetics_X3b_fr_*" type="text_phonetic_fr" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucphoneticm_X3b_fr_*" type="text_phonetic_fr" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphonetics_X3b_es_*" type="text_phonetic_es" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcphoneticm_X3b_es_*" type="text_phonetic_es" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocphonetics_X3b_es_*" type="text_phonetic_es" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocphoneticm_X3b_es_*" type="text_phonetic_es" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucphonetics_X3b_es_*" type="text_phonetic_es" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucphoneticm_X3b_es_*" type="text_phonetic_es" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="ts_X3b_und_*" type="text_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="ts_*" type="text_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_X3b_und_*" type="text_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_*" type="text_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tos_X3b_und_*" type="text_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tos_*" type="text_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_X3b_und_*" type="text_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_*" type="text_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tus_X3b_und_*" type="text_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tus_*" type="text_und" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_X3b_und_*" type="text_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_*" type="text_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="spellcheck_und*" type="text_spell_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="spellcheck_*" type="text_spell_und" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="sort_X3b_und_*" type="collated_und" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+<dynamicField name="sort_*" type="collated_und" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+<dynamicField name="tcngramstrings_X3b_und_*" type="text_ngramstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngramstrings_*" type="text_ngramstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngramstringm_X3b_und_*" type="text_ngramstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngramstringm_*" type="text_ngramstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocngramstrings_X3b_und_*" type="text_ngramstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocngramstrings_*" type="text_ngramstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocngramstringm_X3b_und_*" type="text_ngramstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tocngramstringm_*" type="text_ngramstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucngramstrings_X3b_und_*" type="text_ngramstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucngramstrings_*" type="text_ngramstring" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucngramstringm_X3b_und_*" type="text_ngramstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tucngramstringm_*" type="text_ngramstring" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngrams_X3b_und_*" type="text_ngram" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngrams_*" type="text_ngram" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngramm_X3b_und_*" type="text_ngram" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tcngramm_*" type="text_ngram" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tocngrams_X3b_und_*" type="text_ngram" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocngrams_*" type="text_ngram" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tocngramm_X3b_und_*" type="text_ngram" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tocngramm_*" type="text_ngram" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tucngrams_X3b_und_*" type="text_ngram" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucngrams_*" type="text_ngram" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tucngramm_X3b_und_*" type="text_ngram" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tucngramm_*" type="text_ngram" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="ts_X3b_zh_X2d_hans_*" type="text_zh_hans" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_X3b_zh_X2d_hans_*" type="text_zh_hans" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tos_X3b_zh_X2d_hans_*" type="text_zh_hans" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_X3b_zh_X2d_hans_*" type="text_zh_hans" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tus_X3b_zh_X2d_hans_*" type="text_unstemmed_zh_hans" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_X3b_zh_X2d_hans_*" type="text_unstemmed_zh_hans" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="spellcheck_zh_hans*" type="text_spell_zh_hans" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="sort_X3b_zh_X2d_hans_*" type="collated_zh-hans" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+<dynamicField name="ts_X3b_es_*" type="text_es" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tm_X3b_es_*" type="text_es" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="tos_X3b_es_*" type="text_es" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="true" />
+<dynamicField name="tom_X3b_es_*" type="text_es" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="true" />
+<dynamicField name="tus_X3b_es_*" type="text_unstemmed_es" stored="true" indexed="true" multiValued="false" termVectors="true" omitNorms="false" />
+<dynamicField name="tum_X3b_es_*" type="text_unstemmed_es" stored="true" indexed="true" multiValued="true" termVectors="true" omitNorms="false" />
+<dynamicField name="sort_X3b_es_*" type="collated_es" stored="false" indexed="false" docValues="true" useDocValuesAsStored="false" />
+
+
+<!-- HPC API specific fields -->
+
+<field name="docType" type="string" indexed="true" stored="true" required="true" />
+
+<!-- FLOW DOC TYPE -->
+<!-- Flow Record Details -->
+<field name="versionId" type="pint" indexed="true" stored="true" required="false" />
+<field name="amountUSD" type="plong" indexed="true" stored="true" required="false" />
+<field name="description" type="string" indexed="false" stored="true" required="false" />
+<field name="flowStatus" type="string" indexed="true" stored="true" required="false" />
+<field name="flowType" type="string" indexed="true" stored="true" required="false" />
+<field name="contributionType" type="string" indexed="true" stored="true" required="false" />
+<field name="keywords" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="parentFlowId" type="pint" indexed="true" stored="true" required="false" />
+<field name="childFlowIds" type="pint" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="decisionDate" type="pdate" indexed="true" stored="true" required="false" />
+<field name="flowDate" type="pdate" indexed="true" stored="true" required="false" />
+<field name="firstReportedDate" type="pdate" indexed="true" stored="true" required="false" />
+<field name="budgetYear" type="string" indexed="true" stored="true" required="false" />
+<field name="fundingMonth" type="pint" indexed="true" stored="true" required="false" />
+<field name="origAmount" type="plong" indexed="false" stored="true" required="false" />
+<field name="origCurrency" type="string" indexed="false" stored="true" required="false" />
+<field name="exchangeRate" type="pfloat" indexed="false" stored="true" required="false" />
+<field name="beneficiaryGroupId" type="string" indexed="true" stored="true" required="false"  multiValued="true"  />
+<field name="beneficiaryGroupName" type="string" indexed="true" stored="true" required="false"  multiValued="true"/>
+<field name="beneficiaryGroupIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true"/>
+<field name="earmarkingType" type="string" indexed="false" stored="true" required="false" multiValued="true" />
+<field name="createdAt" type="pdate" indexed="true" stored="true" required="false" />
+<field name="updatedAt" type="pdate" indexed="true" stored="true" required="false" />
+<field name="activeStatus" type="boolean" indexed="true" stored="true" required="false" />
+<field name="restricted" type="boolean" indexed="true" stored="true" required="false" />
+<field name="newMoney" type="boolean" indexed="true" stored="true" required="false" />
+<field name="reportDetails" type="string" indexed="false" stored="true" required="false" />
+<field name="method" type="string" indexed="false" stored="true" required="false" />
+
+<!-- Plans -->
+<field name="sourcePlanId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourcePlanName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourcePlanNameMin" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourcePlanNameMax" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourcePlanIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourcePlanCodeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourcePlanBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourcePlanYear" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationPlanId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationPlanName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationPlanNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationPlanNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationPlanIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationPlanCodeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationPlanBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationPlanYear" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="PlanBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!-- Organizations -->
+<field name="sourceOrganizationId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationNameMin" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourceOrganizationNameMax" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourceOrganizationIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourceOrganizationTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationIdTypeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationOrganizationNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationOrganizationIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationOrganizationTypeId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationTypeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationTypeIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationOrganizationIdTypeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="OrganizationBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourceOrganizationSubTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationSubTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationIdSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationSubTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationSubTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationIdSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationTypeSubTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationTypeSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationTypeSubTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationIdTypeSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationTypeSubTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationTypeSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationTypeSubTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationIdTypeSubTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationIdLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationIdLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationSubLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationSubLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationIdSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationSubLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationSubLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationIdSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationLevelSubLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationLevelSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationLevelSubLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationIdLevelSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationLevelSubLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationLevelSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationLevelSubLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationIdLevelSubLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllIdTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllTypeId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllTypeIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllIdTypeName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="sourceOrganizationAllIdLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllLevelId" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllLevelIdName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+<field name="destinationOrganizationAllIdLevelName" type="string" indexed="true" stored="true" required="false" multiValued="true" />
+
+<!-- Clusters -->
+<field name="sourceClusterId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceClusterName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceClusterNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceClusterNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceClusterIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceClusterBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationClusterId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationClusterName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationClusterNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationClusterNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationClusterIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationClusterBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="ClusterBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!-- GlobalClusters -->
+<field name="sourceGlobalClusterId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceGlobalClusterName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceGlobalClusterNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceGlobalClusterNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceGlobalClusterIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceGlobalClusterCodeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceGlobalClusterBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationGlobalClusterId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationGlobalClusterName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationGlobalClusterNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationGlobalClusterNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationGlobalClusterIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationGlobalClusterCodeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationGlobalClusterBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="GlobalClusterBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!-- Locations -->
+<field name="sourceLocationId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceLocationName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceLocationNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceLocationNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceLocationIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceLocationBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="sourceLocationIdISO3" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationLocationId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationLocationName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationLocationNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationLocationNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationLocationIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationLocationBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationLocationIdISO3" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="LocationBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!-- Projects -->
+<field name="sourceProjectId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCodeMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceProjectCodeMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceProjectName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceProjectNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceProjectIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectIdCode" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationProjectId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCodeMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationProjectCodeMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationProjectName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationProjectNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationProjectIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectIdCode" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="ProjectBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<field name="sourceProjectCustomLocationId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCustomLocationName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCustomLocationIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomLocationId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomLocationName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomLocationIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<field name="sourceProjectCustomGrouping1Id" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCustomGrouping1Name" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCustomGrouping1IdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomGrouping1Id" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomGrouping1Name" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomGrouping1IdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<field name="sourceProjectCustomGrouping2Id" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCustomGrouping2Name" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectCustomGrouping2IdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomGrouping2Id" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomGrouping2Name" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectCustomGrouping2IdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<field name="sourceProjectPriorityId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectPriorityName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectPriorityIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectPriorityId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectPriorityName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectPriorityIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<field name="sourceProjectGenderMarkerId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectGenderMarkerName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectGenderMarkerCode" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectGenderMarkerIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectGenderMarkerId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectGenderMarkerName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectGenderMarkerCode" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectGenderMarkerIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<field name="sourceProjectSubsetOfPlanId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectSubsetOfPlanName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectSubsetOfPlanIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectSubsetOfPlanId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectSubsetOfPlanName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectSubsetOfPlanIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<field name="sourceProjectResponseTypeId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectResponseTypeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceProjectResponseTypeIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectResponseTypeId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectResponseTypeName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationProjectResponseTypeIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+
+<!-- Emergencies -->
+<field name="sourceEmergencyId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceEmergencyName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceEmergencyNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceEmergencyNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceEmergencyIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceEmergencyBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationEmergencyId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationEmergencyName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationEmergencyNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationEmergencyNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationEmergencyIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationEmergencyBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="EmergencyBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!-- Usage Years -->
+<field name="sourceUsageYearId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceUsageYearName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceUsageYearNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceUsageYearNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="sourceUsageYearIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="sourceUsageYearBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="destinationUsageYearId" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationUsageYearName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationUsageYearNameMin" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationUsageYearNameMax" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="destinationUsageYearIdName" type="string" indexed="true" stored="true" required="false"  multiValued="true" />
+<field name="destinationUsageYearBehavior" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="UsageYearBoundary" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!-- Project Record Details -->
+<field name="projectId" type="string" indexed="true" stored="true" required="false" />
+<field name="name" type="string" indexed="false" stored="true" required="false" />
+<field name="code" type="string" indexed="false" stored="true" required="false" />
+<field name="origRequestedFunds" type="plong" indexed="true" stored="true" required="false" />
+<field name="currentRequestedFunds" type="plong" indexed="true" stored="true" required="false" />
+<field name="planId" type="string" indexed="true" stored="true" required="false"  multiValued="false" />
+<field name="amountUSDContributed" type="plong" indexed="true" stored="true" required="false" />
+<field name="amountUSDPledged" type="plong" indexed="true" stored="true" required="false" />
