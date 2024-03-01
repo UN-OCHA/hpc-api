@@ -6,7 +6,6 @@ import {
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
-import { mapFlowObjectConditionsToWhereClause } from './utils';
 
 @Service()
 export class GetFlowIdsFromObjectConditionsStrategyImpl
@@ -17,21 +16,28 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
   async search(
     args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
-    const { models, flowObjectsConditions } = args;
-    const flowObjectWhere = mapFlowObjectConditionsToWhereClause(
-      flowObjectsConditions!
-    );
+    const { flowObjectsConditions, databaseConnection } = args;
 
+    // 1. Obtain flowIDs from flowObjects
     const flowsFromFilteredFlowObjects: UniqueFlowEntity[] = [];
-    const tempFlowIDs: UniqueFlowEntity[][] = await Promise.all(
-      flowObjectWhere.map((whereClause) =>
-        this.flowObjectService.getFlowFromFlowObjects(models, whereClause)
-      )
-    );
+    const flowObjects =
+      await this.flowObjectService.getFlowObjectsByFlowObjectConditions(
+        databaseConnection,
+        flowObjectsConditions
+      );
 
-    // Flatten array of arrays keeping only values present in all arrays
-    const flowIDs = tempFlowIDs.flat();
-    flowsFromFilteredFlowObjects.push(...new Set(flowIDs));
+    // 1.1. Check if flowObjects is undefined
+    if (!flowObjects) {
+      return { flows: [] };
+    }
+
+    // 2. Map flowObjects to UniqueFlowEntity and store in flowsFromFilteredFlowObjects
+    for (const flowObject of flowObjects) {
+      flowsFromFilteredFlowObjects.push({
+        id: flowObject.flowID,
+        versionID: flowObject.versionID,
+      });
+    }
 
     return { flows: flowsFromFilteredFlowObjects };
   }

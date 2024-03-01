@@ -14,7 +14,6 @@ import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
   intersectUniqueFlowEntities,
-  mapFlowObjectConditions,
   mapFlowOrderBy,
   prepareFlowConditions,
   sortEntitiesByReferenceList,
@@ -100,10 +99,15 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     if (isFilterByNestedFilters) {
       const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromNestedFlowFilters.search({
+          databaseConnection,
           models,
           nestedFlowFilters,
         });
 
+      //If after this filter we have no flows, we can return an empty array
+      if (flows.length === 0) {
+        return { flows: [], count: 0 };
+      }
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
       // When using the spread operator - a workaround is to use push fot each element
@@ -133,6 +137,11 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           flowObjectsConditions: undefined,
         });
 
+      //If after this filter we have no flows, we can return an empty array
+      if (flows.length === 0) {
+        return { flows: [], count: 0 };
+      }
+
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
       // When using the spread operator - a workaround is to use push fot each element
@@ -147,14 +156,17 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const flowsFromObjectFilters: UniqueFlowEntity[] = [];
     if (isFilterByFlowObjects) {
-      const flowObjectConditionsMap =
-        mapFlowObjectConditions(flowObjectFilters);
       const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromObjectConditions.search({
           databaseConnection,
           models,
-          flowObjectsConditions: flowObjectConditionsMap,
+          flowObjectsConditions: flowObjectFilters,
         });
+
+      //If after this filter we have no flows, we can return an empty array
+      if (flows.length === 0) {
+        return { flows: [], count: 0 };
+      }
 
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
@@ -177,6 +189,11 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         conditions: flowConditions,
         orderBy: { column: orderBy.column, order: orderBy.order },
       });
+
+      //If after this filter we have no flows, we can return an empty array
+      if (flows.length === 0) {
+        return { flows: [], count: 0 };
+      }
 
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error

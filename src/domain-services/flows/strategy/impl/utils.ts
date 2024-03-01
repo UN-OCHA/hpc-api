@@ -1,47 +1,8 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import type Knex from 'knex';
-import {
-  type FlowCategory,
-  type FlowObjectFilters,
-  type SearchFlowsFilters,
-} from '../../graphql/args';
+import { type FlowCategory, type SearchFlowsFilters } from '../../graphql/args';
 import { type UniqueFlowEntity } from '../../model';
-
-/*
- * Map structure:
- * {
- *   KEY = objectType: string,
- *   VALUE = {
- *         KEY = refDirection: string,
- *         VALUE = [objectID: number]
- *         }
- * }
- */
-export function mapFlowObjectConditionsToWhereClause(
-  flowObjectConditions: Map<string, Map<string, number[]>>
-): any[] {
-  const whereClauses: any = [];
-  for (const [objectType, refDirectionMap] of flowObjectConditions) {
-    for (const [refDirection, objectIDs] of refDirectionMap) {
-      const whereClause = {
-        objectID: {
-          [Op.IN]: objectIDs,
-        },
-        refDirection: {
-          [Op.LIKE]: refDirection,
-        },
-        objectType: {
-          [Op.LIKE]: objectType,
-        },
-      };
-
-      whereClauses.push(whereClause);
-    }
-  }
-
-  return whereClauses;
-}
 
 export function mapFlowCategoryConditionsToWhereClause(
   flowCategoryConditions: FlowCategory[]
@@ -198,40 +159,6 @@ export function mapCountResultToCountObject(countRes: any[]) {
   const countObject = countRes[0] as { count: number };
 
   return countObject;
-}
-
-export function mapFlowObjectConditions(
-  flowObjectFilters: FlowObjectFilters[] = []
-): Map<string, Map<string, number[]>> {
-  const flowObjectsConditions: Map<string, Map<string, number[]>> = new Map<
-    string,
-    Map<string, number[]>
-  >();
-
-  for (const flowObjectFilter of flowObjectFilters) {
-    const { objectType, direction, objectID } = flowObjectFilter;
-
-    if (!flowObjectsConditions.has(objectType)) {
-      flowObjectsConditions.set(objectType, new Map<string, number[]>());
-    }
-
-    const refDirectionMap = flowObjectsConditions.get(objectType);
-    if (!refDirectionMap!.has(direction)) {
-      refDirectionMap!.set(direction, []);
-    }
-
-    const objectIDsArray = refDirectionMap!.get(direction);
-
-    if (objectIDsArray!.includes(objectID)) {
-      throw new Error(
-        `Duplicate flow object filter: ${objectType} ${direction} ${objectID}`
-      );
-    }
-
-    objectIDsArray!.push(objectID);
-  }
-
-  return flowObjectsConditions;
 }
 
 export function mergeUniqueEntities(

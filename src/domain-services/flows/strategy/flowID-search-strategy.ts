@@ -8,9 +8,9 @@ export interface FlowIdSearchStrategyResponse {
 }
 
 export interface FlowIdSearchStrategyArgs {
-  databaseConnection?: Knex;
+  databaseConnection: Knex;
   models: Database;
-  flowObjectsConditions?: Map<string, Map<string, number[]>>;
+  flowObjectsConditions?: any; // TODO: use proper type
   flowCategoryConditions?: FlowCategory[];
   nestedFlowFilters?: NestedFlowFilters;
   shortcutFilter?: any[] | null;
