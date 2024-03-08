@@ -231,21 +231,48 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     );
 
     // Then we are going to slice the flows using the limit and offset
-    const reducedFlows: UniqueFlowEntity[] = sortedFlows.slice(
-      offset,
-      offset! + limit!
-    );
-
-    // Once the list of elements is reduced, we need to build the conditions
-    const searchConditions = this.buildConditions(reducedFlows, flowFilters);
+    let reducedFlows: UniqueFlowEntity[];
+    if (offset && limit) {
+      reducedFlows = sortedFlows.slice(offset, offset + limit);
+    } else {
+      reducedFlows = sortedFlows;
+    }
 
     const orderByForFlow = { column: 'updatedAt', order: 'DESC' };
 
-    const flows = await this.flowService.getFlows({
-      models,
-      conditions: searchConditions,
-      orderBy: orderByForFlow,
-    });
+    let flows: FlowEntity[] = [];
+    const chunkSize = 5000;
+    if (reducedFlows.length > chunkSize) {
+      // We need to paginate over the searchConditions
+      // Then collect the flows
+
+      // 1. Generate an array of arrays with the chunkSize
+      const chunkedFlows = [];
+      for (let i = 0; i < reducedFlows.length; i += chunkSize) {
+        chunkedFlows.push(reducedFlows.slice(i, i + chunkSize));
+      }
+
+      // 2. Iterate over the array of arrays to generate the searchConditions
+      // And collect the flows
+      for (const chunk of chunkedFlows) {
+        const chunkSearchConditions = this.buildConditions(chunk, flowFilters);
+        const flowsChunk = await this.flowService.getFlows({
+          models,
+          conditions: chunkSearchConditions,
+          orderBy: orderByForFlow,
+        });
+        flows = [...flows, ...flowsChunk];
+      }
+    } else {
+      // Once the list of elements is reduced, we need to build the conditions
+      const searchConditions = this.buildConditions(reducedFlows, flowFilters);
+
+      flows = await this.flowService.getFlows({
+        models,
+        conditions: searchConditions,
+        orderBy: orderByForFlow,
+      });
+    }
 
     return { flows, count };
   }
