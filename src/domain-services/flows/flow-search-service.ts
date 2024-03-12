@@ -849,6 +849,9 @@ export class FlowSearchService {
       }
     }
 
+    args.flowObjectFilters = flowObjectFilters;
+    // default limit to increase performance
+    args.limit = 5000;
     // Do the first search
     const flowSearchResponse = await this.search(
       models,
@@ -870,7 +873,6 @@ export class FlowSearchService {
         databaseConnection,
         nextArgs
       );
-
       flows.push(...nextFlowSearchResponse.flows);
 
       hasNextPage = nextFlowSearchResponse.hasNextPage;

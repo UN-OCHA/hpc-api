@@ -232,7 +232,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     // Then we are going to slice the flows using the limit and offset
     let reducedFlows: UniqueFlowEntity[];
-    if (offset && limit) {
+    if (offset !== undefined && limit !== undefined) {
       reducedFlows = sortedFlows.slice(offset, offset + limit);
     } else {
       reducedFlows = sortedFlows;
