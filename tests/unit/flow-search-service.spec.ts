@@ -72,11 +72,17 @@ describe('FlowSearchService', () => {
   describe('prepareFlowObjectConditions', () => {
     it('should prepare flow object conditions correctly', () => {
       const flowObjectFilters: FlowObjectFilters[] = [
-        { objectType: 'organization', direction: 'source', objectID: 12_469 },
+        {
+          objectType: 'organization',
+          direction: 'source',
+          objectID: 12_469,
+          inclusive: false,
+        },
         {
           objectType: 'organization',
           direction: 'destination',
           objectID: 5197,
+          inclusive: false,
         },
       ];
 
@@ -98,8 +104,18 @@ describe('FlowSearchService', () => {
 
     it('should throw an error for duplicate flow object filter', () => {
       const flowObjectFilters: FlowObjectFilters[] = [
-        { objectType: 'organization', direction: 'source', objectID: 12_469 },
-        { objectType: 'organization', direction: 'source', objectID: 12_469 }, // Duplicate filter
+        {
+          objectType: 'organization',
+          direction: 'source',
+          objectID: 12_469,
+          inclusive: false,
+        },
+        {
+          objectType: 'organization',
+          direction: 'source',
+          objectID: 12_469,
+          inclusive: false,
+        }, // Duplicate filter
       ];
 
       expect(() =>

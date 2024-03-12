@@ -53,6 +53,9 @@ export class FlowObjectFilters {
     | 'project'
     | 'globalCluster'
     | 'emergency';
+
+  @Field({ nullable: true })
+  inclusive: boolean;
 }
 
 @InputType()

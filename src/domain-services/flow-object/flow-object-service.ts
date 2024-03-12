@@ -56,28 +56,106 @@ export class FlowObjectService {
     // 1. Map flowObjectConditions to selectQuery
     let selectQuery = databaseConnection?.queryBuilder();
 
-    // 1.1. Map first element of flowObjectConditions to selectQuery
-    // We know there is at least one element in flowObjectConditions
-    const firstFlowObjectCondition = flowObjectConditions[0];
-    selectQuery = selectQuery
-      ?.select('flowID', 'versionID')
-      .from('flowObject')
-      .where('objectID', firstFlowObjectCondition.objectID)
-      .andWhere('objectType', firstFlowObjectCondition.objectType)
-      .andWhere('refDirection', firstFlowObjectCondition.direction);
+    // 1.1. Store FlowObjectConditions in two separate lists
+    // One will store those filters with inclusive = false | undefined
+    // The other will store those filters with inclusive = true
+    const inclusiveFlowObjectConditions = flowObjectConditions.filter(
+      (flowObjectCondition: any) => flowObjectCondition.inclusive
+    );
 
-    // 1.2 Map the rest of the elements of flowObjectConditions to selectQuery
-    for (let i = 1; i < flowObjectConditions.length; i++) {
-      const flowObjectCondition = flowObjectConditions[i];
+    const exclusiveFlowObjectConditions = flowObjectConditions.filter(
+      (flowObjectCondition: any) => !flowObjectCondition.inclusive
+    );
+
+    // 2 If there are elements in inclusiveFlowObjectConditions, map them to selectQuery
+    // Each entry must be part of a 'where' 'orWhere' chain
+    if (inclusiveFlowObjectConditions.length > 0) {
+      selectQuery = selectQuery
+        ?.select('flowID', 'versionID')
+        .from('flowObject')
+        .where(function () {
+          this.where('objectID', '=', inclusiveFlowObjectConditions[0].objectID)
+            .andWhere(
+              'objectType',
+              '=',
+              inclusiveFlowObjectConditions[0].objectType
+            )
+            .andWhere(
+              'refDirection',
+              '=',
+              inclusiveFlowObjectConditions[0].direction
+            );
+        });
+
+      for (let i = 1; i < inclusiveFlowObjectConditions.length; i++) {
+        selectQuery = selectQuery.orWhere(function () {
+          this.where('objectID', '=', inclusiveFlowObjectConditions[i].objectID)
+            .andWhere(
+              'objectType',
+              '=',
+              inclusiveFlowObjectConditions[i].objectType
+            )
+            .andWhere(
+              'refDirection',
+              '=',
+              inclusiveFlowObjectConditions[i].direction
+            );
+        });
+      }
+    }
+
+    // 3 If there are elements in exclusiveFlowObjectConditions, map them to selectQuery
+    // Each entry must be part of a 'where' intersect 'where' chain
+    if (exclusiveFlowObjectConditions.length > 0) {
       selectQuery = selectQuery?.intersect(function () {
         this.select('flowID', 'versionID')
           .from('flowObject')
-          .where('objectID', flowObjectCondition.objectID)
-          .andWhere('objectType', flowObjectCondition.objectType)
-          .andWhere('refDirection', flowObjectCondition.direction);
+          .where(function () {
+            this.where(
+              'objectID',
+              '=',
+              exclusiveFlowObjectConditions[0].objectID
+            )
+              .andWhere(
+                'objectType',
+                '=',
+                exclusiveFlowObjectConditions[0].objectType
+              )
+              .andWhere(
+                'refDirection',
+                '=',
+                exclusiveFlowObjectConditions[0].direction
+              );
+          });
+
+        for (let i = 1; i < exclusiveFlowObjectConditions.length; i++) {
+          selectQuery = selectQuery?.intersect(function () {
+            this.select('flowID', 'versionID')
+              .from('flowObject')
+              .where(function () {
+                this.where(
+                  'objectID',
+                  '=',
+                  exclusiveFlowObjectConditions[i].objectID
+                )
+                  .andWhere(
+                    'objectType',
+                    '=',
+                    exclusiveFlowObjectConditions[i].objectType
+                  )
+                  .andWhere(
+                    'refDirection',
+                    '=',
+                    exclusiveFlowObjectConditions[i].direction
+                  );
+              });
+          });
+        }
       });
     }
 
+    console.log(selectQuery.toString());
+    // 4. Execute selectQuery
     return await selectQuery;
   }
 }
