@@ -799,6 +799,57 @@ export class FlowSearchService {
     databaseConnection: Knex,
     args: SearchFlowsArgs
   ): Promise<FlowSearchResultNonPaginated> {
+    // We need to check if the user sent a 'usageYear' FlowObjectFilter
+    // If not - we need to add it to the filters (both source and destination since 2021 and after)
+    const { flowObjectFilters } = args;
+    if (flowObjectFilters) {
+      const usageYearFilter = flowObjectFilters.find(
+        (filter) => filter.objectType === 'usageYear'
+      );
+
+      if (!usageYearFilter) {
+        // Find the flowObjectFilters since 2021 until currentYear
+        let startYear = 2021;
+        const currentYear = new Date().getFullYear();
+
+        const usageYearsArrayFilter: string[] = [];
+        while (startYear <= currentYear) {
+          usageYearsArrayFilter.push(startYear.toString());
+          startYear++;
+        }
+        const usageYears = await models.usageYear.find({
+          where: {
+            year: {
+              [Op.IN]: usageYearsArrayFilter,
+            },
+          },
+        });
+
+        for (const usageYear of usageYears) {
+          // Map the usageYear filters to the flowObjectFilters
+          const sourceUsageYearFilter: FlowObjectFilters = {
+            objectType: 'usageYear',
+            direction: 'source',
+            objectID: usageYear.id.valueOf(),
+            inclusive: true,
+          };
+
+          const destinationUsageYearFilter: FlowObjectFilters = {
+            objectType: 'usageYear',
+            direction: 'destination',
+            objectID: usageYear.id.valueOf(),
+            inclusive: true,
+          };
+
+          flowObjectFilters.push(
+            sourceUsageYearFilter,
+            destinationUsageYearFilter
+          );
+        }
+      }
+    }
+
+    // Do the first search
     const flowSearchResponse = await this.search(
       models,
       databaseConnection,

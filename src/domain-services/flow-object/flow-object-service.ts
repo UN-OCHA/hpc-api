@@ -154,7 +154,6 @@ export class FlowObjectService {
       });
     }
 
-    console.log(selectQuery.toString());
     // 4. Execute selectQuery
     return await selectQuery;
   }

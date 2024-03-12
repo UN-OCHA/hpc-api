@@ -54,7 +54,7 @@ export class FlowObjectFilters {
     | 'globalCluster'
     | 'emergency';
 
-  @Field({ nullable: true })
+  @Field({ nullable: true, defaultValue: false })
   inclusive: boolean;
 }
 
