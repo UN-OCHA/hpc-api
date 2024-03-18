@@ -17,6 +17,7 @@ import { type Organization } from '../organizations/graphql/types';
 import { OrganizationService } from '../organizations/organization-service';
 import { type BasePlan } from '../plans/graphql/types';
 import { PlanService } from '../plans/plan-service';
+import { type ReportDetail } from '../report-details/graphql/types';
 import { ReportDetailService } from '../report-details/report-detail-service';
 import { type UsageYear } from '../usage-years/grpahql/types';
 import { UsageYearService } from '../usage-years/usage-year-service';
@@ -119,10 +120,13 @@ export class FlowSearchService {
 
     const offset = nextPageCursor ?? prevPageCursor ?? 0;
 
+    // we add 1 to the limit to check if there is a next page
+    const searchLimit = limit + 1;
+
     const { flows, count } = await strategy.search({
       models,
       databaseConnection,
-      limit,
+      limit: searchLimit,
       orderBy,
       offset,
       flowFilters,
@@ -201,71 +205,75 @@ export class FlowSearchService {
       this.reportDetailService.getReportDetailsForFlows(flowIds, models),
     ]);
 
-    const items = await Promise.all(
-      flows.map(async (flow) => {
-        const flowLink = flowLinksMap.get(flow.id) ?? [];
+    const promises = flows.map(async (flow) => {
+      const flowLink = flowLinksMap.get(flow.id) ?? [];
 
-        // Categories Map follows the structure:
-        // flowID: { versionID: [categories]}
-        // So we need to get the categories for the flow version
-        const categories = categoriesMap.get(flow.id);
-        const categoriesByVersion = categories?.get(flow.versionID) ?? [];
-        const organizations = organizationsMap.get(flow.id) ?? [];
-        const locations = locationsMap.get(flow.id) ?? [];
-        const plans = plansMap.get(flow.id) ?? [];
-        const usageYears = usageYearsMap.get(flow.id) ?? [];
-        const externalReferences = externalReferencesMap.get(flow.id) ?? [];
-        const reportDetails = reportDetailsMap.get(flow.id) ?? [];
+      // Categories Map follows the structure:
+      // flowID: { versionID: [categories]}
+      // So we need to get the categories for the flow version
+      const categories = categoriesMap.get(flow.id);
+      const categoriesByVersion = categories?.get(flow.versionID) ?? [];
+      const organizations = organizationsMap.get(flow.id) ?? [];
+      const locations = locationsMap.get(flow.id) ?? [];
+      const plans = plansMap.get(flow.id) ?? [];
+      const usageYears = usageYearsMap.get(flow.id) ?? [];
+      const externalReferences = externalReferencesMap.get(flow.id) ?? [];
+      const reportDetails = reportDetailsMap.get(flow.id) ?? [];
 
-        const reportDetailsWithChannel =
+      let reportDetailsWithChannel: ReportDetail[] = [];
+      if (reportDetails.length > 0) {
+        reportDetailsWithChannel =
           await this.categoryService.addChannelToReportDetails(
             models,
             reportDetails
           );
+      }
 
-        let parkedParentSource: FlowParkedParentSource | null = null;
-        const shouldLookAfterParentSource =
-          flowLink.length > 0 && shouldIncludeChildrenOfParkedFlows;
+      let parkedParentSource: FlowParkedParentSource | null = null;
+      const shouldLookAfterParentSource =
+        flowLink.length > 0 && shouldIncludeChildrenOfParkedFlows;
 
-        if (shouldLookAfterParentSource) {
-          parkedParentSource = await this.getParketParents(
-            flow,
-            flowLink,
-            models
-          );
-        }
-
-        const childIDs: number[] =
-          (flowLinksMap
-            .get(flow.id)
-            ?.filter(
-              (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
-            )
-            .map((flowLink) => flowLink.childID.valueOf()) as number[]) ?? [];
-
-        const parentIDs: number[] =
-          (flowLinksMap
-            .get(flow.id)
-            ?.filter(
-              (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
-            )
-            .map((flowLink) => flowLink.parentID.valueOf()) as number[]) ?? [];
-
-        return this.buildFlowDTO(
+      if (shouldLookAfterParentSource) {
+        parkedParentSource = await this.getParketParents(
           flow,
-          categoriesByVersion,
-          organizations,
-          locations,
-          plans,
-          usageYears,
-          childIDs,
-          parentIDs,
-          externalReferences,
-          reportDetailsWithChannel,
-          parkedParentSource
+          flowLink,
+          models
         );
-      })
-    );
+      }
+
+      const childIDs: number[] =
+        (flowLinksMap
+          .get(flow.id)
+          ?.filter(
+            (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
+          )
+          .map((flowLink) => flowLink.childID.valueOf()) as number[]) ?? [];
+
+      const parentIDs: number[] =
+        (flowLinksMap
+          .get(flow.id)
+          ?.filter(
+            (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
+          )
+          .map((flowLink) => flowLink.parentID.valueOf()) as number[]) ?? [];
+
+      const parsedFlow: Flow = this.buildFlowDTO(
+        flow,
+        categoriesByVersion,
+        organizations,
+        locations,
+        plans,
+        usageYears,
+        childIDs,
+        parentIDs,
+        externalReferences,
+        reportDetailsWithChannel,
+        parkedParentSource
+      );
+
+      return parsedFlow;
+    });
+    const items = await Promise.all(promises);
 
     return {
       flows: items,

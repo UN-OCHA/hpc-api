@@ -56,7 +56,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           models,
           databaseConnection,
           orderBy,
-          limit
+          limit,
+          offset
         );
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
@@ -76,6 +77,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           databaseConnection,
           conditions: flowFilters,
           orderBy: orderByForFlow,
+          offset,
+          limit,
         });
 
       // Since there can be many flowIDs returned
@@ -214,7 +217,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowsFromCategoryFilters,
       flowsFromObjectFilters,
       flowsFromFlowFilters,
-      sortByFlowIDs,
       flowIDsFromNestedFlowFilters
     );
 
@@ -273,7 +275,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         orderBy: orderByForFlow,
       });
     }
-
     return { flows, count };
   }
 

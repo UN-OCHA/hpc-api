@@ -126,8 +126,11 @@ export class CategoryService {
   async addChannelToReportDetails(
     models: Database,
     reportDetails: ReportDetail[]
-  ) {
-    const listOfCategoryRefORs = [];
+  ): Promise<ReportDetail[]> {
+    const listOfCategoryRefORs: Array<{
+      objectID: number;
+      objectType: string;
+    }> = [];
 
     for (const reportDetail of reportDetails) {
       const orClause = {
