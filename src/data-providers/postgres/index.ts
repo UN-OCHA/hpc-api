@@ -4,7 +4,7 @@ import { CONFIG } from '../../../config';
 /**
  * Initialize a new Postgres provider
  */
-export async function createDbConnetion() {
+export async function createDbConnection() {
   const knex = Knex({
     client: 'pg',
     connection: CONFIG.db.connection,
@@ -28,4 +28,4 @@ export async function createDbConnetion() {
   }
 }
 
-export default { createDbConnetion };
+export default { createDbConnection };
