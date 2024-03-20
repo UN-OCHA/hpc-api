@@ -14,7 +14,7 @@ import v4Models from '@unocha/hpc-api-core/src/db';
 import { CONFIG } from '../config';
 import { getTokenFromRequest } from './common-libs/auth';
 import { initializeLogging } from './common-libs/logging';
-import { createDbConnetion } from './data-providers/postgres';
+import { createDbConnection } from './data-providers/postgres';
 
 declare module '@hapi/hapi' {
   interface ServerApplicationState {
@@ -38,7 +38,7 @@ async function startServer() {
     container: Container, // Register the 3rd party IOC container
   });
 
-  const dbConnection = await createDbConnetion();
+  const dbConnection = await createDbConnection();
 
   const hapiServer = Hapi.server({
     port: CONFIG.httpPort,
