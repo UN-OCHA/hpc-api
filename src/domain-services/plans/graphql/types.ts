@@ -1,6 +1,7 @@
 import { Brand } from '@unocha/hpc-api-core/src/util/types';
 import { MaxLength } from 'class-validator';
 import { Field, ID, Int, ObjectType } from 'type-graphql';
+import { BaseType } from '../../../utils/graphql/base-types';
 import PlanTag from '../../plan-tag/graphql/types';
 
 @ObjectType()
@@ -94,4 +95,52 @@ export default class Plan {
 
   @Field(() => [PlanTag])
   tags: PlanTag[];
+}
+
+@ObjectType()
+export class BasePlan extends BaseType {
+  @Field(() => Int, { nullable: true })
+  id: number;
+
+  @Field({ nullable: true })
+  name: string;
+
+  @Field({ nullable: true })
+  direction: string;
+
+  @Field({ nullable: true })
+  startDate: string;
+
+  @Field({ nullable: true })
+  endDate: string;
+
+  @Field(() => String, { nullable: true })
+  comments: string | null;
+
+  @Field({ nullable: true })
+  isForHPCProjects: boolean;
+
+  @Field(() => String, { nullable: true })
+  code: string | null;
+
+  @Field(() => String, { nullable: true })
+  customLocationCode: string | null;
+
+  @Field(() => Number, { nullable: true })
+  currentReportingPeriodId: number | null;
+
+  @Field({ nullable: true })
+  currentVersion: boolean;
+
+  @Field({ nullable: true })
+  latestVersion: boolean;
+
+  @Field({ nullable: true })
+  latestTaggedVersion: boolean;
+
+  @Field(() => Number, { nullable: true })
+  lastPublishedReportingPeriodId: number | null;
+
+  @Field(() => String, { nullable: true })
+  clusterSelectionType: string | null;
 }
