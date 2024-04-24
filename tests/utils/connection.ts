@@ -24,7 +24,7 @@ export async function createDbConnection(connection: ConnectionConfig) {
 
     return knexInstance;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new Error(
       'Unable to connect to Postgres via Knex. Ensure a valid connection.'
     );
