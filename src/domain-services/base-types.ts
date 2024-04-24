@@ -1,16 +1,23 @@
 import { Field, ObjectType } from 'type-graphql';
 
+export type EntityDirection = 'source' | 'destination';
 @ObjectType()
 export class BaseType {
   @Field()
-  createdAt: Date;
+  createdAt: string;
 
   @Field()
-  updatedAt: Date;
+  updatedAt: string;
+}
+
+@ObjectType()
+export class BaseTypeWithDirection extends BaseType {
+  @Field()
+  direction: EntityDirection;
 }
 
 @ObjectType()
 export class BaseTypeWithSoftDelete extends BaseType {
-  @Field({ nullable: true })
-  deletedAt: Date;
+  @Field(() => String, { nullable: true })
+  deletedAt: string | null;
 }
