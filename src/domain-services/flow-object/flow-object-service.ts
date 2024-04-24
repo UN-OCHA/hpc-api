@@ -4,10 +4,13 @@ import {
   Op,
   type Condition,
 } from '@unocha/hpc-api-core/src/db/util/conditions';
-import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
+import { type OrderByCond } from '@unocha/hpc-api-core/src/db/util/raw-model';
+import type {
+  FieldsOfModel,
+  InstanceOfModel,
+} from '@unocha/hpc-api-core/src/db/util/types';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { type OrderBy } from '../../utils/database-types';
 import { type UniqueFlowEntity } from '../flows/model';
 import { buildSearchFlowsObjectConditions } from '../flows/strategy/impl/utils';
 import { type FlowObjectFilterGrouped } from './model';
@@ -16,6 +19,8 @@ import { buildWhereConditionsForFlowObjectFilters } from './utils';
 // Local types definition to increase readability
 type FlowObjectModel = Database['flowObject'];
 type FlowObjectInstance = InstanceOfModel<FlowObjectModel>;
+export type FlowObjectsFieldsDefinition = FieldsOfModel<FlowObjectModel>;
+export type FlowObjectOrderByCond = OrderByCond<FlowObjectsFieldsDefinition>;
 export type FlowObjectWhere = Condition<FlowObjectInstance>;
 @Service()
 export class FlowObjectService {
@@ -75,7 +80,7 @@ export class FlowObjectService {
   async getFlowsObjectsByFlows(
     models: Database,
     whereClauses: FlowObjectWhere,
-    orderBy?: OrderBy<FlowObjectModel['_internals']['fields']>
+    orderBy?: FlowObjectOrderByCond
   ): Promise<FlowObjectInstance[]> {
     const distinctColumns: Array<keyof FlowObjectInstance> = [
       'flowID',
@@ -104,7 +109,7 @@ export class FlowObjectService {
     stopOnBatchSize: boolean,
     responseList: FlowObjectInstance[],
     flowObjectsWhere: FlowObjectWhere,
-    orderBy?: OrderBy<FlowObjectModel['_internals']['fields']>
+    orderBy?: FlowObjectOrderByCond
   ): Promise<FlowObjectInstance[]> {
     const reducedFlows = referenceList.slice(offset, offset + batchSize);
 

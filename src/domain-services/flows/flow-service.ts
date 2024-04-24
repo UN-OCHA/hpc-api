@@ -20,10 +20,7 @@ import type {
   IGetFlowsArgs,
   UniqueFlowEntity,
 } from './model';
-import {
-  buildSearchFlowsConditions,
-  mapOrderByToEntityOrderBy,
-} from './strategy/impl/utils';
+import { buildSearchFlowsConditions } from './strategy/impl/utils';
 
 @Service()
 export class FlowService {
@@ -56,12 +53,11 @@ export class FlowService {
   ): Promise<UniqueFlowEntity[]> {
     const entity = orderBy.subEntity ?? orderBy.entity;
     // Get the entity list
-    const mappedOrderBy = mapOrderByToEntityOrderBy(orderBy);
     // 'externalReference' is a special case
     // because it does have a direct relation with flow
     // and no direction
     if (entity === 'externalReference') {
-      const column = mappedOrderBy.column as keyof InstanceOfModel<
+      const column = orderBy.column as keyof InstanceOfModel<
         Database['externalReference']
       >;
       const externalReferences = await database.externalReference.find({
@@ -90,9 +86,14 @@ export class FlowService {
     switch (entity) {
       case 'emergency': {
         // Get emergency entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['emergency']
+        >;
+        const orderByEmergency = { column, order: orderBy.order };
+
         const emergencies = await database.emergency.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByEmergency,
         });
 
         entityIDsSorted = emergencies.map((emergency) =>
@@ -102,9 +103,14 @@ export class FlowService {
       }
       case 'globalCluster': {
         // Get globalCluster entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['globalCluster']
+        >;
+        const orderByGlobalCluster = { column, order: orderBy.order };
+
         const globalClusters = await database.globalCluster.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByGlobalCluster,
         });
 
         entityIDsSorted = globalClusters.map((globalCluster) =>
@@ -114,9 +120,14 @@ export class FlowService {
       }
       case 'governingEntity': {
         // Get governingEntity entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['governingEntity']
+        >;
+        const orderByGoverningEntity = { column, order: orderBy.order };
+
         const governingEntities = await database.governingEntity.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByGoverningEntity,
         });
 
         entityIDsSorted = governingEntities.map((governingEntity) =>
@@ -126,9 +137,14 @@ export class FlowService {
       }
       case 'location': {
         // Get location entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['location']
+        >;
+        const orderByLocation = { column, order: orderBy.order };
+
         const locations = await database.location.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByLocation,
         });
 
         entityIDsSorted = locations.map((location) => location.id.valueOf());
@@ -136,9 +152,14 @@ export class FlowService {
       }
       case 'organization': {
         // Get organization entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['organization']
+        >;
+        const orderByOrganization = { column, order: orderBy.order };
+
         const organizations = await database.organization.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByOrganization,
         });
 
         entityIDsSorted = organizations.map((organization) =>
@@ -148,9 +169,14 @@ export class FlowService {
       }
       case 'plan': {
         // Get plan entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['plan']
+        >;
+        const orderByPlan = { column, order: orderBy.order };
+
         const plans = await database.plan.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByPlan,
         });
 
         entityIDsSorted = plans.map((plan) => plan.id.valueOf());
@@ -158,9 +184,14 @@ export class FlowService {
       }
       case 'project': {
         // Get project entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['project']
+        >;
+        const orderByProject = { column, order: orderBy.order };
+
         const projects = await database.project.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByProject,
         });
 
         entityIDsSorted = projects.map((project) => project.id.valueOf());
@@ -168,9 +199,14 @@ export class FlowService {
       }
       case 'usageYear': {
         // Get usageYear entities sorted
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['usageYear']
+        >;
+        const orderByUsageYear = { column, order: orderBy.order };
+
         const usageYears = await database.usageYear.find({
-          distinct: [mappedOrderBy.column, 'id'],
-          orderBy: mappedOrderBy,
+          distinct: [column, 'id'],
+          orderBy: orderByUsageYear,
         });
 
         entityIDsSorted = usageYears.map((usageYear) => usageYear.id.valueOf());
@@ -183,9 +219,14 @@ export class FlowService {
           entity.split(/[A-Z]/)[0]
         }Id` as keyof InstanceOfModel<Database['planVersion']>;
 
+        const column = orderBy.column as keyof InstanceOfModel<
+          Database['planVersion']
+        >;
+        const orderByPlanVersion = { column, order: orderBy.order };
+
         const planVersions = await database.planVersion.find({
-          distinct: [mappedOrderBy.column, entityKey],
-          orderBy: mappedOrderBy,
+          distinct: [column, entityKey],
+          orderBy: orderByPlanVersion,
         });
 
         entityIDsSorted = planVersions.map((planVersion) =>
