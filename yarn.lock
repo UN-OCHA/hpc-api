@@ -1550,19 +1550,18 @@
     "@typescript-eslint/types" "8.4.0"
     eslint-visitor-keys "^3.4.3"
 
-"@unocha/hpc-api-core@^10.1.1":
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-10.1.1.tgz#7a85c4afc4bb43b52e83ffdd83e58e03886940b9"
-  integrity sha512-BOGKuzCd7iCZ9qItHw/qaAB0VSYPGUYzUHoI7EgSGfQL0mBz8r+vKvyf+d3CZ6pbG6Hw0kagAMvCQa1Smdrjag==
+"@unocha/hpc-api-core@github:UN-OCHA/hpc-api-core#337ed38a307a038eadad14f2f79b6c1bfbf56af2":
+  version "8.2.0"
+  resolved "https://codeload.github.com/UN-OCHA/hpc-api-core/tar.gz/337ed38a307a038eadad14f2f79b6c1bfbf56af2"
   dependencies:
-    "@types/lodash" "^4.17.10"
-    "@types/node-fetch" "2.6.11"
+    "@types/lodash" "^4.14.194"
+    "@types/node-fetch" "2.6.3"
     fp-ts "^2.14.0"
     io-ts "2.2.20"
-    knex "3.1.0"
+    knex "0.21.1"
     lodash "^4.17.21"
-    node-fetch "2.7.0"
-    pg "^8.13.0"
+    node-fetch "2.6.9"
+    pg "^8.11.3"
     ts-node "^10.9.2"
 
 "@unocha/hpc-repo-tools@^5.0.0":
@@ -4156,7 +4155,14 @@ node-abort-controller@^3.0.1:
   resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-3.0.1.tgz#f91fa50b1dee3f909afabb7e261b1e1d6b0cb74e"
   integrity sha512-/ujIVxthRs+7q6hsdjHMaj8hRG9NuWmwrz+JdRwZ14jdFoKSkm+vDsCbF9PLpnSqjaWQJuTmVtcWHNLr+vrOFw==
 
-node-fetch@2.7.0, node-fetch@^2.6.7:
+node-fetch@2.6.9:
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.9.tgz#7c7f744b5cc6eb5fd404e0c7a9fec630a55657e6"
+  integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
+  dependencies:
+    whatwg-url "^5.0.0"
+
+node-fetch@^2.6.7:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
   integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
@@ -4435,7 +4441,7 @@ pg-types@^4.0.1:
     postgres-interval "^3.0.0"
     postgres-range "^1.1.1"
 
-pg@^8.12.0, pg@^8.13.0:
+pg@^8.11.3, pg@^8.12.0:
   version "8.13.0"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.13.0.tgz#e3d245342eb0158112553fcc1890a60720ae2a3d"
   integrity sha512-34wkUTh3SxTClfoHB3pQ7bIMvw9dpFU1audQQeZG837fmHfHpr14n/AELVDoOYVDW2h5RDWU78tFjkD+erSBsw==
