@@ -39,11 +39,11 @@ const testSoftwareInfo =
   };
 
 describe('Query should return Software info', () => {
-  it('All data should be returned', testSoftwareInfo(true, true, true));
+  test('All data should be returned', testSoftwareInfo(true, true, true));
 
-  it('Only version should be returned', testSoftwareInfo(true, false, false));
+  test('Only version should be returned', testSoftwareInfo(true, false, false));
 
-  it('Only title should be returned', testSoftwareInfo(false, true, false));
+  test('Only title should be returned', testSoftwareInfo(false, true, false));
 
-  it('Only status should be returned', testSoftwareInfo(false, false, true));
+  test('Only status should be returned', testSoftwareInfo(false, false, true));
 });
