@@ -40,6 +40,8 @@ import {
   createBrandedValue,
   type Brand,
 } from '@unocha/hpc-api-core/src/util/types';
+import { chunk } from 'lodash';
+import { CONFIG } from '../../../config';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyModelId = Brand<number, any, any>;
@@ -257,18 +259,29 @@ const updateBaseAndVersionModelTags = async (
     },
     skipValidation: skipAttachmentsAndMeasurementsValidation(tableName),
   });
-  await versionModel.update({
-    values: {
-      latestTaggedVersion: false,
-      ...(tag.public ? { currentVersion: false } : {}),
-    },
-    where: {
-      id: {
-        [models.Op.IN]: oldVersions.map((v) => v.id as AnyModelId),
+  /**
+   * We have to limit the number of parameters that can be passed to a query.
+   * Limit is 32768 (2^15) which is batchLimit in the config file.
+   * latestTaggedVersion, currentVersion, and updatedAt is also included in the parameters
+   * so we subtract 3 from the limit to get the maximum number of parameters that can be passed to a query
+   */
+  for (const chunkedOldVersionModelIDs of chunk(
+    oldVersions.map((v) => v.id as AnyModelId),
+    CONFIG.db.batchLimit - 3
+  )) {
+    await versionModel.update({
+      values: {
+        latestTaggedVersion: false,
+        ...(tag.public ? { currentVersion: false } : {}),
       },
-    },
-    skipValidation: skipAttachmentsAndMeasurementsValidation(tableName),
-  });
+      where: {
+        id: {
+          [models.Op.IN]: chunkedOldVersionModelIDs,
+        },
+      },
+      skipValidation: skipAttachmentsAndMeasurementsValidation(tableName),
+    });
+  }
 };
 
 const updateBaseModelTags = async (
