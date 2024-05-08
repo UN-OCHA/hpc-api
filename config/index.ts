@@ -23,6 +23,7 @@ export const CONFIG = {
   name: process.env.NODE_ENV,
   authBaseUrl: process.env.AUTHBASE_URL,
   db: {
+    batchLimit: 32_768, // 2^15,
     connection: process.env.POSTGRES_SERVER,
     logging: !!parseInt(process.env.POSTGRES_LOGGING ?? ''),
     poolMin: 2,
