@@ -24,10 +24,7 @@ import type {
   IGetUniqueFlowsArgs,
   UniqueFlowEntity,
 } from './model';
-import {
-  applySearchFilters,
-  mapOrderByToEntityOrderBy,
-} from './strategy/impl/utils';
+import { mapOrderByToEntityOrderBy } from './strategy/impl/utils';
 
 @Service()
 export class FlowService {
@@ -68,28 +65,15 @@ export class FlowService {
   }
 
   async getFlowsRaw(
-    databaseConnection: Knex,
-    database: Database,
+    models: Database,
     whereClauses: FlowWhere,
-    orderBy: FlowOrderByCond | null
+    orderBy: FlowOrderByCond
   ): Promise<FlowInstance[]> {
-    let query = databaseConnection!
-      .queryBuilder()
-      .select('*')
-      .from('flow')
-      .whereNull('deletedAt');
-
-    if (orderBy?.raw) {
-      query = query.orderByRaw(orderBy.raw);
-    } else if (orderBy?.order) {
-      query = query.orderBy(orderBy.column, orderBy.order);
-    }
-
-    if (whereClauses) {
-      query = query.andWhere(prepareCondition(whereClauses));
-    }
-
-    const flows: FlowInstance[] = await query;
+    const flows: FlowInstance[] = await models.flow.find({
+      orderBy,
+      where: whereClauses,
+      distinct: [orderBy?.column, 'id', 'versionID'],
+    });
 
     return flows;
   }
@@ -138,7 +122,7 @@ export class FlowService {
         (externalReference) =>
           ({
             id: externalReference.flowID,
-            versionID: externalReference.versionID || 1, // Default to 1 if versionID
+            versionID: externalReference.versionID ?? 1, // Default to 1 if versionID
           }) satisfies UniqueFlowEntity
       );
 
@@ -287,9 +271,7 @@ export class FlowService {
     flowObjects = flowObjects
       .map((flowObject) => ({
         ...flowObject,
-        sortingKey: entityIDsSorted.findIndex(
-          (entityID) => entityID === flowObject.objectID.valueOf()
-        ),
+        sortingKey: entityIDsSorted.indexOf(flowObject.objectID.valueOf()),
       }))
       .sort((a, b) => a.sortingKey - b.sortingKey);
 
@@ -456,127 +438,4 @@ export class FlowService {
     }));
     return mappedChildsOfParkedParents;
   }
-}
-function differenceBy(
-  flowObjects: import('@unocha/hpc-api-core/src/db/util/model-definition').InstanceDataOf<
-    import('@unocha/hpc-api-core/src/db/util/sequelize-model').FieldsWithSequelize<
-      {
-        required: {
-          flowID: {
-            kind: 'branded-integer';
-            brand: import('io-ts').Type<
-              import('@unocha/hpc-api-core/src/db/models/flow').FlowId,
-              import('@unocha/hpc-api-core/src/db/models/flow').FlowId,
-              unknown
-            >;
-          };
-          objectID: { kind: 'checked'; type: import('io-ts').NumberC };
-          objectType: {
-            kind: 'checked';
-            type: import('io-ts').KeyofC<{
-              anonymizedOrganization: null;
-              cluster: null;
-              corePlanEntityActivity: null;
-              corePlanEntityObjective: null;
-              emergency: null;
-              flow: null;
-              globalCluster: null;
-              governingEntity: null;
-              location: null;
-              organization: null;
-              plan: null;
-              planEntity: null;
-              project: null;
-              usageYear: null;
-            }>;
-          };
-          refDirection: {
-            kind: 'checked';
-            type: import('io-ts').KeyofC<{ source: null; destination: null }>;
-          };
-        };
-        nonNullWithDefault: {
-          versionID: { kind: 'checked'; type: import('io-ts').NumberC };
-        };
-        optional: {
-          behavior: { kind: 'enum'; values: { overlap: null; shared: null } };
-          objectDetail: { kind: 'checked'; type: import('io-ts').StringC };
-        };
-      },
-      false
-    >
-  >[],
-  planVersions: import('@unocha/hpc-api-core/src/db/util/model-definition').InstanceDataOf<
-    import('@unocha/hpc-api-core/src/db/util/legacy-versioned-model').FieldsWithVersioned<
-      {
-        generated: {
-          id: {
-            kind: 'branded-integer';
-            brand: import('io-ts').Type<
-              import('@unocha/hpc-api-core/src/db/models/planVersion').PlanVersionId,
-              import('@unocha/hpc-api-core/src/db/models/planVersion').PlanVersionId,
-              unknown
-            >;
-          };
-        };
-        nonNullWithDefault: {
-          isForHPCProjects: { kind: 'checked'; type: import('io-ts').BooleanC };
-          visibilityPreferences: {
-            kind: 'checked';
-            type: import('io-ts').TypeC<{
-              isDisaggregationForCaseloads: import('io-ts').BooleanC;
-              isDisaggregationForIndicators: import('io-ts').BooleanC;
-            }>;
-          };
-        };
-        required: {
-          planId: {
-            kind: 'branded-integer';
-            brand: import('io-ts').Type<
-              import('@unocha/hpc-api-core/src/db/models/plan').PlanId,
-              import('@unocha/hpc-api-core/src/db/models/plan').PlanId,
-              unknown
-            >;
-          };
-          name: { kind: 'checked'; type: import('io-ts').StringC };
-          startDate: {
-            kind: 'checked';
-            type: import('io-ts').Type<Date, Date, unknown>;
-          };
-          endDate: {
-            kind: 'checked';
-            type: import('io-ts').Type<Date, Date, unknown>;
-          };
-        };
-        optional: {
-          comments: { kind: 'checked'; type: import('io-ts').StringC };
-          code: { kind: 'checked'; type: import('io-ts').StringC };
-          customLocationCode: {
-            kind: 'checked';
-            type: import('io-ts').StringC;
-          };
-          currentReportingPeriodId: {
-            kind: 'branded-integer';
-            brand: import('io-ts').Type<
-              import('@unocha/hpc-api-core/src/db/models/planReportingPeriod').PlanReportingPeriodId,
-              import('@unocha/hpc-api-core/src/db/models/planReportingPeriod').PlanReportingPeriodId,
-              unknown
-            >;
-          };
-          lastPublishedReportingPeriodId: {
-            kind: 'checked';
-            type: import('io-ts').NumberC;
-          };
-          clusterSelectionType: {
-            kind: 'checked';
-            type: import('io-ts').KeyofC<{ single: null; multi: null }>;
-          };
-        };
-      },
-      false
-    >
-  >[],
-  arg2: string
-): any[] {
-  throw new Error('Function not implemented.');
 }

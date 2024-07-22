@@ -1,5 +1,4 @@
-import { Database } from '@unocha/hpc-api-core/src/db';
-import type Knex from 'knex';
+import { type Database } from '@unocha/hpc-api-core/src/db';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
 import type {
@@ -17,7 +16,6 @@ import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow
 import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-from-nested-flow-filters-strategy-impl';
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
-  buildOrderByReference,
   buildSearchFlowsConditions,
   defaultFlowOrderBy,
   intersectUniqueFlowEntities,
@@ -262,19 +260,23 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const count = sortedFlows.length;
 
-    const flowEntityOrderBy = isSortByEntity
-      ? buildOrderByReference(sortedFlows)
-      : orderByForFlow;
-
     const flows = await this.progresiveSearch(
-      databaseConnection,
       models,
       sortedFlows,
       limit,
       offset ?? 0,
-      flowEntityOrderBy,
+      orderByForFlow,
       []
     );
+
+    if (isSortByEntity) {
+      // Sort the flows using the sortedFlows as referenceList
+      flows.sort((a, b) => {
+        const aIndex = sortedFlows.findIndex((flow) => flow.id === a.id);
+        const bIndex = sortedFlows.findIndex((flow) => flow.id === b.id);
+        return aIndex - bIndex;
+      });
+    }
 
     return { flows, count };
   }
@@ -298,12 +300,11 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
    * @returns list of flows
    */
   async progresiveSearch(
-    databaseConnection: Knex,
     database: Database,
     sortedFlows: UniqueFlowEntity[],
     limit: number,
     offset: number,
-    orderBy: FlowOrderByCond | null,
+    orderBy: FlowOrderByCond,
     flowResponse: FlowInstance[]
   ): Promise<FlowInstance[]> {
     const reducedFlows = sortedFlows.slice(offset, offset + limit);
@@ -311,7 +312,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const whereConditions = buildSearchFlowsConditions(reducedFlows);
 
     const flows = await this.flowService.getFlowsRaw(
-      databaseConnection,
       database,
       whereConditions,
       orderBy
@@ -326,7 +326,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // Recursive call
     offset += limit;
     return await this.progresiveSearch(
-      databaseConnection,
       database,
       sortedFlows,
       limit,
