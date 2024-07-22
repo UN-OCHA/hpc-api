@@ -18,15 +18,7 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
   constructor(private readonly flowService: FlowService) {}
 
   async search(args: FlowSearchArgs): Promise<FlowSearchStrategyResponse> {
-    const {
-      databaseConnection,
-      models,
-      flowFilters,
-      orderBy,
-      limit,
-      offset,
-      statusFilter,
-    } = args;
+    const { models, flowFilters, orderBy, limit, offset, statusFilter } = args;
     // Map flowConditions to where clause
     let flowConditions = prepareFlowConditions(flowFilters);
 
@@ -56,7 +48,7 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
         orderBy: orderByFlow,
         limit,
       }),
-      this.flowService.getFlowsCount(databaseConnection, models, whereClause),
+      this.flowService.getFlowsCount(models, whereClause),
     ]);
 
     // Map count result query to count object

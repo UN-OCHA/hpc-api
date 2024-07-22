@@ -1,8 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
-import {
-  Op,
-  prepareCondition,
-} from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import type Knex from 'knex';
@@ -78,25 +75,10 @@ export class FlowService {
     return flows;
   }
 
-  async getFlowsCount(
-    databaseConnection: Knex,
-    database: Database,
-    conditions: FlowWhere
-  ) {
-    // Since this is the only place where we need to use the count method
-    // Instead of implementing on the models, we can use the queryBuilder directly
-    // Why use the count method? Because it's faster than fetching all the data
-    // and since we are filtering and paginating it makes no sense to fetch all the data
-    // just to do the count - this approach is faster and more efficient
-    const query = databaseConnection
-      .queryBuilder()
-      .count('*')
-      .from('flow')
-      .where(prepareCondition(conditions));
-
-    const [{ count }] = await query;
-
-    return Number(count);
+  async getFlowsCount(models: Database, conditions: FlowWhere) {
+    return await models.flow.count({
+      where: conditions,
+    });
   }
 
   async getFlowIDsFromEntity(

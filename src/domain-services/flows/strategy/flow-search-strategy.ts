@@ -12,7 +12,7 @@ import type { FlowInstance, FlowOrderBy } from '../model';
 
 export interface FlowSearchStrategyResponse {
   flows: FlowInstance[];
-  count: number;
+  count: number | bigint;
 }
 
 export interface FlowSearchArgs {
