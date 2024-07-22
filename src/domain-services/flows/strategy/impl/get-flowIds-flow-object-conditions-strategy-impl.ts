@@ -19,7 +19,7 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
   async search(
     args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
-    const { flowObjectFilterGrouped, databaseConnection } = args;
+    const { flowObjectFilterGrouped, databaseConnection, models } = args;
 
     if (!flowObjectFilterGrouped) {
       return { flows: [] };
@@ -28,6 +28,7 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
     const flowObjects =
       await this.flowObjectService.getFlowObjectsByFlowObjectConditions(
         databaseConnection,
+        models,
         flowObjectFilterGrouped
       );
 

@@ -1,5 +1,4 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
-import { FLOW_OBJECT_TYPE_TYPE } from '@unocha/hpc-api-core/src/db/models/flowObjectType';
 import {
   Op,
   prepareCondition,
@@ -83,6 +82,7 @@ export class FlowService {
 
   async getFlowsRaw(
     databaseConnection: Knex,
+    database: Database,
     whereClauses: FlowWhere,
     orderBy: FlowOrderByCond | null
   ): Promise<FlowInstance[]> {
@@ -107,7 +107,11 @@ export class FlowService {
     return flows;
   }
 
-  async getFlowsCount(databaseConnection: Knex, conditions: FlowWhere) {
+  async getFlowsCount(
+    databaseConnection: Knex,
+    database: Database,
+    conditions: FlowWhere
+  ) {
     // Since this is the only place where we need to use the count method
     // Instead of implementing on the models, we can use the queryBuilder directly
     // Why use the count method? Because it's faster than fetching all the data
@@ -125,70 +129,188 @@ export class FlowService {
   }
 
   async getFlowIDsFromEntity(
-    dbConnection: Knex,
+    database: Database,
     orderBy: FlowOrderBy
   ): Promise<UniqueFlowEntity[]> {
     const entity = orderBy.subEntity ?? orderBy.entity;
     // Get the entity list
     const mappedOrderBy = mapOrderByToEntityOrderBy(orderBy);
-    const orderByRaw = `"${mappedOrderBy.column}" ${mappedOrderBy.order} nulls last`;
-
     // 'externalReference' is a special case
     // because it does have a direct relation with flow
     // and no direction
     if (entity === 'externalReference') {
-      const entityList = await dbConnection
-        .queryBuilder()
-        .distinct('flowID', 'versionID', mappedOrderBy.column)
-        .from('externalReference')
-        .orderByRaw(orderByRaw);
+      const column = mappedOrderBy.column as keyof InstanceOfModel<
+        Database['externalReference']
+      >;
+      const externalReferences = await database.externalReference.find({
+        orderBy: { column, order: orderBy.order, nulls: 'last' },
+        distinct: ['flowID', 'versionID'],
+      });
 
-      return this.processFlowIDs(entityList);
+      const uniqueFlowEntities: UniqueFlowEntity[] = externalReferences.map(
+        (externalReference) =>
+          ({
+            id: externalReference.flowID,
+            versionID: externalReference.versionID || 1, // Default to 1 if versionID
+          }) satisfies UniqueFlowEntity
+      );
+
+      return uniqueFlowEntities;
     }
-
-    // Get the flowIDs from the entity list
-    // using the flow-object relation if the entity is a flow-object
-    const entityCondKey = orderBy.entity as unknown;
 
     const refDirection = orderBy.direction ?? 'source';
 
     // Validate the variable using io-ts
-    const result = FLOW_OBJECT_TYPE_TYPE.decode(entityCondKey);
-    const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
 
-    let joinQuery = dbConnection
-      .queryBuilder()
-      .distinct('flowObject.flowID', 'flowObject.versionID')
-      .from('flowObject');
+    let flowObjects = [];
+    let entityIDsSorted: number[] = [];
 
-    if (result._tag === 'Right') {
-      joinQuery = joinQuery
-        .join(entity, 'flowObject.objectID', `${entity}.id`)
-        .select(`${entity}.${mappedOrderBy.column}`) // This is needed since we must select the column to order by
-        .where('flowObject.objectType', entityCondKeyFlowObjectType)
-        .andWhere('flowObject.refDirection', refDirection)
-        .orderByRaw(orderByRaw);
-    } else {
-      // Collect fisrt part of the entity key by the fisrt Case letter
-      const entityKey = entity.slice(0, entity.search(/[A-Z]/));
-      joinQuery = joinQuery
-        .join(
-          orderBy.entity,
-          'flowObject.objectID',
-          `${orderBy.entity}.${entityKey}Id`
-        )
-        .select(`${orderBy.entity}.${mappedOrderBy.column}`) // This is needed since we must select the column to order by
-        .where('flowObject.objectType', entityKey)
-        .andWhere('flowObject.refDirection', refDirection)
-        .orderByRaw(orderByRaw);
+    switch (entity) {
+      case 'emergency': {
+        // Get emergency entities sorted
+        const emergencies = await database.emergency.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = emergencies.map((emergency) =>
+          emergency.id.valueOf()
+        );
+        break;
+      }
+      case 'globalCluster': {
+        // Get globalCluster entities sorted
+        const globalClusters = await database.globalCluster.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = globalClusters.map((globalCluster) =>
+          globalCluster.id.valueOf()
+        );
+        break;
+      }
+      case 'governingEntity': {
+        // Get governingEntity entities sorted
+        const governingEntities = await database.governingEntity.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = governingEntities.map((governingEntity) =>
+          governingEntity.id.valueOf()
+        );
+        break;
+      }
+      case 'location': {
+        // Get location entities sorted
+        const locations = await database.location.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = locations.map((location) => location.id.valueOf());
+        break;
+      }
+      case 'organization': {
+        // Get organization entities sorted
+        const organizations = await database.organization.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = organizations.map((organization) =>
+          organization.id.valueOf()
+        );
+        break;
+      }
+      case 'plan': {
+        // Get plan entities sorted
+        const plans = await database.plan.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = plans.map((plan) => plan.id.valueOf());
+        break;
+      }
+      case 'project': {
+        // Get project entities sorted
+        const projects = await database.project.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = projects.map((project) => project.id.valueOf());
+        break;
+      }
+      case 'usageYear': {
+        // Get usageYear entities sorted
+        const usageYears = await database.usageYear.find({
+          distinct: [mappedOrderBy.column, 'id'],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = usageYears.map((usageYear) => usageYear.id.valueOf());
+        break;
+      }
+      case 'planVersion': {
+        // Get planVersion entities sorted
+        // Collect fisrt part of the entity key by the fisrt Case letter
+        const entityKey = `${
+          entity.split(/[A-Z]/)[0]
+        }Id` as keyof InstanceOfModel<Database['planVersion']>;
+
+        const planVersions = await database.planVersion.find({
+          distinct: [mappedOrderBy.column, entityKey],
+          orderBy: mappedOrderBy,
+        });
+
+        entityIDsSorted = planVersions.map((planVersion) =>
+          planVersion.planId.valueOf()
+        );
+        break;
+      }
+      default: {
+        throw new Error(`Invalid entity ${orderBy.entity} to sort by`);
+      }
     }
 
-    const flowIDs = await joinQuery;
-    return this.processFlowIDs(flowIDs);
+
+    // After getting the sorted entityID list
+    // we can now get the flowObjects
+    const entityCondKey = orderBy.entity as unknown;
+    const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
+
+    flowObjects = await database.flowObject.find({
+      where: {
+        objectType: entityCondKeyFlowObjectType,
+        refDirection,
+        objectID: {
+          [Op.IN]: entityIDsSorted,
+        },
+      },
+      distinct: ['flowID', 'versionID'],
+    });
+
+    // Then, we need to filter the results from the flowObject table
+    // using the planVersions list as sorted reference
+    // this is because we cannot apply the order of a given list
+    // to the query directly
+    flowObjects = flowObjects
+      .map((flowObject) => ({
+        ...flowObject,
+        sortingKey: entityIDsSorted.findIndex(
+          (entityID) => entityID === flowObject.objectID.valueOf()
+        ),
+      }))
+      .sort((a, b) => a.sortingKey - b.sortingKey);
+
+    return this.processFlowIDs(flowObjects);
   }
 
-  private processFlowIDs(flowObjecst: FlowObject[]) {
-    const mapFlowsToUniqueFlowEntities = flowObjecst.map((flowObject) => ({
+  private processFlowIDs(flowObjects: FlowObject[]) {
+    const mapFlowsToUniqueFlowEntities = flowObjects.map((flowObject) => ({
       id: flowObject.flowID,
       versionID: flowObject.versionID,
     }));
@@ -347,4 +469,127 @@ export class FlowService {
     }));
     return mappedChildsOfParkedParents;
   }
+}
+function differenceBy(
+  flowObjects: import('@unocha/hpc-api-core/src/db/util/model-definition').InstanceDataOf<
+    import('@unocha/hpc-api-core/src/db/util/sequelize-model').FieldsWithSequelize<
+      {
+        required: {
+          flowID: {
+            kind: 'branded-integer';
+            brand: import('io-ts').Type<
+              import('@unocha/hpc-api-core/src/db/models/flow').FlowId,
+              import('@unocha/hpc-api-core/src/db/models/flow').FlowId,
+              unknown
+            >;
+          };
+          objectID: { kind: 'checked'; type: import('io-ts').NumberC };
+          objectType: {
+            kind: 'checked';
+            type: import('io-ts').KeyofC<{
+              anonymizedOrganization: null;
+              cluster: null;
+              corePlanEntityActivity: null;
+              corePlanEntityObjective: null;
+              emergency: null;
+              flow: null;
+              globalCluster: null;
+              governingEntity: null;
+              location: null;
+              organization: null;
+              plan: null;
+              planEntity: null;
+              project: null;
+              usageYear: null;
+            }>;
+          };
+          refDirection: {
+            kind: 'checked';
+            type: import('io-ts').KeyofC<{ source: null; destination: null }>;
+          };
+        };
+        nonNullWithDefault: {
+          versionID: { kind: 'checked'; type: import('io-ts').NumberC };
+        };
+        optional: {
+          behavior: { kind: 'enum'; values: { overlap: null; shared: null } };
+          objectDetail: { kind: 'checked'; type: import('io-ts').StringC };
+        };
+      },
+      false
+    >
+  >[],
+  planVersions: import('@unocha/hpc-api-core/src/db/util/model-definition').InstanceDataOf<
+    import('@unocha/hpc-api-core/src/db/util/legacy-versioned-model').FieldsWithVersioned<
+      {
+        generated: {
+          id: {
+            kind: 'branded-integer';
+            brand: import('io-ts').Type<
+              import('@unocha/hpc-api-core/src/db/models/planVersion').PlanVersionId,
+              import('@unocha/hpc-api-core/src/db/models/planVersion').PlanVersionId,
+              unknown
+            >;
+          };
+        };
+        nonNullWithDefault: {
+          isForHPCProjects: { kind: 'checked'; type: import('io-ts').BooleanC };
+          visibilityPreferences: {
+            kind: 'checked';
+            type: import('io-ts').TypeC<{
+              isDisaggregationForCaseloads: import('io-ts').BooleanC;
+              isDisaggregationForIndicators: import('io-ts').BooleanC;
+            }>;
+          };
+        };
+        required: {
+          planId: {
+            kind: 'branded-integer';
+            brand: import('io-ts').Type<
+              import('@unocha/hpc-api-core/src/db/models/plan').PlanId,
+              import('@unocha/hpc-api-core/src/db/models/plan').PlanId,
+              unknown
+            >;
+          };
+          name: { kind: 'checked'; type: import('io-ts').StringC };
+          startDate: {
+            kind: 'checked';
+            type: import('io-ts').Type<Date, Date, unknown>;
+          };
+          endDate: {
+            kind: 'checked';
+            type: import('io-ts').Type<Date, Date, unknown>;
+          };
+        };
+        optional: {
+          comments: { kind: 'checked'; type: import('io-ts').StringC };
+          code: { kind: 'checked'; type: import('io-ts').StringC };
+          customLocationCode: {
+            kind: 'checked';
+            type: import('io-ts').StringC;
+          };
+          currentReportingPeriodId: {
+            kind: 'branded-integer';
+            brand: import('io-ts').Type<
+              import('@unocha/hpc-api-core/src/db/models/planReportingPeriod').PlanReportingPeriodId,
+              import('@unocha/hpc-api-core/src/db/models/planReportingPeriod').PlanReportingPeriodId,
+              unknown
+            >;
+          };
+          lastPublishedReportingPeriodId: {
+            kind: 'checked';
+            type: import('io-ts').NumberC;
+          };
+          clusterSelectionType: {
+            kind: 'checked';
+            type: import('io-ts').KeyofC<{ single: null; multi: null }>;
+          };
+        };
+      },
+      false
+    >
+  >[],
+  arg2: string
+): any[] {
+  throw new Error('Function not implemented.');
 }

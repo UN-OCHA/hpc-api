@@ -1,3 +1,4 @@
+import { Database } from '@unocha/hpc-api-core/src/db';
 import type Knex from 'knex';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
@@ -63,10 +64,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     if (isSortByEntity) {
       // Get the flowIDs using the orderBy entity
       const flowIDsFromSortingEntity: UniqueFlowEntity[] =
-        await this.flowService.getFlowIDsFromEntity(
-          databaseConnection,
-          orderBy
-        );
+        await this.flowService.getFlowIDsFromEntity(models, orderBy);
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
       // When using the spread operator - a workaround is to use push fot each element
@@ -270,6 +268,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const flows = await this.progresiveSearch(
       databaseConnection,
+      models,
       sortedFlows,
       limit,
       offset ?? 0,
@@ -300,6 +299,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
    */
   async progresiveSearch(
     databaseConnection: Knex,
+    database: Database,
     sortedFlows: UniqueFlowEntity[],
     limit: number,
     offset: number,
@@ -312,6 +312,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const flows = await this.flowService.getFlowsRaw(
       databaseConnection,
+      database,
       whereConditions,
       orderBy
     );
@@ -326,6 +327,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     offset += limit;
     return await this.progresiveSearch(
       databaseConnection,
+      database,
       sortedFlows,
       limit,
       offset,

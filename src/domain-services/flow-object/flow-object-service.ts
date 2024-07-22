@@ -61,6 +61,7 @@ export class FlowObjectService {
 
   async getFlowObjectsByFlowObjectConditions(
     databaseConnection: Knex,
+    database: Database,
     flowObjectFilterGrouped: FlowObjectFilterGrouped
   ): Promise<UniqueFlowEntity[]> {
     // 1. Create base query to obtain flowIDs and versionIDs

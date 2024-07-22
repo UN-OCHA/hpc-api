@@ -1,8 +1,13 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import {
+  FieldDefinition,
+  InstanceDataOf,
+} from '@unocha/hpc-api-core/src/db/util/model-definition';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import type Knex from 'knex';
 import { type OrderBy } from '../../../../utils/database-types';
+import { SortOrder } from '../../../../utils/graphql/pagination';
 import { type EntityDirection } from '../../../base-types';
 import type {
   FlowObjectFilterGrouped,
@@ -13,11 +18,10 @@ import type {
   FlowObjectFilters,
   SearchFlowsFilters,
 } from '../../graphql/args';
-import { type FlowStatusFilter } from '../../graphql/types';
+import { FlowSortField, type FlowStatusFilter } from '../../graphql/types';
 import type {
-  FlowInstance,
+  FlowFieldsDefinition,
   FlowOrderBy,
-  FlowOrderByCond,
   FlowWhere,
   UniqueFlowEntity,
 } from '../../model';
@@ -128,15 +132,22 @@ export const sortingColumnMapping: Map<string, string> = new Map<
   ['sourceID', 'sourceID'],
 ]);
 
-export const mapFlowOrderBy = (orderBy?: FlowOrderBy): FlowOrderByCond => {
+export const mapFlowOrderBy = (
+  orderBy?: FlowOrderBy
+): OrderBy<FlowFieldsDefinition> => {
   if (!orderBy || orderBy.entity !== 'flow') {
     return defaultFlowOrderBy();
   }
 
-  return { column: orderBy.column as keyof FlowInstance, order: orderBy.order };
+  return {
+    column: orderBy.column as keyof InstanceDataOf<FlowFieldsDefinition>,
+    order: orderBy.order,
+  };
 };
 
-export const mapOrderByToEntityOrderBy = (orderBy?: FlowOrderBy): OrderBy => {
+export const mapOrderByToEntityOrderBy = <F extends FieldDefinition>(
+  orderBy?: FlowOrderBy
+): OrderBy<F> => {
   if (!orderBy || orderBy.entity === 'flow') {
     return defaultFlowOrderBy();
   }
@@ -151,22 +162,33 @@ export const mapOrderByToEntityOrderBy = (orderBy?: FlowOrderBy): OrderBy => {
     columnToSort = orderBy.column;
   }
 
-  return { column: columnToSort, order: orderBy.order };
+  return {
+    column: columnToSort as keyof InstanceDataOf<F>,
+    order: orderBy.order,
+    nulls: 'last',
+  };
 };
 
-export const defaultFlowOrderBy = (): FlowOrderByCond => {
-  return { column: 'updatedAt', order: 'desc' };
+export const defaultFlowOrderBy = (): OrderBy<FlowFieldsDefinition> => {
+  return {
+    column: 'updatedAt' as keyof InstanceDataOf<FlowFieldsDefinition>,
+    order: 'desc',
+    nulls: 'last',
+  };
 };
 
 export const buildOrderByReference = (
   refList: UniqueFlowEntity[]
-): FlowOrderByCond => {
+):
+  | OrderBy<FlowFieldsDefinition>
+  | (OrderBy<FlowFieldsDefinition> & { raw: string }) => {
   if (refList.length === 0) {
     return defaultFlowOrderBy();
   }
 
   return {
-    column: 'id',
+    column: 'id' as keyof InstanceDataOf<FlowFieldsDefinition>,
+    order: 'asc',
     raw: `array_position(ARRAY[${refList
       .map((entry) => entry.id)
       .join(',')}], "id")`,
@@ -385,4 +407,51 @@ export const mapFlowFiltersToFlowObjectFiltersGrouped = (
   }
 
   return flowObjectFilterGrouped;
+};
+
+export const buildOrderBy = (
+  sortField?: FlowSortField | string,
+  sortOrder?: SortOrder
+) => {
+  const orderBy: FlowOrderBy = {
+    column: sortField ?? 'updatedAt',
+    order: sortOrder ?? ('desc' as SortOrder),
+    direction: undefined,
+    entity: 'flow',
+  };
+
+  // Check if sortField is a nested property
+  if (orderBy.column.includes('.')) {
+    // OrderBy can came in the format:
+    // column: 'organizations.source.name'
+    // or in the format:
+    // column: 'flow.updatedAt'
+    // or in the format:
+    // column: 'planVersion.source.name'
+    // in this last case, we need to look after the capitalized letter
+    // that will indicate the entity
+    // and the whole word will be the subEntity
+    const struct = orderBy.column.split('.');
+
+    if (struct.length === 2) {
+      orderBy.column = struct[1];
+      orderBy.entity = struct[0];
+    } else if (struct.length === 3) {
+      orderBy.column = struct[2];
+      orderBy.direction = struct[1] as EntityDirection;
+
+      // We need to look after the '-' character
+      // [0] will indicate the entity
+      // and [1] will be the subEntity
+      const splitted = struct[0].split('-');
+      const entity = splitted[0];
+      orderBy.entity = entity;
+
+      if (entity === struct[0]) {
+        orderBy.subEntity = struct[0];
+      }
+    }
+  }
+
+  return orderBy;
 };

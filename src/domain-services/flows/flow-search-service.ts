@@ -44,6 +44,7 @@ import type { FlowInstance, FlowOrderBy } from './model';
 import { type FlowSearchStrategy } from './strategy/flow-search-strategy';
 import { OnlyFlowFiltersStrategy } from './strategy/impl/only-flow-conditions-strategy-impl';
 import { SearchFlowByFiltersStrategy } from './strategy/impl/search-flow-by-filters-strategy-impl';
+import { buildOrderBy } from './strategy/impl/utils';
 
 @Service()
 export class FlowSearchService {
@@ -80,7 +81,7 @@ export class FlowSearchService {
       status,
     } = filters;
 
-    const orderBy: FlowOrderBy = this.buildOrderBy(sortField, sortOrder);
+    const orderBy: FlowOrderBy = buildOrderBy(sortField, sortOrder);
 
     let { flowFilters } = filters;
     const {
@@ -357,50 +358,6 @@ export class FlowSearchService {
 
     // Otherwise, use flowObjectFiltersStrategy
     return this.searchFlowByFiltersStrategy;
-  }
-
-  buildOrderBy(sortField?: FlowSortField, sortOrder?: SortOrder) {
-    const orderBy: FlowOrderBy = {
-      column: sortField ?? 'updatedAt',
-      order: sortOrder ?? ('desc' as SortOrder),
-      direction: undefined,
-      entity: 'flow',
-    };
-
-    // Check if sortField is a nested property
-    if (orderBy.column.includes('.')) {
-      // OrderBy can came in the format:
-      // column: 'organizations.source.name'
-      // or in the format:
-      // column: 'flow.updatedAt'
-      // or in the format:
-      // column: 'planVersion.source.name'
-      // in this last case, we need to look after the capitalized letter
-      // that will indicate the entity
-      // and the whole word will be the subEntity
-      const struct = orderBy.column.split('.');
-
-      if (struct.length === 2) {
-        orderBy.column = struct[1];
-        orderBy.entity = struct[0];
-      } else if (struct.length === 3) {
-        orderBy.column = struct[2];
-        orderBy.direction = struct[1] as EntityDirection;
-
-        // We need to look after the '-' character
-        // [0] will indicate the entity
-        // and [1] will be the subEntity
-        const splitted = struct[0].split('-');
-        const entity = splitted[0];
-        orderBy.entity = entity;
-
-        if (entity === struct[0]) {
-          orderBy.subEntity = struct[0];
-        }
-      }
-    }
-
-    return orderBy;
   }
 
   private groupByFlowObjectType(
