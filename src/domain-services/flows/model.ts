@@ -34,7 +34,7 @@ export interface IGetFlowsArgs {
 }
 
 export interface IGetUniqueFlowsArgs {
-  databaseConnection: Knex;
+  models: Database;
   conditions?: FlowWhere;
   whereClauses?: FlowWhere;
   orderBy: FlowOrderByCond;

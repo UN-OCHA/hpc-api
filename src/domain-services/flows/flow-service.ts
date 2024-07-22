@@ -51,27 +51,14 @@ export class FlowService {
   async getFlowsAsUniqueFlowEntity(
     args: IGetUniqueFlowsArgs
   ): Promise<UniqueFlowEntity[]> {
-    const { databaseConnection, orderBy, conditions, whereClauses } = args;
+    const { models, orderBy, conditions, whereClauses } = args;
 
-    let query = databaseConnection!
-      .queryBuilder()
-      .distinct('id', 'versionID', orderBy.column) // Include orderBy.column in the distinct selection
-      .from('flow')
-      .whereNull('deletedAt');
-    if (orderBy.raw) {
-      query = query.orderByRaw(orderBy.raw);
-    } else {
-      query = query.orderBy(orderBy.column, orderBy.order);
-    }
+    const flows = await models.flow.find({
+      orderBy,
+      where: { ...conditions, ...whereClauses },
+      distinct: [orderBy.column, 'id', 'versionID'],
+    });
 
-    if (conditions) {
-      query = applySearchFilters(query, conditions);
-    }
-    if (whereClauses) {
-      query = query.andWhere(prepareCondition(whereClauses));
-    }
-
-    const flows = await query;
     const mapFlowsToUniqueFlowEntities = flows.map((flow) => ({
       id: flow.id,
       versionID: flow.versionID,

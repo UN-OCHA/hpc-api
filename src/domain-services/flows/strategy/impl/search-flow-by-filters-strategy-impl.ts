@@ -77,7 +77,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       // using the orderBy
       const flowsToSort: UniqueFlowEntity[] =
         await this.flowService.getFlowsAsUniqueFlowEntity({
-          databaseConnection,
+          models,
           orderBy: orderByForFlow,
         });
 
@@ -217,7 +217,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
       const flows: UniqueFlowEntity[] =
         await this.flowService.getFlowsAsUniqueFlowEntity({
-          databaseConnection,
+          models,
           conditions: flowConditions,
           orderBy: orderByForFlowFilter,
         });

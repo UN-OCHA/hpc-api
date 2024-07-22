@@ -98,7 +98,7 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
     // Slice the flowIDs in chunks of 1000 to avoid the SQL query limit
     for (let i = 0; i < flowIDsFromNestedFlowFilters.length; i += 1000) {
       const getFlowArgs: IGetUniqueFlowsArgs = {
-        databaseConnection,
+        models,
         orderBy: defaultFlowOrderBy(),
         whereClauses: buildSearchFlowsConditions(
           flowIDsFromNestedFlowFilters.slice(i, i + 1000)
