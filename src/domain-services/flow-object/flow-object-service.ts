@@ -6,13 +6,12 @@ import {
 } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import type Knex from 'knex';
 import { Service } from 'typedi';
 import { type OrderBy } from '../../utils/database-types';
 import { type UniqueFlowEntity } from '../flows/model';
 import { buildSearchFlowsObjectConditions } from '../flows/strategy/impl/utils';
 import { type FlowObjectFilterGrouped } from './model';
-import { buildJoinQueryForFlowObjectFilters } from './utils';
+import { buildWhereConditionsForFlowObjectFilters } from './utils';
 
 // Local types definition to increase readability
 type FlowObjectModel = Database['flowObject'];
@@ -63,33 +62,14 @@ export class FlowObjectService {
   }
 
   async getFlowObjectsByFlowObjectConditions(
-    databaseConnection: Knex,
-    database: Database,
+    models: Database,
     flowObjectFilterGrouped: FlowObjectFilterGrouped
-  ): Promise<UniqueFlowEntity[]> {
-    // 1. Create base query to obtain flowIDs and versionIDs
-    // Joined with flow table to remove those flows that are deleted
-    let queryBuilder = databaseConnection
-      .queryBuilder()
-      .distinct('flow.id as flowID', 'flow.versionID as versionID')
-      .from('flow');
-
-    // 2. Iterate over the flowObjectFilters and create a join+where clause
-    // For each flowObjectType and refDirection
-    queryBuilder = buildJoinQueryForFlowObjectFilters(
-      queryBuilder,
-      flowObjectFilterGrouped,
-      'flow'
+  ): Promise<FlowObjectInstance[]> {
+    const whereClause = buildWhereConditionsForFlowObjectFilters(
+      flowObjectFilterGrouped
     );
-    const flowObjects = await queryBuilder;
 
-    return flowObjects.map(
-      (flowObject) =>
-        ({
-          id: flowObject.flowID,
-          versionID: flowObject.versionID,
-        }) satisfies UniqueFlowEntity
-    );
+    return await models.flowObject.find({ where: whereClause });
   }
 
   async getFlowsObjectsByFlows(

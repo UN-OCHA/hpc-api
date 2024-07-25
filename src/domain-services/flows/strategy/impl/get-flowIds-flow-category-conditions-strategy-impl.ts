@@ -17,6 +17,7 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
 {
   constructor(private readonly categoryService: CategoryService) {}
 
+  // TODO: rewrite
   async search(
     args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
@@ -63,6 +64,7 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
       }
     }
 
+    // FIXME: rewrite this query with model find
     let joinQuery = databaseConnection!
       .queryBuilder()
       .distinct('flow.id', 'flow.versionID')

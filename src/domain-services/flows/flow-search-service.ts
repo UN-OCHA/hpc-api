@@ -4,7 +4,6 @@ import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
 import type Knex from 'knex';
 import { Service } from 'typedi';
-import { type SortOrder } from '../../utils/graphql/pagination';
 import type { BaseTypeWithDirection, EntityDirection } from '../base-types';
 import { CategoryService } from '../categories/category-service';
 import { type Category } from '../categories/graphql/types';

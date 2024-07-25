@@ -31,6 +31,7 @@ import {
 export class FlowService {
   constructor(private readonly flowObjectService: FlowObjectService) {}
 
+  // TODO: check if this can be merge or replaced with getFlowsRaw and getFlowsAsUniqueFlowEntity
   async getFlows(args: IGetFlowsArgs) {
     const { models, conditions, offset, orderBy, limit } = args;
 
@@ -46,6 +47,7 @@ export class FlowService {
     });
   }
 
+  // TODO: check if this can be merge or replaced with getFlowsRaw and getFlows
   async getFlowsAsUniqueFlowEntity(
     args: IGetUniqueFlowsArgs
   ): Promise<UniqueFlowEntity[]> {
@@ -65,6 +67,7 @@ export class FlowService {
     return mapFlowsToUniqueFlowEntities;
   }
 
+  // TODO: check if this can be merge or replaced with getFlowsAsUniqueFlowEntity and getFlows
   async getFlowsRaw(
     models: Database,
     whereClauses: FlowWhere,
@@ -267,6 +270,7 @@ export class FlowService {
     return this.processFlowIDs(flowObjects);
   }
 
+  // FIXME: change to a meaningful name
   private processFlowIDs(flowObjects: FlowObject[]) {
     const mapFlowsToUniqueFlowEntities = flowObjects.map((flowObject) => ({
       id: flowObject.flowID,

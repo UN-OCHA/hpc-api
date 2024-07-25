@@ -1,6 +1,7 @@
 import { Service } from 'typedi';
 import { FlowObjectService } from '../../../flow-object/flow-object-service';
 import { FlowService } from '../../flow-service';
+import { type UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
@@ -19,7 +20,7 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
   async search(
     args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
-    const { flowObjectFilterGrouped, databaseConnection, models } = args;
+    const { flowObjectFilterGrouped, models } = args;
 
     if (!flowObjectFilterGrouped) {
       return { flows: [] };
@@ -27,11 +28,17 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
 
     const flowObjects =
       await this.flowObjectService.getFlowObjectsByFlowObjectConditions(
-        databaseConnection,
         models,
         flowObjectFilterGrouped
       );
 
-    return { flows: flowObjects };
+    const uniqueFlowObjectsEntities: UniqueFlowEntity[] = flowObjects.map(
+      (flowObject) => ({
+        id: flowObject.flowID,
+        versionID: flowObject.versionID,
+      })
+    );
+
+    return { flows: uniqueFlowObjectsEntities };
   }
 }

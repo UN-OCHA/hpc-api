@@ -27,6 +27,8 @@ import type {
   UniqueFlowEntity,
 } from '../../model';
 
+// FIXME: review for unused methods
+
 export const mapFlowCategoryConditionsToWhereClause = (
   flowCategoryConditions: FlowCategory[]
 ) => {
