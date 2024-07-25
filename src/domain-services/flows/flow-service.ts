@@ -89,12 +89,6 @@ export class FlowService {
     return flows;
   }
 
-  async getFlowsCount(models: Database, conditions: FlowWhere) {
-    return await models.flow.count({
-      where: conditions,
-    });
-  }
-
   async getFlowIDsFromEntity(
     database: Database,
     orderBy: FlowOrderBy

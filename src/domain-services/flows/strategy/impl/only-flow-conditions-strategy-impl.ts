@@ -48,7 +48,9 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
         orderBy: orderByFlow,
         limit,
       }),
-      this.flowService.getFlowsCount(models, whereClause),
+      await models.flow.count({
+        where: whereClause,
+      }),
     ]);
 
     // Map count result query to count object
