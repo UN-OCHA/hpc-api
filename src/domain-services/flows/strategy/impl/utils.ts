@@ -1,14 +1,15 @@
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
-import {
+import type {
   FieldDefinition,
   InstanceDataOf,
 } from '@unocha/hpc-api-core/src/db/util/model-definition';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import type Knex from 'knex';
 import { type OrderBy } from '../../../../utils/database-types';
-import { SortOrder } from '../../../../utils/graphql/pagination';
+import { type SortOrder } from '../../../../utils/graphql/pagination';
 import { type EntityDirection } from '../../../base-types';
+import { type FlowObjectWhere } from '../../../flow-object/flow-object-service';
 import type {
   FlowObjectFilterGrouped,
   FlowObjectType,
@@ -18,7 +19,7 @@ import type {
   FlowObjectFilters,
   SearchFlowsFilters,
 } from '../../graphql/args';
-import { FlowSortField, type FlowStatusFilter } from '../../graphql/types';
+import type { FlowSortField, FlowStatusFilter } from '../../graphql/types';
 import type {
   FlowFieldsDefinition,
   FlowOrderBy,
@@ -165,7 +166,6 @@ export const mapOrderByToEntityOrderBy = <F extends FieldDefinition>(
   return {
     column: columnToSort as keyof InstanceDataOf<F>,
     order: orderBy.order,
-    nulls: 'last',
   };
 };
 
@@ -173,7 +173,6 @@ export const defaultFlowOrderBy = (): OrderBy<FlowFieldsDefinition> => {
   return {
     column: 'updatedAt' as keyof InstanceDataOf<FlowFieldsDefinition>,
     order: 'desc',
-    nulls: 'last',
   };
 };
 
@@ -209,6 +208,22 @@ export const prepareFlowConditions = (
   }
 
   return flowConditions satisfies FlowWhere;
+};
+
+export const prepareFlowObjectsConditions = (
+  flowFilters: SearchFlowsFilters
+): FlowObjectWhere => {
+  let flowConditions = {};
+
+  if (flowFilters) {
+    for (const [key, value] of Object.entries(flowFilters)) {
+      if (value !== undefined) {
+        flowConditions = { ...flowConditions, [key]: value };
+      }
+    }
+  }
+
+  return flowConditions satisfies FlowObjectWhere;
 };
 
 export const mergeUniqueEntities = (
@@ -356,7 +371,10 @@ export const buildSearchFlowsConditions = (
   flowFilters?: SearchFlowsFilters
 ): FlowWhere => {
   const whereClauses = uniqueFlowEntities.map((flow) => ({
-    [Cond.AND]: [{ id: flow.id }, { versionID: flow.versionID }],
+    [Cond.AND]: [
+      { id: flow.id },
+      flow.versionID ? { versionID: flow.versionID } : {},
+    ],
   }));
 
   if (flowFilters) {
@@ -368,6 +386,28 @@ export const buildSearchFlowsConditions = (
         { [Cond.OR]: whereClauses },
       ],
     } satisfies FlowWhere;
+  }
+
+  return {
+    [Cond.OR]: whereClauses,
+  };
+};
+
+export const buildSearchFlowsObjectConditions = (
+  uniqueFlowEntities: UniqueFlowEntity[],
+  flowObjectsWhere?: FlowObjectWhere
+): FlowObjectWhere => {
+  const whereClauses = uniqueFlowEntities.map((flow) => ({
+    [Cond.AND]: [
+      { flowID: flow.id },
+      flow.versionID ? { versionID: flow.versionID } : {},
+    ],
+  }));
+
+  if (flowObjectsWhere) {
+    return {
+      [Cond.AND]: [flowObjectsWhere, ...whereClauses],
+    } satisfies FlowObjectWhere;
   }
 
   return {

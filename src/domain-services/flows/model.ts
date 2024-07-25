@@ -3,7 +3,6 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Condition } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type OrderByCond } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import type Knex from 'knex';
 import { type SortOrder } from '../../utils/graphql/pagination';
 import { type EntityDirection } from '../base-types';
 
@@ -14,7 +13,7 @@ export type FlowFieldsDefinition = FlowModel['_internals']['fields'];
 export type FlowOrderByCond = OrderByCond<FlowFieldsDefinition>; // Can this be simplified somehow?
 export type UniqueFlowEntity = {
   id: FlowId;
-  versionID: number;
+  versionID: number | null;
 };
 
 export type FlowOrderBy = {

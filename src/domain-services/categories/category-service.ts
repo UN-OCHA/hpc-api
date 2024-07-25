@@ -15,7 +15,6 @@ import { type ShortcutCategoryFilter } from './model';
 // Local types definition to increase readability
 type CategoryRefModel = Database['categoryRef'];
 type CategoryRefInstance = InstanceOfModel<CategoryRefModel>;
-type CategoryRefWhere = Condition<CategoryRefInstance>;
 
 type CategoryModel = Database['category'];
 type CategoryInstance = InstanceOfModel<CategoryModel>;
@@ -130,14 +129,6 @@ export class CategoryService {
     });
 
     return categories;
-  }
-
-  async findCategoryRefs(models: Database, where: CategoryRefWhere) {
-    const categoryRef = await models.categoryRef.find({
-      where,
-    });
-
-    return categoryRef;
   }
 
   async addChannelToReportDetails(

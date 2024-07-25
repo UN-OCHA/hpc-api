@@ -1,11 +1,7 @@
-import { type Database } from '@unocha/hpc-api-core/src/db';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
-import type {
-  FlowInstance,
-  FlowOrderByCond,
-  UniqueFlowEntity,
-} from '../../model';
+import { type SearchFlowsFilters } from '../../graphql/args';
+import type { UniqueFlowEntity } from '../../model';
 import type {
   FlowSearchArgs,
   FlowSearchStrategy,
@@ -16,7 +12,6 @@ import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow
 import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-from-nested-flow-filters-strategy-impl';
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
-  buildSearchFlowsConditions,
   defaultFlowOrderBy,
   intersectUniqueFlowEntities,
   mapFlowFiltersToFlowObjectFiltersGrouped,
@@ -184,7 +179,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         const childs =
           await this.flowService.getParkedParentFlowsByFlowObjectFilter(
             models,
-            databaseConnection,
             flowObjectFiltersGrouped
           );
 
@@ -260,13 +254,15 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const count = sortedFlows.length;
 
-    const flows = await this.progresiveSearch(
+    const flows = await this.flowService.progresiveSearch(
       models,
       sortedFlows,
       limit,
       offset ?? 0,
-      orderByForFlow,
-      []
+      true, // Stop when we have the limit
+      [],
+      {} as SearchFlowsFilters,
+      orderByForFlow
     );
 
     if (isSortByEntity) {
@@ -279,59 +275,5 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     }
 
     return { flows, count };
-  }
-
-  /**
-   * This method progressively search the flows
-   * accumulating the results in the flowResponse
-   * until the limit is reached or there are no more flows
-   * in the sortedFlows
-   *
-   * Since this is a recursive, the exit condition is when
-   * the flowResponse length is equal to the limit
-   * or the reducedFlows length is less than the limit after doing the search
-   *
-   * @param models
-   * @param sortedFlows
-   * @param limit
-   * @param offset
-   * @param orderBy
-   * @param flowResponse
-   * @returns list of flows
-   */
-  async progresiveSearch(
-    database: Database,
-    sortedFlows: UniqueFlowEntity[],
-    limit: number,
-    offset: number,
-    orderBy: FlowOrderByCond,
-    flowResponse: FlowInstance[]
-  ): Promise<FlowInstance[]> {
-    const reducedFlows = sortedFlows.slice(offset, offset + limit);
-
-    const whereConditions = buildSearchFlowsConditions(reducedFlows);
-
-    const flows = await this.flowService.getFlowsRaw(
-      database,
-      whereConditions,
-      orderBy
-    );
-
-    flowResponse.push(...flows);
-
-    if (flowResponse.length === limit || reducedFlows.length < limit) {
-      return flowResponse;
-    }
-
-    // Recursive call
-    offset += limit;
-    return await this.progresiveSearch(
-      database,
-      sortedFlows,
-      limit,
-      offset,
-      orderBy,
-      flowResponse
-    );
   }
 }

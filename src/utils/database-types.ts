@@ -1,5 +1,7 @@
-import { FieldDefinition, InstanceDataOf } from "@unocha/hpc-api-core/src/db/util/model-definition";
-import { AnyModel, InstanceOfModel } from "@unocha/hpc-api-core/src/db/util/types";
+import type {
+  FieldDefinition,
+  InstanceDataOf,
+} from '@unocha/hpc-api-core/src/db/util/model-definition';
 
 export type OrderByCond<T> = {
   column: keyof T;
@@ -11,5 +13,4 @@ export type OrderByCond<T> = {
 export type OrderBy<F extends FieldDefinition> = {
   column: keyof InstanceDataOf<F>;
   order?: 'asc' | 'desc';
-  nulls?: 'first' | 'last';
 };
