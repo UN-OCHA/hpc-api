@@ -89,7 +89,7 @@ export class ExternalReferenceService {
   ): UniqueFlowEntity {
     return {
       id: createBrandedValue(external.flowID),
-      versionID: external.versionID ?? 1,
+      versionID: external.versionID,
     };
   }
 }

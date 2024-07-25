@@ -112,7 +112,7 @@ export class FlowService {
         (externalReference) =>
           ({
             id: externalReference.flowID,
-            versionID: externalReference.versionID ?? 1, // Default to 1 if versionID
+            versionID: externalReference.versionID,
           }) satisfies UniqueFlowEntity
       );
 
