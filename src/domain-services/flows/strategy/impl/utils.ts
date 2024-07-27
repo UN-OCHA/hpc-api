@@ -412,7 +412,7 @@ export const buildSearchFlowsObjectConditions = (
     ],
   }));
 
-  if (flowObjectsWhere) {
+  if (flowObjectsWhere && Object.entries(flowObjectsWhere).length > 0) {
     return {
       [Cond.AND]: [flowObjectsWhere, ...whereClauses],
     } satisfies FlowObjectWhere;

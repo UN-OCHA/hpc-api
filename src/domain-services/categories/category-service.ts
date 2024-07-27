@@ -123,14 +123,6 @@ export class CategoryService {
     };
   }
 
-  async findCategories(models: Database, where: CategoryWhere) {
-    const categories = await models.category.find({
-      where,
-    });
-
-    return categories;
-  }
-
   async addChannelToReportDetails(
     models: Database,
     reportDetails: ReportDetail[]
@@ -221,7 +213,7 @@ export class CategoryService {
    * @returns [{ category: String, operation: Op.IN | Op.NOT_IN}]
    */
   async mapShortcutFilters(
-    database: Database,
+    models: Database,
     isPendingFlows: boolean,
     isCommitmentFlows: boolean,
     isPaidFlows: boolean,
@@ -242,24 +234,26 @@ export class CategoryService {
       { flag: isStandardFlows, category: 'Standard' },
     ];
 
-    const searchCategories = filters
-      .filter((filter) => filter.flag !== undefined)
-      .map((filter) => filter.category);
+    const usedFilters = filters.filter((filter) => filter.flag !== undefined);
+
+    const searchCategories = usedFilters.map((filter) => filter.category);
 
     const whereClause: CategoryWhere = {
-      name: {
-        [Op.IN]: searchCategories,
-      },
+      [Cond.OR]: searchCategories.map((cat) => ({
+        name: { [Op.ILIKE]: `%${cat}%` },
+      })),
     };
 
-    const categories = await this.findCategories(database, whereClause);
+    const categories = await models.category.find({
+      where: whereClause,
+    });
 
-    const shortcutFilters: ShortcutCategoryFilter[] = filters
-      .filter((filter) => filter.flag !== undefined)
+    const shortcutFilters: ShortcutCategoryFilter[] = usedFilters
       .map((filter) => {
         const categoryId = categories
-          .find((category) => category.name === filter.category)
+          .find((category) => category.name.includes(filter.category))
           ?.id.valueOf();
+
         return {
           category: filter.category,
           operation: filter.flag ? Op.IN : Op.NOT_IN,

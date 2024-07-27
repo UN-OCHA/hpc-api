@@ -559,7 +559,7 @@ export class FlowService {
     offset: number,
     stopOnBatchSize: boolean,
     flowResponse: FlowInstance[],
-    flowWhere: SearchFlowsFilters,
+    flowWhere?: SearchFlowsFilters,
     orderBy?: FlowOrderByCond
   ): Promise<FlowInstance[]> {
     const reducedFlows = referenceFlowList.slice(offset, offset + batchSize);

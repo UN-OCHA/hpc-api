@@ -1,9 +1,14 @@
+import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import {
+  Op,
+  type Condition,
+} from '@unocha/hpc-api-core/src/db/util/conditions';
+import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { CategoryService } from '../../../categories/category-service';
-import { type UniqueFlowEntity } from '../../model';
+import { FlowService } from '../../flow-service';
+import type { UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
@@ -15,32 +20,26 @@ import { mapFlowCategoryConditionsToWhereClause } from './utils';
 export class GetFlowIdsFromCategoryConditionsStrategyImpl
   implements FlowIDSearchStrategy
 {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly flowService: FlowService) {}
 
-  // TODO: rewrite
   async search(
     args: FlowIdSearchStrategyArgs
   ): Promise<FlowIdSearchStrategyResponse> {
-    const {
-      models,
-      flowCategoryConditions,
-      shortcutFilters,
-      databaseConnection,
-    } = args;
+    const { models, flowCategoryConditions, shortcutFilters } = args;
 
     let categoriesIds: CategoryId[] = [];
 
     let whereClause = null;
+
     if (flowCategoryConditions) {
       whereClause = mapFlowCategoryConditionsToWhereClause(
         flowCategoryConditions
       );
     }
     if (whereClause) {
-      const categories = await this.categoryService.findCategories(
-        models,
-        whereClause
-      );
+      const categories = await models.category.find({
+        where: whereClause,
+      });
 
       categoriesIds = categories.map((category) => category.id);
     }
@@ -64,52 +63,61 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
       }
     }
 
-    // FIXME: rewrite this query with model find
-    let joinQuery = databaseConnection!
-      .queryBuilder()
-      .distinct('flow.id', 'flow.versionID')
-      .from('flow')
-      .where('flow.deletedAt', null)
-      .join('categoryRef', function () {
-        this.on('flow.id', '=', 'categoryRef.objectID').andOn(
-          'flow.versionID',
-          '=',
-          'categoryRef.versionID'
-        );
-      });
-
-    if (categoriesIds.length > 0) {
-      joinQuery = joinQuery.andWhere(function () {
-        this.where('categoryRef.categoryID', 'IN', categoriesIds).andWhere(
-          'categoryRef.objectType',
-          'flow'
-        );
-      });
-    }
-
-    if (categoriesIdsFromShortcutFilterIN.length > 0) {
-      joinQuery = joinQuery.andWhere(function () {
-        this.where(
-          'categoryRef.categoryID',
-          'IN',
-          categoriesIdsFromShortcutFilterIN
-        ).andWhere('categoryRef.objectType', 'flow');
-      });
-    }
+    // Search categoriesRef with categoriesID IN and categoriesIdsFromShortcutFilterIN
+    // and categoriesIdsFromShortcutFilterNOTIN
+    const where: Condition<InstanceOfModel<Database['categoryRef']>> = {
+      objectType: 'flow',
+    };
 
     if (categoriesIdsFromShortcutFilterNOTIN.length > 0) {
-      joinQuery = joinQuery.andWhere(function () {
-        this.where(
-          'categoryRef.categoryID',
-          'NOT IN',
-          categoriesIdsFromShortcutFilterNOTIN
-        ).andWhere('categoryRef.objectType', 'flow');
-      });
+      where['categoryID'] = {
+        [Op.NOT_IN]: categoriesIdsFromShortcutFilterNOTIN,
+      };
     }
 
-    const flows = await joinQuery;
+    const categoriesIDsIN = [
+      ...categoriesIds,
+      ...categoriesIdsFromShortcutFilterIN,
+    ];
 
-    const mapFlows: UniqueFlowEntity[] = flows.map(
+    if (categoriesIDsIN.length > 0) {
+      where['categoryID'] = { [Op.IN]: categoriesIds };
+    }
+
+    const categoriesRef = await models.categoryRef.find({
+      where,
+      distinct: ['objectID', 'versionID'],
+    });
+
+    // Map categoryRef to UniqueFlowEntity (flowId and versionID)
+    const flowIDsFromCategoryRef: UniqueFlowEntity[] = categoriesRef.map(
+      (catRef) => ({
+        id: createBrandedValue(catRef.objectID),
+        versionID: catRef.versionID,
+      })
+    );
+
+    // Since the list of UniqueFlowEntities can be really large ~370k entries
+    // we need to do it using chunks
+
+    // NOTE: this call is ajusted in size to obtain the best performance
+    // If greater than 100, there is no increase in performance
+    // With 100 the average time is ~16s
+    // ie: 10000 takes ~3 min
+    // 5000 takes ~2 min
+    // and lower than 100, the performance decreases too
+    // ie: 50 takes ~20 secs
+    // 10 takes ~30 secs
+    const flowObjectsModels = await this.flowService.progresiveSearch(
+      models,
+      flowIDsFromCategoryRef,
+      100,
+      0,
+      false, // Not stop when reaching limit
+      []
+    );
+
+    const mapFlows: UniqueFlowEntity[] = flowObjectsModels.map(
       (flow) =>
         ({
           id: flow.id,
