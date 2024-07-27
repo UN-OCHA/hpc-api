@@ -199,12 +199,18 @@ export const buildOrderByReference = (
 export const prepareFlowConditions = (
   flowFilters: SearchFlowsFilters
 ): FlowWhere => {
-  let flowConditions = {};
+  let flowConditions: FlowWhere = {};
 
   if (flowFilters) {
     for (const [key, value] of Object.entries(flowFilters)) {
       if (value !== undefined) {
-        flowConditions = { ...flowConditions, [key]: value };
+        if (key === 'id') {
+          const brandedIDs = value.map((id: number) => createBrandedValue(id));
+          flowConditions[key] = { [Op.IN]: brandedIDs };
+        } else {
+          const typedKey = key as keyof FlowWhere;
+          flowConditions = { ...flowConditions, [typedKey]: value };
+        }
       }
     }
   }
