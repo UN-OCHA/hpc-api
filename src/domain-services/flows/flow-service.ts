@@ -17,9 +17,7 @@ import type {
   FlowInstance,
   FlowOrderBy,
   FlowOrderByCond,
-  FlowWhere,
   IGetFlowsArgs,
-  IGetUniqueFlowsArgs,
   UniqueFlowEntity,
 } from './model';
 import {
@@ -31,48 +29,9 @@ import {
 export class FlowService {
   constructor(private readonly flowObjectService: FlowObjectService) {}
 
-  // TODO: check if this can be merge or replaced with getFlowsRaw and getFlowsAsUniqueFlowEntity
-  async getFlows(args: IGetFlowsArgs) {
-    const { models, conditions, offset, orderBy, limit } = args;
+  async getFlows(args: IGetFlowsArgs): Promise<FlowInstance[]> {
+    const { models, orderBy, conditions, limit, offset } = args;
 
-    if (!models) {
-      throw new Error('Models not available');
-    }
-
-    return await models.flow.find({
-      orderBy,
-      limit,
-      where: conditions,
-      offset,
-    });
-  }
-
-  // TODO: check if this can be merge or replaced with getFlowsRaw and getFlows
-  async getFlowsAsUniqueFlowEntity(
-    args: IGetUniqueFlowsArgs
-  ): Promise<UniqueFlowEntity[]> {
-    const { models, orderBy, conditions, whereClauses } = args;
-
-    const flows = await models.flow.find({
-      orderBy,
-      where: { ...conditions, ...whereClauses },
-      distinct: [orderBy.column, 'id', 'versionID'],
-    });
-
-    const mapFlowsToUniqueFlowEntities = flows.map((flow) => ({
-      id: flow.id,
-      versionID: flow.versionID,
-    }));
-
-    return mapFlowsToUniqueFlowEntities;
-  }
-
-  // TODO: check if this can be merge or replaced with getFlowsAsUniqueFlowEntity and getFlows
-  async getFlowsRaw(
-    models: Database,
-    whereClauses: FlowWhere,
-    orderBy?: FlowOrderByCond
-  ): Promise<FlowInstance[]> {
     const distinctColumns = [
       'id' as keyof FlowInstance,
       'versionID' as keyof FlowInstance,
@@ -85,8 +44,10 @@ export class FlowService {
 
     const flows: FlowInstance[] = await models.flow.find({
       orderBy,
-      where: whereClauses,
+      where: conditions,
       distinct: distinctColumns,
+      limit,
+      offset,
     });
 
     return flows;
@@ -477,63 +438,10 @@ export class FlowService {
     // Once we have the child flows, we need to filter them
     // using the flowObjectFilters
     // This search needs to be also done by chunks
-    const childFlowsRef: UniqueFlowEntity[] = childFlows.map((ref) => ({
+    return childFlows.map((ref) => ({
       id: createBrandedValue(ref.id),
       versionID: ref.versionID,
     }));
-
-    const mappedChildsOfParkedParents = childFlowsRef.map((child) => ({
-      id: child.id,
-      versionID: child.versionID,
-    }));
-    return mappedChildsOfParkedParents;
-
-    // let query = databaseConnection
-    //   .queryBuilder()
-    //   .select('fChild.id', 'fChild.versionID')
-    //   .from('categoryRef as cr')
-    //   .where('cr.categoryID', parkedCategory.id)
-    //   .andWhere('cr.objectType', 'flow')
-    //   // Flow link join + where
-    //   .innerJoin('flowLink as fl', function () {
-    //     this.on('fl.parentID', '=', 'cr.objectID');
-    //   })
-    //   .where('fl.depth', '>', 0)
-    //   // Flow parent join + where
-    //   .innerJoin('flow as fParent', function () {
-    //     this.on('cr.objectID', '=', 'fParent.id').andOn(
-    //       'cr.versionID',
-    //       '=',
-    //       'fParent.versionID'
-    //     );
-    //   })
-    //   .where('fParent.deletedAt', null)
-    //   .andWhere('fParent.activeStatus', true)
-    //   // Flow child join + where
-    //   .innerJoin('flow as fChild', function () {
-    //     this.on('fl.childID', '=', 'fChild.id');
-    //   })
-    //   .where('fChild.deletedAt', null)
-    //   .andWhere('fChild.activeStatus', true);
-
-    // Flow object join + where
-
-    // query = buildJoinQueryForFlowObjectFilters(
-    //   query,
-    //   flowObjectFilters,
-    //   'fParent'
-    // );
-
-    // TODO: check if when applying multiple conditions it works or we need to do the 'join' for each condition
-    // const childsOfParkedParents = await query;
-    // const childsNotPresent = childsOfParkedParents.filter(
-    //   (child) =>
-    //     !childFlowsRef.some(
-    //       (childOfParkedParent) =>
-    //         child.id === childOfParkedParent.id &&
-    //         child.versionID === childOfParkedParent.versionID
-    //     )
-    // );
   }
 
   /**
@@ -555,7 +463,7 @@ export class FlowService {
    * @returns list of flows
    */
   async progresiveSearch(
-    database: Database,
+    models: Database,
     referenceFlowList: UniqueFlowEntity[],
     batchSize: number,
     offset: number,
@@ -566,9 +474,9 @@ export class FlowService {
   ): Promise<FlowInstance[]> {
     const reducedFlows = referenceFlowList.slice(offset, offset + batchSize);
 
-    const whereConditions = buildSearchFlowsConditions(reducedFlows, flowWhere);
+    const conditions = buildSearchFlowsConditions(reducedFlows, flowWhere);
 
-    const flows = await this.getFlowsRaw(database, whereConditions, orderBy);
+    const flows = await this.getFlows({ models, conditions, orderBy });
 
     flowResponse.push(...flows);
 
@@ -582,7 +490,7 @@ export class FlowService {
     // Recursive call
     offset += batchSize;
     return await this.progresiveSearch(
-      database,
+      models,
       referenceFlowList,
       batchSize,
       offset,

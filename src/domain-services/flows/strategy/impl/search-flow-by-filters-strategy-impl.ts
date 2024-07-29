@@ -68,11 +68,10 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     } else {
       // In this case we fetch the list of flows from the database
       // using the orderBy
-      const flowsToSort: UniqueFlowEntity[] =
-        await this.flowService.getFlowsAsUniqueFlowEntity({
-          models,
-          orderBy: orderByForFlow,
-        });
+      const flowsToSort: UniqueFlowEntity[] = await this.flowService.getFlows({
+        models,
+        orderBy: orderByForFlow,
+      });
 
       // Since there can be many flowIDs returned
       // This can cause 'Maximum call stack size exceeded' error
@@ -207,12 +206,11 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         ? defaultFlowOrderBy()
         : orderByForFlow;
 
-      const flows: UniqueFlowEntity[] =
-        await this.flowService.getFlowsAsUniqueFlowEntity({
-          models,
-          conditions: flowConditions,
-          orderBy: orderByForFlowFilter,
-        });
+      const flows: UniqueFlowEntity[] = await this.flowService.getFlows({
+        models,
+        conditions: flowConditions,
+        orderBy: orderByForFlowFilter,
+      });
 
       // If after this filter we have no flows, we can return an empty array
       if (flows.length === 0) {

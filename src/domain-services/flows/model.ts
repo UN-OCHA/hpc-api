@@ -26,15 +26,8 @@ export type FlowOrderBy = {
 
 export interface IGetFlowsArgs {
   models: Database;
-  limit: number;
+  limit?: number;
   offset?: number;
   conditions?: FlowWhere;
   orderBy?: FlowOrderByCond;
-}
-
-export interface IGetUniqueFlowsArgs {
-  models: Database;
-  conditions?: FlowWhere;
-  whereClauses?: FlowWhere;
-  orderBy: FlowOrderByCond;
 }
