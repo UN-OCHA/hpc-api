@@ -267,17 +267,19 @@ export class FlowService {
       }))
       .sort((a, b) => a.sortingKey - b.sortingKey);
 
-    return this.processFlowIDs(flowObjects);
+    return this.mapFlowsToUniqueFlowEntities(flowObjects);
   }
 
-  // FIXME: change to a meaningful name
-  private processFlowIDs(flowObjects: FlowObject[]) {
-    const mapFlowsToUniqueFlowEntities = flowObjects.map((flowObject) => ({
-      id: flowObject.flowID,
-      versionID: flowObject.versionID,
-    }));
-
-    return mapFlowsToUniqueFlowEntities;
+  private mapFlowsToUniqueFlowEntities(
+    flowObjects: FlowObject[]
+  ): UniqueFlowEntity[] {
+    return flowObjects.map(
+      (flowObject) =>
+        ({
+          id: flowObject.flowID,
+          versionID: flowObject.versionID,
+        }) satisfies UniqueFlowEntity
+    );
   }
 
   async getParketParents(
