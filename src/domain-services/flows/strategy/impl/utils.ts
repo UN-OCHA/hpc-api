@@ -1,11 +1,9 @@
-import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import type {
   FieldDefinition,
   InstanceDataOf,
 } from '@unocha/hpc-api-core/src/db/util/model-definition';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
-import type Knex from 'knex';
 import { type OrderBy } from '../../../../utils/database-types';
 import { type SortOrder } from '../../../../utils/graphql/pagination';
 import { type EntityDirection } from '../../../base-types';
@@ -27,7 +25,17 @@ import type {
   UniqueFlowEntity,
 } from '../../model';
 
-// FIXME: review for unused methods
+export const sortingColumnMapping: Map<string, string> = new Map<
+  string,
+  string
+>([
+  ['reporterRefCode', 'refCode'],
+  ['sourceID', 'sourceID'],
+]);
+
+export const defaultSearchFlowFilter: FlowWhere = {
+  deletedAt: null,
+};
 
 export const mapFlowCategoryConditionsToWhereClause = (
   flowCategoryConditions: FlowCategory[]
@@ -87,54 +95,6 @@ export const mapFlowCategoryConditionsToWhereClause = (
   return null;
 };
 
-export const mergeFlowIDsFromFilteredFlowObjectsAndFlowCategories = (
-  flowIDsFromFilteredFlowObjects: FlowId[],
-  flowIDsFromFilteredFlowCategories: FlowId[]
-): FlowId[] => {
-  const isFlowIDsFromFilteredFlowCategoriesIsEmpty =
-    !flowIDsFromFilteredFlowCategories?.length;
-  const isFlowIDsFromFilteredFlowObjectsIsEmpty =
-    !flowIDsFromFilteredFlowObjects?.length;
-
-  if (
-    isFlowIDsFromFilteredFlowCategoriesIsEmpty &&
-    isFlowIDsFromFilteredFlowObjectsIsEmpty
-  ) {
-    return [];
-  }
-
-  if (
-    isFlowIDsFromFilteredFlowCategoriesIsEmpty &&
-    !isFlowIDsFromFilteredFlowObjectsIsEmpty
-  ) {
-    return flowIDsFromFilteredFlowObjects;
-  }
-
-  if (
-    !isFlowIDsFromFilteredFlowCategoriesIsEmpty &&
-    isFlowIDsFromFilteredFlowObjectsIsEmpty
-  ) {
-    return flowIDsFromFilteredFlowCategories;
-  }
-
-  return flowIDsFromFilteredFlowObjects.length >
-    flowIDsFromFilteredFlowCategories.length
-    ? flowIDsFromFilteredFlowCategories.filter((flowID) =>
-        flowIDsFromFilteredFlowObjects.includes(flowID)
-      )
-    : flowIDsFromFilteredFlowObjects.filter((flowID) =>
-        flowIDsFromFilteredFlowCategories.includes(flowID)
-      );
-};
-
-export const sortingColumnMapping: Map<string, string> = new Map<
-  string,
-  string
->([
-  ['reporterRefCode', 'refCode'],
-  ['sourceID', 'sourceID'],
-]);
-
 export const mapFlowOrderBy = (
   orderBy?: FlowOrderBy
 ): OrderBy<FlowFieldsDefinition> => {
@@ -178,28 +138,10 @@ export const defaultFlowOrderBy = (): OrderBy<FlowFieldsDefinition> => {
   };
 };
 
-export const buildOrderByReference = (
-  refList: UniqueFlowEntity[]
-):
-  | OrderBy<FlowFieldsDefinition>
-  | (OrderBy<FlowFieldsDefinition> & { raw: string }) => {
-  if (refList.length === 0) {
-    return defaultFlowOrderBy();
-  }
-
-  return {
-    column: 'id' as keyof InstanceDataOf<FlowFieldsDefinition>,
-    order: 'asc',
-    raw: `array_position(ARRAY[${refList
-      .map((entry) => entry.id)
-      .join(',')}], "id")`,
-  };
-};
-
 export const prepareFlowConditions = (
   flowFilters: SearchFlowsFilters
 ): FlowWhere => {
-  let flowConditions: FlowWhere = {};
+  let flowConditions: FlowWhere = defaultSearchFlowFilter;
 
   if (flowFilters) {
     for (const [key, value] of Object.entries(flowFilters)) {
@@ -216,22 +158,6 @@ export const prepareFlowConditions = (
   }
 
   return flowConditions satisfies FlowWhere;
-};
-
-export const prepareFlowObjectsConditions = (
-  flowFilters: SearchFlowsFilters
-): FlowObjectWhere => {
-  let flowConditions = {};
-
-  if (flowFilters) {
-    for (const [key, value] of Object.entries(flowFilters)) {
-      if (value !== undefined) {
-        flowConditions = { ...flowConditions, [key]: value };
-      }
-    }
-  }
-
-  return flowConditions satisfies FlowObjectWhere;
 };
 
 export const mergeUniqueEntities = (
@@ -309,66 +235,17 @@ export const mapUniqueFlowEntitisSetKeyToUniqueFlowEntity = (
   });
 };
 
-export const removeDuplicatesUniqueFlowEntities = (
-  entities: UniqueFlowEntity[]
-): UniqueFlowEntity[] => {
-  const uniqueEntities = new Map<string, UniqueFlowEntity>();
-
-  for (const entity of entities) {
-    const key = `${entity.id}_${entity.versionID}`;
-    if (!uniqueEntities.has(key)) {
-      uniqueEntities.set(key, entity);
-    }
-  }
-
-  return [...uniqueEntities.values()];
-};
-
-// FIXME: to be removed once the new search is implemented
-export function applySearchFilters(
-  query: Knex.QueryBuilder,
-  filters: any
-): Knex.QueryBuilder {
-  // Check if 'id' filter is defined and apply it
-  if (filters.id !== null && filters.id !== undefined) {
-    query.whereIn('id', filters.id);
-  }
-
-  // Check if 'activeStatus' filter is defined and apply it
-  if (filters.activeStatus !== null && filters.activeStatus !== undefined) {
-    query.andWhere('activeStatus', filters.activeStatus);
-  }
-
-  // Check if 'amountUSD' filter is defined and apply it
-  if (filters.amountUSD !== null && filters.amountUSD !== undefined) {
-    query.andWhere('amountUSD', filters.amountUSD);
-  }
-
-  // Check if 'restricted' filter is defined and apply it
-  if (filters.restricted !== null && filters.restricted !== undefined) {
-    query.andWhere('restricted', filters.restricted);
-  }
-
-  // Check if 'versionID' filter is defined and apply it
-  if (filters.versionID !== null && filters.versionID !== undefined) {
-    query.andWhere('versionID', filters.versionID, 1);
-  }
-
-  return query;
-}
-
-// FIXME: to be removed once the new search is implemented
 export const prepareFlowStatusConditions = (
-  flowConditions: any,
+  flowConditions: FlowWhere,
   statusFilter: FlowStatusFilter | null
-) => {
+): FlowWhere => {
   if (statusFilter) {
     if (statusFilter === 'new') {
       // Flows with version 1 are considered new
-      flowConditions = { ...flowConditions, versionID: '=' };
+      flowConditions = { ...flowConditions, versionID: 1 };
     } else if (statusFilter === 'updated') {
       // Flows with version greater than 1 are considered updated
-      flowConditions = { ...flowConditions, versionID: '>' };
+      flowConditions = { ...flowConditions, versionID: { [Op.GT]: 1 } };
     }
   }
   return flowConditions;
@@ -376,7 +253,7 @@ export const prepareFlowStatusConditions = (
 
 export const buildSearchFlowsConditions = (
   uniqueFlowEntities: UniqueFlowEntity[],
-  flowFilters?: SearchFlowsFilters
+  flowFilters?: FlowWhere
 ): FlowWhere => {
   const whereClauses = uniqueFlowEntities.map((flow) => ({
     [Cond.AND]: [
@@ -386,12 +263,11 @@ export const buildSearchFlowsConditions = (
   }));
 
   if (flowFilters) {
-    const flowConditions = prepareFlowConditions(flowFilters);
     return {
       [Cond.AND]: [
         { deletedAt: null },
-        flowConditions,
         { [Cond.OR]: whereClauses },
+        flowFilters,
       ],
     } satisfies FlowWhere;
   }

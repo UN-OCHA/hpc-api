@@ -20,7 +20,7 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
   async search(args: FlowSearchArgs): Promise<FlowSearchStrategyResponse> {
     const { models, flowFilters, orderBy, limit, offset, statusFilter } = args;
     // Map flowConditions to where clause
-    let flowConditions = prepareFlowConditions(flowFilters);
+    let flowConditions: FlowWhere = prepareFlowConditions(flowFilters);
 
     // Add status filter conditions if provided
     flowConditions = prepareFlowStatusConditions(flowConditions, statusFilter);

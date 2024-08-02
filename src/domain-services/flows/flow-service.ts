@@ -11,12 +11,12 @@ import type {
   FlowObjectType,
 } from '../flow-object/model';
 import { buildWhereConditionsForFlowObjectFilters } from '../flow-object/utils';
-import { type SearchFlowsFilters } from './graphql/args';
 import { type FlowParkedParentSource } from './graphql/types';
 import type {
   FlowInstance,
   FlowOrderBy,
   FlowOrderByCond,
+  FlowWhere,
   IGetFlowsArgs,
   UniqueFlowEntity,
 } from './model';
@@ -390,7 +390,7 @@ export class FlowService {
       0,
       false, // Stop on batch size
       [],
-      { activeStatus: true } as SearchFlowsFilters
+      { activeStatus: true }
     );
 
     const flowObjectsWhere =
@@ -469,7 +469,7 @@ export class FlowService {
     offset: number,
     stopOnBatchSize: boolean,
     flowResponse: FlowInstance[],
-    flowWhere?: SearchFlowsFilters,
+    flowWhere?: FlowWhere,
     orderBy?: FlowOrderByCond
   ): Promise<FlowInstance[]> {
     const reducedFlows = referenceFlowList.slice(offset, offset + batchSize);

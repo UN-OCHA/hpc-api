@@ -30,7 +30,6 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     let categoriesIds: CategoryId[] = [];
 
     let whereClause = null;
-
     if (flowCategoryConditions) {
       whereClause = mapFlowCategoryConditionsToWhereClause(
         flowCategoryConditions
@@ -81,7 +80,7 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     ];
 
     if (categoriesIDsIN.length > 0) {
-      where['categoryID'] = { [Op.IN]: categoriesIds };
+      where['categoryID'] = { [Op.IN]: categoriesIDsIN };
     }
 
     const categoriesRef = await models.categoryRef.find({
@@ -96,35 +95,6 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
         versionID: catRef.versionID,
       })
     );
-
-    // Since the list of UniqueFlowEntities can be really large ~370k entries
-    // we need to do it using chunks
-
-    // NOTE: this call is ajusted in size to obtain the best performance
-    // If greater than 100, there is no increase in performance
-    // With 100 the average time is ~16s
-    // ie: 10000 takes ~3 min
-    // 5000 takes ~2 min
-    // and lower than 100, the performance decreases too
-    // ie: 50 takes ~20 secs
-    // 10 takes ~30 secs
-    const flowObjectsModels = await this.flowService.progresiveSearch(
-      models,
-      flowIDsFromCategoryRef,
-      100,
-      0,
-      false, // Not stop when reaching limit
-      []
-    );
-
-    const mapFlows: UniqueFlowEntity[] = flowObjectsModels.map(
-      (flow) =>
-        ({
-          id: flow.id,
-          versionID: flow.versionID,
-        }) satisfies UniqueFlowEntity
-    );
-
-    return { flows: mapFlows };
+    return { flows: flowIDsFromCategoryRef };
   }
 }

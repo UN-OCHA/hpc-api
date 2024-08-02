@@ -1,7 +1,6 @@
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
-import { type SearchFlowsFilters } from '../../graphql/args';
-import type { UniqueFlowEntity } from '../../model';
+import type { FlowWhere, UniqueFlowEntity } from '../../model';
 import type {
   FlowSearchArgs,
   FlowSearchStrategy,
@@ -13,6 +12,7 @@ import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
   defaultFlowOrderBy,
+  defaultSearchFlowFilter,
   intersectUniqueFlowEntities,
   mapFlowFiltersToFlowObjectFiltersGrouped,
   mapFlowOrderBy,
@@ -195,7 +195,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const flowsFromFlowFilters: UniqueFlowEntity[] = [];
     if (isFilterByFlow || isFilterByFlowStatus) {
-      let flowConditions = prepareFlowConditions(flowFilters);
+      let flowConditions: FlowWhere = prepareFlowConditions(flowFilters);
       // Add status filter conditions if provided
       flowConditions = prepareFlowStatusConditions(
         flowConditions,
@@ -259,7 +259,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       offset ?? 0,
       true, // Stop when we have the limit
       [],
-      {} as SearchFlowsFilters,
+      defaultSearchFlowFilter,
       orderByForFlow
     );
 
