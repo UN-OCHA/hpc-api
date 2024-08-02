@@ -33,7 +33,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
   async search(args: FlowSearchArgs): Promise<FlowSearchStrategyResponse> {
     const {
       models,
-      databaseConnection,
       flowFilters,
       flowObjectFilters,
       flowCategoryFilters,
@@ -90,7 +89,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     if (isFilterByNestedFilters) {
       const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromNestedFlowFilters.search({
-          databaseConnection,
           models,
           nestedFlowFilters,
         });
@@ -121,7 +119,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     if (isFilterByCategory) {
       const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromCategoryConditions.search({
-          databaseConnection,
           models,
           flowCategoryConditions: flowCategoryFilters ?? [],
           shortcutFilters,
@@ -154,7 +151,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
       const { flows }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromObjectConditions.search({
-          databaseConnection,
           models,
           flowObjectFilterGrouped: flowObjectFiltersGrouped,
         });

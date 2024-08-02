@@ -1,5 +1,4 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
-import type Knex from 'knex';
 import { type ShortcutCategoryFilter } from '../../categories/model';
 import {
   type FlowCategory,
@@ -17,7 +16,6 @@ export interface FlowSearchStrategyResponse {
 
 export interface FlowSearchArgs {
   models: Database;
-  databaseConnection: Knex;
   flowFilters: SearchFlowsFilters;
   flowObjectFilters: FlowObjectFilters[];
   flowCategoryFilters: FlowCategory[];

@@ -16,11 +16,7 @@ export default class FlowResolver {
     @Args(() => SearchFlowsArgs, { validate: false })
     args: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
-    return await this.flowSearchService.search(
-      context.models,
-      context.connection,
-      args
-    );
+    return await this.flowSearchService.search(context.models, args);
   }
 
   @Query(() => FlowSearchResultNonPaginated)
@@ -31,10 +27,6 @@ export default class FlowResolver {
   ): Promise<FlowSearchResultNonPaginated> {
     // Set default batch size to 1000
     args.limit = args.limit > 0 ? args.limit : 1000;
-    return await this.flowSearchService.searchBatches(
-      context.models,
-      context.connection,
-      args
-    );
+    return await this.flowSearchService.searchBatches(context.models, args);
   }
 }

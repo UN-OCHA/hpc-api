@@ -2,7 +2,6 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
-import type Knex from 'knex';
 import { Service } from 'typedi';
 import type { BaseTypeWithDirection, EntityDirection } from '../base-types';
 import { CategoryService } from '../categories/category-service';
@@ -66,7 +65,6 @@ export class FlowSearchService {
 
   async search(
     models: Database,
-    databaseConnection: Knex,
     filters: SearchFlowsArgs
   ): Promise<FlowSearchResult> {
     const {
@@ -144,7 +142,6 @@ export class FlowSearchService {
 
     const { flows, count } = await strategy.search({
       models,
-      databaseConnection,
       limit: searchLimit,
       orderBy,
       offset,
@@ -470,7 +467,6 @@ export class FlowSearchService {
 
   async searchBatches(
     models: Database,
-    databaseConnection: Knex,
     args: SearchFlowsArgs
   ): Promise<FlowSearchResultNonPaginated> {
     // We need to check if the user sent a 'usageYear' FlowObjectFilter
@@ -527,11 +523,7 @@ export class FlowSearchService {
     // Default limit to increase performance
     args.limit = 5000;
     // Do the first search
-    const flowSearchResponse = await this.search(
-      models,
-      databaseConnection,
-      args
-    );
+    const flowSearchResponse = await this.search(models, args);
 
     const flows: Flow[] = flowSearchResponse.flows;
 
@@ -542,11 +534,7 @@ export class FlowSearchService {
 
     let nextFlowSearchResponse: FlowSearchResult;
     while (hasNextPage) {
-      nextFlowSearchResponse = await this.search(
-        models,
-        databaseConnection,
-        nextArgs
-      );
+      nextFlowSearchResponse = await this.search(models, nextArgs);
       flows.push(...nextFlowSearchResponse.flows);
 
       hasNextPage = nextFlowSearchResponse.hasNextPage;
