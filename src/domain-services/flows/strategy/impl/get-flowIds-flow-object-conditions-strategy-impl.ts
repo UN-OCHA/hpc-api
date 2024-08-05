@@ -1,21 +1,18 @@
+import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
-import { FlowObjectService } from '../../../flow-object/flow-object-service';
-import { FlowService } from '../../flow-service';
 import { type UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
+import { intersectUniqueFlowEntities } from './utils';
 
 @Service()
 export class GetFlowIdsFromObjectConditionsStrategyImpl
   implements FlowIDSearchStrategy
 {
-  constructor(
-    private readonly flowObjectService: FlowObjectService,
-    private readonly flowService: FlowService
-  ) {}
+  constructor() {}
 
   async search(
     args: FlowIdSearchStrategyArgs
@@ -26,19 +23,35 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
       return { flows: [] };
     }
 
-    const flowObjects =
-      await this.flowObjectService.getFlowObjectsByFlowObjectConditions(
-        models,
-        flowObjectFilterGrouped
-      );
+    let intersectedFlows: UniqueFlowEntity[] = [];
 
-    const uniqueFlowObjectsEntities: UniqueFlowEntity[] = flowObjects.map(
-      (flowObject) => ({
-        id: flowObject.flowID,
-        versionID: flowObject.versionID,
-      })
-    );
+    for (const [flowObjectType, group] of flowObjectFilterGrouped.entries()) {
+      for (const [direction, ids] of group.entries()) {
+        const condition = {
+          objectType: flowObjectType,
+          refDirection: direction,
+          objectID: { [Op.IN]: ids },
+        };
+        const flowObjectsFound = await models.flowObject.find({
+          where: condition,
+        });
 
-    return { flows: uniqueFlowObjectsEntities };
+        const uniqueFlowObjectsEntities: UniqueFlowEntity[] =
+          flowObjectsFound.map(
+            (flowObject) =>
+              ({
+                id: flowObject.flowID,
+                versionID: flowObject.versionID,
+              }) satisfies UniqueFlowEntity
+          );
+
+        intersectedFlows = intersectUniqueFlowEntities(
+          intersectedFlows,
+          uniqueFlowObjectsEntities
+        );
+      }
+    }
+
+    return { flows: intersectedFlows };
   }
 }
