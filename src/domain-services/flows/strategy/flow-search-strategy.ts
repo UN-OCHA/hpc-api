@@ -11,7 +11,7 @@ import type { FlowInstance, FlowOrderBy } from '../model';
 
 export interface FlowSearchStrategyResponse {
   flows: FlowInstance[];
-  count: number | bigint;
+  count: number;
 }
 
 export interface FlowSearchArgs {

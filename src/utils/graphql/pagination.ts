@@ -30,7 +30,7 @@ export class PageInfo<TSortFields extends string> {
   sortOrder: string;
 
   @Field(() => Number, { nullable: false })
-  total: number | bigint;
+  total: number;
 }
 
 @ArgsType()
