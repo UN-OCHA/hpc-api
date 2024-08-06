@@ -141,7 +141,7 @@ export const defaultFlowOrderBy = (): OrderBy<FlowFieldsDefinition> => {
 export const prepareFlowConditions = (
   flowFilters: SearchFlowsFilters
 ): FlowWhere => {
-  let flowConditions: FlowWhere = defaultSearchFlowFilter;
+  let flowConditions: FlowWhere = { ...defaultSearchFlowFilter };
 
   if (flowFilters) {
     for (const [key, value] of Object.entries(flowFilters)) {
