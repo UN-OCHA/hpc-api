@@ -38,7 +38,7 @@
     "@types/jest": "^29.5.12",
     "@types/node": "^20.8.10",
     "@types/pg": "^8.11.3",
-    "@unocha/hpc-repo-tools": "^4.0.0",
+    "@unocha/hpc-repo-tools": "^4.2.0",
     "eslint": "^8.52.0",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
