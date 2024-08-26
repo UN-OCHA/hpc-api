@@ -1592,10 +1592,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.2.0.tgz#756641adb587851b5ccb3e095daf27ae581c8406"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
-"@unocha/hpc-api-core@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-7.0.0.tgz#fcce4dfbef17476ee60cef794eea9c562d3f2ddb"
-  integrity sha512-itzYwSOMPo39tLXQP7J0PD/4dfweEerEReQ5R82WYMYwYVAdFVPOPMC0HuPBEPupWBc45peYciNGGCCdzTIuhA==
+"@unocha/hpc-api-core@^8.2.0":
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-8.2.0.tgz#727a759c5f27f4171a68ed4d754fc44f523aaba6"
+  integrity sha512-jOmUV6hsZDCj7Lp56pAlt7iuQ66heYt84N0aXQ6BDCqS6m5ZbMeE2se2CB/4NdDDcq8Nrzin2O26xg2o+kvByg==
   dependencies:
     "@types/lodash" "^4.14.194"
     "@types/node-fetch" "2.6.3"
@@ -1605,6 +1605,7 @@
     lodash "^4.17.21"
     node-fetch "2.6.9"
     pg "^8.11.3"
+    ts-node "^10.9.2"
 
 "@unocha/hpc-repo-tools@^4.0.0":
   version "4.0.0"
