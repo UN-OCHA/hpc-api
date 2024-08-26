@@ -8,6 +8,7 @@
   "scripts": {
     "check-types": "tsc --noEmit",
     "install-and-link": "sh ./bin/install.sh",
+    "reinstall": "rm -rf node_modules/ && yarn install-and-link dev",
     "start": "pm2 start start.js --no-daemon",
     "dev": "ts-node-dev --inspect=127.0.0.1:9339 --transpile-only --no-notify -- start.js",
     "prepare": "[ -d .git ] && git config blame.ignoreRevsFile .git-blame-ignore-revs; husky install",
