@@ -1,16 +1,15 @@
 import * as Hapi from '@hapi/hapi';
+import v4Models from '@unocha/hpc-api-core/src/db';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import {
   ApolloServer,
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
+import { type Knex } from 'knex';
 import path from 'node:path';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
-import Knex = require('knex');
-
-import v4Models from '@unocha/hpc-api-core/src/db';
 import { CONFIG } from '../config';
 import { getTokenFromRequest } from './common-libs/auth';
 import { initializeLogging } from './common-libs/logging';
