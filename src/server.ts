@@ -4,7 +4,7 @@ import {
   ApolloServer,
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
-import { join } from 'node:path';
+import path from 'node:path';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
@@ -34,7 +34,7 @@ async function startServer() {
   const rootLogContext = await initializeLogging();
 
   const schema = await buildSchema({
-    resolvers: [join(__dirname, 'domain-services/**/resolver.{ts,js}')],
+    resolvers: [path.join(__dirname, 'domain-services/**/resolver.{ts,js}')],
     container: Container, // Register the 3rd party IOC container
   });
 

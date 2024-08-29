@@ -6,7 +6,7 @@ import {
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
 import type Knex from 'knex';
-import PlatformPath from 'node:path';
+import path from 'node:path';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
@@ -20,10 +20,7 @@ export default async function createApolloTestServer(
 ) {
   const schema = await buildSchema({
     resolvers: [
-      PlatformPath.join(
-        __dirname,
-        '../../src/domain-services/**/resolver.{ts,js}'
-      ),
+      path.join(__dirname, '../../src/domain-services/**/resolver.{ts,js}'),
     ],
     container: Container, // Register the 3rd party IOC container
   });

@@ -1,0 +1,35 @@
+# Documentation for all configuration options:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      time: '11:00'
+      timezone: 'Europe/Zurich'
+    open-pull-requests-limit: 10
+    reviewers:
+      - '@UN-OCHA/hpc-js-reviewers'
+    allow:
+      - dependency-name: '@unocha/hpc-api-core'
+      - dependency-name: 'bunyan'
+      - dependency-name: '@types/bunyan'
+      - dependency-name: 'class-validator'
+      - dependency-name: 'knex'
+      - dependency-name: 'pg'
+      - dependency-name: '@types/pg'
+      - dependency-name: 'pm2'
+      - dependency-name: 'reflect-metadata'
+      - dependency-name: 'ts-node'
+      - dependency-name: 'ts-node-dev'
+      - dependency-name: 'typedi'
+      - dependency-name: 'jest'
+      - dependency-name: '@types/jest'
+      - dependency-name: 'ts-jest'
+      - dependency-name: '@types/node'
+      - dependency-name: '@unocha/hpc-repo-tools'
+      - dependency-name: 'husky'
+      - dependency-name: 'lint-staged'
+      - dependency-name: 'prettier'
