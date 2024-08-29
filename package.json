@@ -36,7 +36,7 @@
     "@types/bunyan": "^1.8.11",
     "@types/hapi__hapi": "^20.0.9",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.8.10",
+    "@types/node": "^22.5.1",
     "@types/pg": "^8.11.3",
     "@unocha/hpc-repo-tools": "^4.2.0",
     "eslint": "^8.57.0",
