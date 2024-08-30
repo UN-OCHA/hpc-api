@@ -1,6 +1,6 @@
 import v4Models, { type Database } from '@unocha/hpc-api-core/src/db';
 import { type ApolloServer } from 'apollo-server-hapi';
-import type Knex from 'knex';
+import type { Knex } from 'knex';
 import { createDbConnection } from './utils/connection';
 import createApolloTestServer from './utils/server';
 

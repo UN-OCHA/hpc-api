@@ -1,11 +1,11 @@
-import Knex from 'knex';
+import { knex } from 'knex';
 import { CONFIG } from '../../../config';
 
 /**
  * Initialize a new Postgres provider
  */
 export async function createDbConnection() {
-  const knex = Knex({
+  const knexInstance = knex({
     client: 'pg',
     connection: CONFIG.db.connection,
     pool: {
@@ -18,9 +18,9 @@ export async function createDbConnection() {
 
   // Verify the connection before proceeding
   try {
-    await knex.raw('SELECT now()');
+    await knexInstance.raw('SELECT now()');
 
-    return knex;
+    return knexInstance;
   } catch {
     throw new Error(
       'Unable to connect to Postgres via Knex. Ensure a valid connection.'

@@ -5,7 +5,7 @@ import {
   ApolloServer,
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
-import type Knex from 'knex';
+import type { Knex } from 'knex';
 import path from 'node:path';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
