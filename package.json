@@ -1,6 +1,6 @@
 {
   "name": "hpc-api",
-  "version": "4.6.5",
+  "version": "4.7.0",
   "description": "api for HPC applications",
   "main": "src/server.ts",
   "license": "MIT",
@@ -8,47 +8,48 @@
   "scripts": {
     "check-types": "tsc --noEmit",
     "install-and-link": "sh ./bin/install.sh",
+    "reinstall": "rm -rf node_modules/ && yarn install-and-link dev",
     "start": "pm2 start start.js --no-daemon",
     "dev": "ts-node-dev --inspect=127.0.0.1:9339 --transpile-only --no-notify -- start.js",
-    "prepare": "[ -d .git ] && git config blame.ignoreRevsFile .git-blame-ignore-revs; husky install",
+    "prepare": "[ -d .git ] && git config blame.ignoreRevsFile .git-blame-ignore-revs; husky",
     "lint-prettier": "prettier -c .",
     "lint-eslint": "eslint --quiet .",
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^7.0.0",
+    "@unocha/hpc-api-core": "^9.0.0",
     "apollo-server-hapi": "^3.12.0",
     "bunyan": "^1.8.15",
-    "class-validator": "^0.14.0",
+    "class-validator": "^0.14.1",
     "graphql": "^15.7.2",
-    "knex": "0.21.1",
-    "pg": "^8.11.3",
-    "pm2": "^5.3.0",
-    "reflect-metadata": "^0.1.13",
-    "ts-node": "^10.9.1",
+    "knex": "3.1.0",
+    "pg": "^8.12.0",
+    "pm2": "^5.4.2",
+    "reflect-metadata": "^0.2.2",
+    "ts-node": "^10.9.2",
     "type-graphql": "^1.1.1",
     "typedi": "^0.10.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.5.4"
   },
   "devDependencies": {
     "@hapi/hapi": "^20.2.1",
-    "@types/bunyan": "^1.8.8",
+    "@types/bunyan": "^1.8.11",
     "@types/hapi__hapi": "^20.0.9",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.8.10",
-    "@types/pg": "^8.11.3",
-    "@unocha/hpc-repo-tools": "^4.0.0",
-    "eslint": "^8.52.0",
-    "husky": "^8.0.3",
+    "@types/node": "^22.5.1",
+    "@types/pg": "^8.11.6",
+    "@unocha/hpc-repo-tools": "^4.2.0",
+    "eslint": "^8.57.0",
+    "husky": "^9.1.5",
     "jest": "^29.7.0",
-    "lint-staged": "^15.0.2",
-    "prettier": "3.0.3",
-    "ts-jest": "^29.1.2",
+    "lint-staged": "^15.2.9",
+    "prettier": "3.3.3",
+    "ts-jest": "^29.2.5",
     "ts-node-dev": "^2.0.0"
   },
   "engines": {
-    "node": ">=18.18.2 || >=20.9.0",
-    "yarn": ">=1.22.10"
+    "node": ">=20.15.1",
+    "yarn": ">=1.22.22"
   },
   "lint-staged": {
     "*.{ts,js}": [

@@ -1,5 +1,5 @@
 import * as t from 'io-ts';
-import Knex from 'knex';
+import { knex } from 'knex';
 
 const CONFIG = t.type({
   host: t.string,
@@ -12,7 +12,7 @@ const CONFIG = t.type({
  * Initialize a new Postgres provider
  */
 export async function createDbConnection(connection: t.TypeOf<typeof CONFIG>) {
-  const knex = Knex({
+  const knexInstance = knex({
     client: 'pg',
     connection,
     pool: { min: 0, max: 10, idleTimeoutMillis: 500 },
@@ -21,9 +21,9 @@ export async function createDbConnection(connection: t.TypeOf<typeof CONFIG>) {
 
   // Verify the connection before proceeding
   try {
-    await knex.raw('SELECT now()');
+    await knexInstance.raw('SELECT now()');
 
-    return knex;
+    return knexInstance;
   } catch (error) {
     console.log(error);
     throw new Error(
