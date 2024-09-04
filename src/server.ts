@@ -1,16 +1,15 @@
 import * as Hapi from '@hapi/hapi';
+import v4Models from '@unocha/hpc-api-core/src/db';
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import {
   ApolloServer,
   ApolloServerPluginStopHapiServer,
 } from 'apollo-server-hapi';
-import { join } from 'node:path';
+import { type Knex } from 'knex';
+import path from 'node:path';
 import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { Container } from 'typedi';
-import Knex = require('knex');
-
-import v4Models from '@unocha/hpc-api-core/src/db';
 import { CONFIG } from '../config';
 import { getTokenFromRequest } from './common-libs/auth';
 import { initializeLogging } from './common-libs/logging';
@@ -34,7 +33,7 @@ async function startServer() {
   const rootLogContext = await initializeLogging();
 
   const schema = await buildSchema({
-    resolvers: [join(__dirname, 'domain-services/**/resolver.{ts,js}')],
+    resolvers: [path.join(__dirname, 'domain-services/**/resolver.{ts,js}')],
     container: Container, // Register the 3rd party IOC container
   });
 
