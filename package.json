@@ -56,6 +56,6 @@
       "prettier --check",
       "eslint"
     ],
-    "*.{js,jsx,ts,tsx,md,json}": "prettier --check"
+    "*.{js,ts,md,json}": "prettier --check"
   }
 }
