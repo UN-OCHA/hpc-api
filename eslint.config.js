@@ -3,6 +3,12 @@ const baseConfig = require('@unocha/hpc-repo-tools/eslint.config.base');
 module.exports = [
   ...baseConfig,
   {
+    files: ['**/*.{js,ts}'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
