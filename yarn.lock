@@ -550,14 +550,7 @@
   dependencies:
     "@hapi/hoek" "9.x.x"
 
-"@hapi/boom@9.x.x", "@hapi/boom@^9.0.0", "@hapi/boom@^9.1.0":
-  version "9.1.2"
-  resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-9.1.2.tgz#48bd41d67437164a2d636e3b5bc954f8c8dc5e38"
-  integrity sha512-uJEJtiNHzKw80JpngDGBCGAmWjBtzxDCz17A9NO2zCi8LLBlb5Frpq4pXwyN+2JQMod4pKz5BALwyneCgDg89Q==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-
-"@hapi/boom@^9.1.2":
+"@hapi/boom@9.x.x", "@hapi/boom@^9.0.0", "@hapi/boom@^9.1.0", "@hapi/boom@^9.1.2":
   version "9.1.4"
   resolved "https://registry.yarnpkg.com/@hapi/boom/-/boom-9.1.4.tgz#1f9dad367c6a7da9f8def24b4a986fc5a7bd9db6"
   integrity sha512-Ls1oH8jaN1vNsqcaHVYJrKmgMcKsC1wcp8bujvXrHaAqD2iDYq3HoOwsxwo09Cuda5R5nC0o0IxlrlTuvPuzSw==
@@ -1730,10 +1723,10 @@ apollo-reporting-protobuf@^3.4.0:
   dependencies:
     "@apollo/protobufjs" "1.2.6"
 
-apollo-server-core@^3.12.0:
-  version "3.12.1"
-  resolved "https://registry.yarnpkg.com/apollo-server-core/-/apollo-server-core-3.12.1.tgz#ba255c37345db29c48a2e0c064c519a8d62eb5af"
-  integrity sha512-9SF5WAkkV0FZQ2HVUWI9Jada1U0jg7e8NCN9EklbtvaCeUlOLyXyM+KCWuZ7+dqHxjshbtcwylPHutt3uzoNkw==
+apollo-server-core@^3.13.0:
+  version "3.13.0"
+  resolved "https://registry.yarnpkg.com/apollo-server-core/-/apollo-server-core-3.13.0.tgz#ad6601fbb34cc97eedca27a9fb0b5738d11cd27d"
+  integrity sha512-v/g6DR6KuHn9DYSdtQijz8dLOkP78I5JSVJzPkARhDbhpH74QNwrQ2PP2URAPPEDJ2EeZNQDX8PvbYkAKqg+kg==
   dependencies:
     "@apollo/utils.keyvaluecache" "^1.0.1"
     "@apollo/utils.logger" "^1.0.0"
@@ -1771,14 +1764,14 @@ apollo-server-errors@^3.3.1:
   resolved "https://registry.yarnpkg.com/apollo-server-errors/-/apollo-server-errors-3.3.1.tgz#ba5c00cdaa33d4cbd09779f8cb6f47475d1cd655"
   integrity sha512-xnZJ5QWs6FixHICXHxUfm+ZWqqxrNuPlQ+kj5m6RtEgIpekOPssH/SD9gf2B4HuWV0QozorrygwZnux8POvyPA==
 
-apollo-server-hapi@^3.12.0:
-  version "3.12.0"
-  resolved "https://registry.yarnpkg.com/apollo-server-hapi/-/apollo-server-hapi-3.12.0.tgz#1b2391d1351cefac3214363f32f58f8248456e9e"
-  integrity sha512-TyS1HDyQKyh1VM3NhacGqyF/IsB9R8+nC6JmkDP3MSlKpWi8Ct8kC7wze94/19mofdhphDYDz42rxKzlh1Bd5w==
+apollo-server-hapi@^3.13.0:
+  version "3.13.0"
+  resolved "https://registry.yarnpkg.com/apollo-server-hapi/-/apollo-server-hapi-3.13.0.tgz#672f2be8e8f0eadf30a016f6d67023b7c19720e1"
+  integrity sha512-C0QOx8liYvKnKfA4vajJ3y/xv7RstgR4g3aTa8K4M0v0GSOF0xEjksHQAlE5trXjE8dnhln1TfG8zaUmjQdsJA==
   dependencies:
     "@hapi/accept" "^5.0.2"
     "@hapi/boom" "^9.1.2"
-    apollo-server-core "^3.12.0"
+    apollo-server-core "^3.13.0"
     apollo-server-types "^3.8.0"
 
 apollo-server-plugin-base@^3.7.2:
