@@ -35,7 +35,7 @@
     "@hapi/hapi": "^20.2.1",
     "@types/bunyan": "^1.8.11",
     "@types/hapi__hapi": "^20.0.9",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.13",
     "@types/node": "^22.7.4",
     "@types/pg": "^8.11.6",
     "@unocha/hpc-repo-tools": "^5.0.0",
