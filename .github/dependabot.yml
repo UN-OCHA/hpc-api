@@ -38,3 +38,11 @@ updates:
         versions: ['>= 16.0.0']
       # Typescript is a peer dependency of `@unocha/hpc-repo-tools`
       - dependency-name: 'typescript'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      time: '11:00'
+      timezone: 'Europe/Zurich'
+    reviewers:
+      - '@UN-OCHA/hpc-js-reviewers'
