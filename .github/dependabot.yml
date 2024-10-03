@@ -12,6 +12,24 @@ updates:
     open-pull-requests-limit: 10
     reviewers:
       - '@UN-OCHA/hpc-js-reviewers'
+    groups:
+      bunyan:
+        applies-to: version-updates
+        patterns:
+          - '*bunyan'
+      hapi:
+        applies-to: version-updates
+        patterns:
+          - '@hapi/hapi'
+          - '@types/hapi__hapi'
+      pg:
+        applies-to: version-updates
+        patterns:
+          - '*pg'
+      jest:
+        applies-to: version-updates
+        patterns:
+          - '*jest'
     ignore:
       # ESLint is a peer dependency of `@unocha/hpc-repo-tools`
       - dependency-name: 'eslint'
