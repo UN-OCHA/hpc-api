@@ -32,9 +32,9 @@
     "typescript": "^5.5.4"
   },
   "devDependencies": {
-    "@hapi/hapi": "^20.2.1",
+    "@hapi/hapi": "^21.3.10",
     "@types/bunyan": "^1.8.11",
-    "@types/hapi__hapi": "^20.0.9",
+    "@types/hapi__hapi": "^21.0.0",
     "@types/jest": "^29.5.13",
     "@types/node": "^22.7.4",
     "@types/pg": "^8.11.6",
