@@ -18,11 +18,6 @@ updates:
         applies-to: version-updates
         patterns:
           - '*bunyan'
-      hapi:
-        applies-to: version-updates
-        patterns:
-          - '@hapi/hapi'
-          - '@types/hapi__hapi'
       pg:
         applies-to: version-updates
         patterns:
@@ -32,6 +27,10 @@ updates:
         patterns:
           - '*jest'
     ignore:
+      # HPC-9080: Don't upgrade Hapi version until migrating to Apollo Server 4
+      - dependency-name: '@hapi/hapi'
+        versions: ['>= 21.0.0']
+      - dependency-name: '@types/hapi__hapi'
       # ESLint is a peer dependency of `@unocha/hpc-repo-tools`
       - dependency-name: 'eslint'
       # Dependency `type-graphql` still doesn't support GraphQL v16
