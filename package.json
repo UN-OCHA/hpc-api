@@ -37,7 +37,7 @@
     "@types/hapi__hapi": "^20.0.9",
     "@types/jest": "^29.5.13",
     "@types/node": "^22.7.4",
-    "@types/pg": "^8.11.6",
+    "@types/pg": "^8.11.10",
     "@unocha/hpc-repo-tools": "^5.0.0",
     "eslint": "9.9.1",
     "husky": "^9.1.6",
