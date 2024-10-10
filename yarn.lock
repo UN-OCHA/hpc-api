@@ -615,10 +615,10 @@
   resolved "https://registry.yarnpkg.com/@hapi/file/-/file-2.0.0.tgz#2ecda37d1ae9d3078a67c13b7da86e8c3237dfb9"
   integrity sha512-WSrlgpvEqgPWkI18kkGELEZfXr0bYLtr16iIN4Krh9sRnzBZN6nnWxHFxtsnP684wueEySBbXPDg/WfA9xJdBQ==
 
-"@hapi/hapi@^20.2.1":
-  version "20.2.1"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.2.1.tgz#7482bc28757cb4671623a61bdb5ce920bffc8a2f"
-  integrity sha512-OXAU+yWLwkMfPFic+KITo+XPp6Oxpgc9WUH+pxXWcTIuvWbgco5TC/jS8UDvz+NFF5IzRgF2CL6UV/KLdQYUSQ==
+"@hapi/hapi@^20.3.0":
+  version "20.3.0"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.3.0.tgz#1d620005afeebcb2c8170352286a4664b0107c15"
+  integrity sha512-zvPSRvaQyF3S6Nev9aiAzko2/hIFZmNSJNcs07qdVaVAvj8dGJSV4fVUuQSnufYJAGiSau+U5LxMLhx79se5WA==
   dependencies:
     "@hapi/accept" "^5.0.1"
     "@hapi/ammo" "^5.0.1"
@@ -634,7 +634,7 @@
     "@hapi/shot" "^5.0.5"
     "@hapi/somever" "^3.0.0"
     "@hapi/statehood" "^7.0.3"
-    "@hapi/subtext" "^7.0.3"
+    "@hapi/subtext" "^7.1.0"
     "@hapi/teamwork" "^5.1.0"
     "@hapi/topo" "^5.0.0"
     "@hapi/validate" "^1.1.1"
@@ -680,10 +680,10 @@
     "@hapi/hoek" "^9.0.4"
     "@hapi/vise" "^4.0.0"
 
-"@hapi/pez@^5.0.1":
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/@hapi/pez/-/pez-5.0.3.tgz#b75446e6fef8cbb16816573ab7da1b0522e7a2a1"
-  integrity sha512-mpikYRJjtrbJgdDHG/H9ySqYqwJ+QU/D7FXsYciS9P7NYBXE2ayKDAy3H0ou6CohOCaxPuTV4SZ0D936+VomHA==
+"@hapi/pez@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@hapi/pez/-/pez-5.1.0.tgz#c03a5e01f8be01cfabc4c0017631e619586321c1"
+  integrity sha512-YfB0btnkLB3lb6Ry/1KifnMPBm5ZPfaAHWFskzOMAgDgXgcBgA+zjpIynyEiBfWEz22DBT8o1e2tAaBdlt8zbw==
   dependencies:
     "@hapi/b64" "5.x.x"
     "@hapi/boom" "9.x.x"
@@ -691,16 +691,7 @@
     "@hapi/hoek" "9.x.x"
     "@hapi/nigel" "4.x.x"
 
-"@hapi/podium@4.x.x", "@hapi/podium@^4.1.1":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-4.1.2.tgz#5ef04ee8ab0b72246447c23a07f6695f0e87d8a6"
-  integrity sha512-M65LcxcFOWGVHyTGv6W6lqv3jFL6CwTMcmqBi05qGOaLA0kSVkC2oPu0EoViGbgujNR3qrrACZC9c3eI6xOcdg==
-  dependencies:
-    "@hapi/hoek" "9.x.x"
-    "@hapi/teamwork" "5.x.x"
-    "@hapi/validate" "1.x.x"
-
-"@hapi/podium@^4.1.3":
+"@hapi/podium@4.x.x", "@hapi/podium@^4.1.1", "@hapi/podium@^4.1.3":
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/@hapi/podium/-/podium-4.1.3.tgz#91e20838fc2b5437f511d664aabebbb393578a26"
   integrity sha512-ljsKGQzLkFqnQxE7qeanvgGj4dejnciErYd30dbrYzUOF/FyS/DOF97qcrT3bhoVwCYmxa6PEMhxfCPlnUcD2g==
@@ -738,17 +729,17 @@
     "@hapi/iron" "6.x.x"
     "@hapi/validate" "1.x.x"
 
-"@hapi/subtext@^7.0.3":
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/@hapi/subtext/-/subtext-7.0.3.tgz#f7440fc7c966858e1f39681e99eb6171c71e7abd"
-  integrity sha512-CekDizZkDGERJ01C0+TzHlKtqdXZxzSWTOaH6THBrbOHnsr3GY+yiMZC+AfNCypfE17RaIakGIAbpL2Tk1z2+A==
+"@hapi/subtext@^7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@hapi/subtext/-/subtext-7.1.0.tgz#b4d1ea2aeab1923ac130a24e75921e38fab5b15b"
+  integrity sha512-n94cU6hlvsNRIpXaROzBNEJGwxC+HA69q769pChzej84On8vsU14guHDub7Pphr/pqn5b93zV3IkMPDU5AUiXA==
   dependencies:
     "@hapi/boom" "9.x.x"
     "@hapi/bourne" "2.x.x"
     "@hapi/content" "^5.0.2"
     "@hapi/file" "2.x.x"
     "@hapi/hoek" "9.x.x"
-    "@hapi/pez" "^5.0.1"
+    "@hapi/pez" "^5.1.0"
     "@hapi/wreck" "17.x.x"
 
 "@hapi/teamwork@5.x.x", "@hapi/teamwork@^5.1.0":
