@@ -10,26 +10,39 @@ updates:
       time: '11:00'
       timezone: 'Europe/Zurich'
     open-pull-requests-limit: 10
+    versioning-strategy: increase
     reviewers:
       - '@UN-OCHA/hpc-js-reviewers'
-    allow:
-      - dependency-name: '@unocha/hpc-api-core'
-      - dependency-name: 'bunyan'
-      - dependency-name: '@types/bunyan'
-      - dependency-name: 'class-validator'
-      - dependency-name: 'knex'
-      - dependency-name: 'pg'
-      - dependency-name: '@types/pg'
-      - dependency-name: 'pm2'
-      - dependency-name: 'reflect-metadata'
-      - dependency-name: 'ts-node'
-      - dependency-name: 'ts-node-dev'
-      - dependency-name: 'typedi'
-      - dependency-name: 'jest'
-      - dependency-name: '@types/jest'
-      - dependency-name: 'ts-jest'
-      - dependency-name: '@types/node'
-      - dependency-name: '@unocha/hpc-repo-tools'
-      - dependency-name: 'husky'
-      - dependency-name: 'lint-staged'
-      - dependency-name: 'prettier'
+    groups:
+      bunyan:
+        applies-to: version-updates
+        patterns:
+          - '*bunyan'
+      pg:
+        applies-to: version-updates
+        patterns:
+          - '*pg'
+      jest:
+        applies-to: version-updates
+        patterns:
+          - '*jest'
+    ignore:
+      # HPC-9080: Don't upgrade Hapi version until migrating to Apollo Server 4
+      - dependency-name: '@hapi/hapi'
+        versions: ['>= 21.0.0']
+      - dependency-name: '@types/hapi__hapi'
+      # ESLint is a peer dependency of `@unocha/hpc-repo-tools`
+      - dependency-name: 'eslint'
+      # Dependency `type-graphql` still doesn't support GraphQL v16
+      - dependency-name: 'graphql'
+        versions: ['>= 16.0.0']
+      # Typescript is a peer dependency of `@unocha/hpc-repo-tools`
+      - dependency-name: 'typescript'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+      time: '11:00'
+      timezone: 'Europe/Zurich'
+    reviewers:
+      - '@UN-OCHA/hpc-js-reviewers'
