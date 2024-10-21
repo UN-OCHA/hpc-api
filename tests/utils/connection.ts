@@ -1,17 +1,16 @@
-import * as t from 'io-ts';
 import { knex } from 'knex';
 
-const CONFIG = t.type({
-  host: t.string,
-  port: t.number,
-  user: t.string,
-  database: t.string,
-});
+type ConnectionConfig = {
+  host: string;
+  port: number;
+  user: string;
+  database: string;
+};
 
 /**
  * Initialize a new Postgres provider
  */
-export async function createDbConnection(connection: t.TypeOf<typeof CONFIG>) {
+export async function createDbConnection(connection: ConnectionConfig) {
   const knexInstance = knex({
     client: 'pg',
     connection,

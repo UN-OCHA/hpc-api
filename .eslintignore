@@ -1,5 +1,0 @@
-# JSON files
-*.json
-# build artifacts
-schema.graphql
-.eslintrc.js
