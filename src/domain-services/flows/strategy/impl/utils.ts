@@ -3,6 +3,7 @@ import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import type { InstanceDataOf } from '@unocha/hpc-api-core/src/db/util/model-definition';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import type * as t from 'io-ts';
 import { type OrderBy } from '../../../../utils/database-types';
 import { type SortOrder } from '../../../../utils/graphql/pagination';
 import { type EntityDirection } from '../../../base-types';
@@ -40,7 +41,8 @@ export const defaultSearchFlowFilter: FlowWhere = {
 
 type FlowOrderByCommon = {
   order: SortOrder;
-  direction?: EntityDirection;
+  direction: EntityDirection;
+  subEntity?: string;
 };
 
 export type FlowOrderBy = FlowOrderByCommon &
@@ -90,6 +92,8 @@ export type FlowOrderBy = FlowOrderByCommon &
         column: keyof InstanceOfModel<Database['project']>;
       }
   );
+
+export type FlowOrderByCodec = t.Type<FlowOrderBy>;
 
 export const mapFlowCategoryConditionsToWhereClause = (
   flowCategoryConditions: FlowCategory[]
@@ -150,7 +154,7 @@ export const mapFlowCategoryConditionsToWhereClause = (
 };
 
 export const mapFlowOrderBy = (
-  orderBy?: FlowOrderByWithSubEntity
+  orderBy?: FlowOrderBy | FlowOrderByWithSubEntity
 ): OrderBy<FlowFieldsDefinition> => {
   if (!orderBy || orderBy.entity !== 'flow') {
     return defaultFlowOrderBy();
@@ -371,9 +375,9 @@ export const buildOrderBy = (
   const orderBy: FlowOrderByWithSubEntity = {
     column: sortField ?? 'updatedAt',
     order: sortOrder ?? ('desc' as SortOrder),
-    direction: undefined,
+    direction: 'source' as EntityDirection,
     entity: 'flow',
-  };
+  } satisfies FlowOrderByWithSubEntity;
 
   // Check if sortField is a nested property
   if (orderBy.column.includes('.')) {

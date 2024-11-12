@@ -2,7 +2,10 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import {
+  createBrandedValue,
+  getTableColumns,
+} from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../flow-object/flow-object-service';
 import type {
@@ -52,11 +55,20 @@ export class FlowService {
     orderBy: FlowOrderByWithSubEntity
   ): Promise<UniqueFlowEntity[]> {
     const entity = orderBy.subEntity ?? orderBy.entity;
+    let columns: string[] = [];
+
     // Get the entity list
     // 'externalReference' is a special case
     // because it does have a direct relation with flow
     // and no direction
     if (entity === 'externalReference') {
+      columns = getTableColumns(database.externalReference);
+      if (!columns.includes(orderBy.column)) {
+        throw new Error(
+          `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+        );
+      }
+
       const column = orderBy.column as keyof InstanceOfModel<
         Database['externalReference']
       >;
@@ -78,17 +90,23 @@ export class FlowService {
 
     const refDirection = orderBy.direction ?? 'source';
 
-    // Validate the variable using io-ts
-
     let flowObjects = [];
     let entityIDsSorted: number[] = [];
 
     switch (entity) {
       case 'emergency': {
+        columns = getTableColumns(database.emergency);
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
+
         // Get emergency entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['emergency']
         >;
+
         const orderByEmergency = { column, order: orderBy.order };
 
         const emergencies = await database.emergency.find({
@@ -102,6 +120,13 @@ export class FlowService {
         break;
       }
       case 'globalCluster': {
+        columns = getTableColumns(database.globalCluster);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get globalCluster entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['globalCluster']
@@ -119,6 +144,13 @@ export class FlowService {
         break;
       }
       case 'governingEntity': {
+        columns = getTableColumns(database.governingEntity);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get governingEntity entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['governingEntity']
@@ -136,6 +168,13 @@ export class FlowService {
         break;
       }
       case 'location': {
+        columns = getTableColumns(database.location);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get location entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['location']
@@ -151,6 +190,13 @@ export class FlowService {
         break;
       }
       case 'organization': {
+        columns = getTableColumns(database.organization);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get organization entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['organization']
@@ -168,6 +214,13 @@ export class FlowService {
         break;
       }
       case 'plan': {
+        columns = getTableColumns(database.plan);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get plan entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['plan']
@@ -183,6 +236,13 @@ export class FlowService {
         break;
       }
       case 'project': {
+        columns = getTableColumns(database.project);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get project entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['project']
@@ -198,6 +258,13 @@ export class FlowService {
         break;
       }
       case 'usageYear': {
+        columns = getTableColumns(database.usageYear);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get usageYear entities sorted
         const column = orderBy.column as keyof InstanceOfModel<
           Database['usageYear']
@@ -213,6 +280,13 @@ export class FlowService {
         break;
       }
       case 'planVersion': {
+        columns = getTableColumns(database.planVersion);
+
+        if (!columns.includes(orderBy.column)) {
+          throw new Error(
+            `Invalid column ${orderBy.column} to sort by in ${orderBy.entity}`
+          );
+        }
         // Get planVersion entities sorted
         // Collect fisrt part of the entity key by the fisrt Case letter
         const entityKey = `${
