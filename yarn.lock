@@ -1373,10 +1373,10 @@
     expect "^29.0.0"
     pretty-format "^29.0.0"
 
-"@types/lodash@^4.17.10":
-  version "4.17.10"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.10.tgz#64f3edf656af2fe59e7278b73d3e62404144a6e6"
-  integrity sha512-YpS0zzoduEhuOWjAotS6A5AVCva7X4lVlYLF0FYHAY9sdraBfnatttHItlWeZdGhuEkf+OzMNg2ZYAx8t+52uQ==
+"@types/lodash@^4.17.13":
+  version "4.17.13"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.13.tgz#786e2d67cfd95e32862143abe7463a7f90c300eb"
+  integrity sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==
 
 "@types/long@^4.0.0":
   version "4.0.2"
@@ -1550,19 +1550,19 @@
     "@typescript-eslint/types" "8.4.0"
     eslint-visitor-keys "^3.4.3"
 
-"@unocha/hpc-api-core@^10.1.1":
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-10.1.1.tgz#7a85c4afc4bb43b52e83ffdd83e58e03886940b9"
-  integrity sha512-BOGKuzCd7iCZ9qItHw/qaAB0VSYPGUYzUHoI7EgSGfQL0mBz8r+vKvyf+d3CZ6pbG6Hw0kagAMvCQa1Smdrjag==
+"@unocha/hpc-api-core@^10.5.0":
+  version "10.5.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-10.5.0.tgz#3bb1f41f01a61f8794155b6fb6e4ab8d2755cad0"
+  integrity sha512-59IGHbiL/Y0RAbZ3F5bCZDTEaypS/ET7IUCElhqHosWOdL2rw+dWuBFsHAXMyb3DbTXuWTpmJpaUFi4Fm4+U7g==
   dependencies:
-    "@types/lodash" "^4.17.10"
+    "@types/lodash" "^4.17.13"
     "@types/node-fetch" "2.6.11"
     fp-ts "^2.14.0"
     io-ts "2.2.20"
     knex "3.1.0"
     lodash "^4.17.21"
     node-fetch "2.7.0"
-    pg "^8.13.0"
+    pg "^8.13.1"
     ts-node "^10.9.2"
 
 "@unocha/hpc-repo-tools@^5.0.0":
@@ -4435,7 +4435,7 @@ pg-types@^4.0.1:
     postgres-interval "^3.0.0"
     postgres-range "^1.1.1"
 
-pg@^8.13.0, pg@^8.13.1:
+pg@^8.13.1:
   version "8.13.1"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.13.1.tgz#6498d8b0a87ff76c2df7a32160309d3168c0c080"
   integrity sha512-OUir1A0rPNZlX//c7ksiu7crsGZTKSOXJPgtNiHGIlC9H0lO+NC6ZDYksSgBYY/thSWhnSRBv8w1lieNNGATNQ==
