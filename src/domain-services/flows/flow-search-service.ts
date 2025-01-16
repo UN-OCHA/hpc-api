@@ -69,8 +69,7 @@ export class FlowSearchService {
   ): Promise<FlowSearchResult> {
     const {
       limit,
-      nextPageCursor,
-      prevPageCursor,
+      page,
       sortField,
       sortOrder,
       includeChildrenOfParkedFlows: shouldIncludeChildrenOfParkedFlows,
@@ -138,7 +137,7 @@ export class FlowSearchService {
       orderBy
     );
 
-    const offset = nextPageCursor ?? prevPageCursor ?? 0;
+    const offset = page && limit ? page * limit : 0;
 
     // We add 1 to the limit to check if there is a next page
     const searchLimit = limit + 1;
@@ -296,13 +295,8 @@ export class FlowSearchService {
     return {
       flows: items,
       hasNextPage: hasNextPage,
-      hasPreviousPage: nextPageCursor !== undefined,
-      prevPageCursor: nextPageCursor ? nextPageCursor - limit : 0,
-      nextPageCursor: hasNextPage
-        ? nextPageCursor
-          ? nextPageCursor + limit
-          : limit
-        : 0,
+      hasPreviousPage: page > 0,
+      page,
       pageSize: flows.length,
       sortField: `${orderBy.entity}.${orderBy.column}` as FlowSortField,
       sortOrder: sortOrder ?? 'desc',
@@ -532,8 +526,8 @@ export class FlowSearchService {
 
     let hasNextPage = flowSearchResponse.hasNextPage;
 
-    let cursor = flowSearchResponse.nextPageCursor;
-    let nextArgs: SearchFlowsArgs = { ...args, nextPageCursor: cursor };
+    let page = flowSearchResponse.page;
+    let nextArgs: SearchFlowsArgs = { ...args, page: page + 1 };
 
     let nextFlowSearchResponse: FlowSearchResult;
     while (hasNextPage) {
@@ -541,10 +535,10 @@ export class FlowSearchService {
       flows.push(...nextFlowSearchResponse.flows);
 
       hasNextPage = nextFlowSearchResponse.hasNextPage;
-      cursor = nextFlowSearchResponse.nextPageCursor;
+      page = nextFlowSearchResponse.page + 1;
 
       // Update the cursor for the next iteration
-      nextArgs = { ...args, nextPageCursor: cursor };
+      nextArgs = { ...args, page };
     }
 
     return { flows, flowsCount: flows.length };
