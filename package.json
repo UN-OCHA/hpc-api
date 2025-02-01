@@ -21,7 +21,7 @@
     "apollo-server-hapi": "^3.13.0",
     "bunyan": "^1.8.15",
     "class-validator": "^0.14.1",
-    "graphql": "^15.9.0",
+    "graphql": "^15.10.1",
     "knex": "3.1.0",
     "pg": "^8.13.1",
     "pm2": "^5.4.3",
