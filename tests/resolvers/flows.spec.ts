@@ -372,8 +372,7 @@ describe('Query should return Flow search', () => {
     expect(searchFlowsResponse.pageSize).toBe(defaultPageSize);
     expect(searchFlowsResponse.hasPreviousPage).toBeDefined();
     expect(searchFlowsResponse.hasNextPage).toBeDefined();
-    expect(searchFlowsResponse.nextPageCursor).toBeDefined();
-    expect(searchFlowsResponse.prevPageCursor).toBeDefined();
+    expect(searchFlowsResponse.page).toBeDefined();
     expect(searchFlowsResponse.total).toBeDefined();
     expect(searchFlowsResponse.flows).toBeDefined();
   }

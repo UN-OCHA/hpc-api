@@ -15,10 +15,7 @@ export class PageInfo<TSortFields extends string> {
   hasPreviousPage: boolean;
 
   @Field(() => Number, { nullable: false })
-  prevPageCursor: number;
-
-  @Field(() => Number, { nullable: false })
-  nextPageCursor: number;
+  page: number;
 
   @Field({ nullable: false })
   pageSize: number;
@@ -39,10 +36,7 @@ export class PaginationArgs<TSortFields extends string> {
   limit: number;
 
   @Field(() => Number, { nullable: true })
-  nextPageCursor: number;
-
-  @Field(() => Number, { nullable: true })
-  prevPageCursor: number;
+  page: number;
 
   @Field(() => String, { nullable: true })
   sortField: TSortFields;
