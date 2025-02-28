@@ -26,7 +26,7 @@ net
       from.on('close', close);
       from.on('error', close);
       from.on('end', close);
-    } catch (e) {
+    } catch {
       console.log('Unable to connect');
       from.destroy();
     }
