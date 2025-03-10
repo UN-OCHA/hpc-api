@@ -24,7 +24,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:14.12-alpine3.19
+    image: postgres:14.17-alpine3.21
     environment:
       - POSTGRES_PASSWORD=demo
       - POSTGRES_USER=demo
