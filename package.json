@@ -29,7 +29,7 @@
     "ts-node": "^10.9.2",
     "type-graphql": "^1.1.1",
     "typedi": "^0.10.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "devDependencies": {
     "@hapi/hapi": "^20.3.0",
@@ -38,7 +38,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.8",
     "@types/pg": "^8.11.11",
-    "@unocha/hpc-repo-tools": "^5.7.1",
+    "@unocha/hpc-repo-tools": "^6.0.0",
     "eslint": "9.21.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
@@ -52,10 +52,10 @@
     "yarn": ">=1.22.22"
   },
   "lint-staged": {
-    "*.{ts,js}": [
+    "*.{ts,js,cjs,mjs}": [
       "prettier --check",
       "eslint"
     ],
-    "*.{js,ts,md,json}": "prettier --check"
+    "*.{js,cjs,mjs,ts,md,json,yml,yaml}": "prettier --check"
   }
 }
