@@ -20,7 +20,7 @@ declare module '@hapi/hapi' {
     config: typeof CONFIG;
     connection: Knex;
   }
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface ServerOptionsApp extends ServerApplicationState {
     /**
      * This needs to be an interface rather than a type to successfully

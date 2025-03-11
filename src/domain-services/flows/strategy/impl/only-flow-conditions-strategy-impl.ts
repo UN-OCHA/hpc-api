@@ -48,7 +48,7 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
         orderBy: orderByFlow,
         limit,
       }),
-      await models.flow.count({
+      models.flow.count({
         where: whereClause,
       }),
     ]);
@@ -56,7 +56,7 @@ export class OnlyFlowFiltersStrategy implements FlowSearchStrategy {
     // Map count result query to count object
     const countObject = countRes;
 
-    // on certain conditions, this conversion from 'bigint' to 'number' can cause a loss of precision
+    // On certain conditions, this conversion from 'bigint' to 'number' can cause a loss of precision
     // But in order to reach that point, the number of flows would have to be in the billions
     // that is not a realistic scenario for this application
     // Nonetheless, we can validate that using Number.MAX_SAFE_INTEGER as a threshold
