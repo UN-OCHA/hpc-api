@@ -1,0 +1,21 @@
+name: Create stage release pull request
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version type (minor or patch)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - minor
+          - patch
+
+jobs:
+  release:
+    uses: UN-OCHA/hpc-actions/.github/workflows/stage-release.yml@develop
+    with:
+      version_type: ${{ github.event.inputs.version_type }}
+    secrets:
+      GH_TOKEN: ${{ secrets.HPC_BOT_TOKEN }}
