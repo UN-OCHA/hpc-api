@@ -9,16 +9,16 @@ services:
       - .:/srv/www
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
-      - LOG_MODE=devServer
-      - POSTGRES_SERVER=postgres://demo:demo@host.docker.internal:5432/demo
-      - PORT=5100
-      - NODE_ENV=development
-      - NAME=hpc-api-standalone-development
-      - POSTGRES_LOGGING=0
-      - ROOT_URL=http://service.hpc.vm/
-      - AUTHBASE_URL=http://api.hid.vm
-      - WAIT_HOSTS=host.docker.internal:5432
-      - WAIT_HOSTS_TIMEOUT=120
+      LOG_MODE: devServer
+      POSTGRES_SERVER: postgres://demo:demo@host.docker.internal:5432/demo
+      PORT: 5100
+      NODE_ENV: development
+      NAME: hpc-api-standalone-development
+      POSTGRES_LOGGING: 0
+      ROOT_URL: http://service.hpc.vm/
+      AUTHBASE_URL: http://api.hid.vm
+      WAIT_HOSTS: host.docker.internal:5432
+      WAIT_HOSTS_TIMEOUT: 120
     links:
       - db
     depends_on:
@@ -26,9 +26,9 @@ services:
   db:
     image: postgres:14.17-alpine3.21
     environment:
-      - POSTGRES_PASSWORD=demo
-      - POSTGRES_USER=demo
-      - POSTGRES_DB=demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_USER: demo
+      POSTGRES_DB: demo
     ports:
       - 5432:5432
     volumes:
