@@ -24,10 +24,9 @@ services:
       - WAIT_HOSTS=pgsql:5432
       - WAIT_HOSTS_TIMEOUT=120
     networks:
-      service:
+      hpc:
         aliases:
           - api.hpc.vm
 networks:
-  service:
-    name: hpcservice_service
+  hpc:
     external: true
