@@ -4,8 +4,7 @@ services:
       context: .
       dockerfile: ./env/api/Dockerfile
     expose:
-      - '5100'
-      - '9393'
+      - '3000'
     ports:
       - '9339:9393'
     volumes:
@@ -15,7 +14,7 @@ services:
     environment:
       LOG_MODE: devServer
       POSTGRES_SERVER: postgres://postgres:@pgsql:5432/hpc
-      PORT: 5100
+      PORT: 3000
       NODE_ENV: development
       NAME: hpc-api-integrated-development
       POSTGRES_LOGGING: 0

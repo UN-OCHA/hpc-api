@@ -4,14 +4,14 @@ services:
       context: .
       dockerfile: ./env/api/Dockerfile
     ports:
-      - '4000:5100'
+      - '3000:3000'
     volumes:
       - .:/srv/www
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
       LOG_MODE: devServer
       POSTGRES_SERVER: postgres://demo:demo@host.docker.internal:5432/demo
-      PORT: 5100
+      PORT: 3000
       NODE_ENV: development
       NAME: hpc-api-standalone-development
       POSTGRES_LOGGING: 0
