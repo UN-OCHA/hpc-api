@@ -10,17 +10,15 @@ services:
       - ./env/api/node.sh:/etc/services.d/node/run
     environment:
       LOG_MODE: devServer
-      POSTGRES_SERVER: postgres://demo:demo@host.docker.internal:5432/demo
+      POSTGRES_SERVER: postgres://demo:demo@db:5432/demo
       PORT: 3000
       NODE_ENV: development
       NAME: hpc-api-standalone-development
       POSTGRES_LOGGING: 0
       ROOT_URL: http://service.hpc.vm/
       AUTHBASE_URL: http://api.hid.vm
-      WAIT_HOSTS: host.docker.internal:5432
+      WAIT_HOSTS: db:5432
       WAIT_HOSTS_TIMEOUT: 120
-    links:
-      - db
     depends_on:
       - db
   db:
