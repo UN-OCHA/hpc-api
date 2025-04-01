@@ -1406,7 +1406,7 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/lodash@^4.17.15":
+"@types/lodash@^4.17.16":
   version "4.17.16"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.16.tgz#94ae78fab4a38d73086e962d0b65c30d816bfb0a"
   integrity sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==
@@ -1583,19 +1583,19 @@
     "@typescript-eslint/types" "8.26.0"
     eslint-visitor-keys "^4.2.0"
 
-"@unocha/hpc-api-core@^10.10.1":
-  version "10.10.1"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-10.10.1.tgz#2b9c24a74142f6618e6e1dd0b0973e7760f7bee0"
-  integrity sha512-ox+H6S1bJvvAnlw/N/UKwDuX8zJ/cCxAWhW/Y+mnQXOPgJ+C3FU4EgzuNHFpQjypQoK6HRPKntpt5bhI2tosUg==
+"@unocha/hpc-api-core@^11.1.0":
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-11.1.0.tgz#60401258307843d347b3eb86e84a82a953aba4b5"
+  integrity sha512-bSYFhkHms4cvpZGHFwjuz/5KJ0G5P651KPFUw8yD/mHutnF20DVT1VVYzgjnlGbEng4tqsINZPr5Kpi1KBv+RQ==
   dependencies:
-    "@types/lodash" "^4.17.15"
+    "@types/lodash" "^4.17.16"
     "@types/node-fetch" "2.6.11"
     fp-ts "^2.14.0"
     io-ts "2.2.20"
     knex "3.1.0"
     lodash "^4.17.21"
     node-fetch "2.7.0"
-    pg "^8.13.1"
+    pg "^8.13.3"
     ts-node "^10.9.2"
 
 "@unocha/hpc-repo-tools@^6.0.0":
@@ -4393,7 +4393,7 @@ pg-types@^4.0.1:
     postgres-interval "^3.0.0"
     postgres-range "^1.1.1"
 
-pg@^8.13.1, pg@^8.14.1:
+pg@^8.13.3, pg@^8.14.1:
   version "8.14.1"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.14.1.tgz#2e3d1f287b64797cdfc8d1ba000f61a7ff8d66ed"
   integrity sha512-0TdbqfjwIun9Fm/r89oB7RFQ0bLgduAhiIqIXOsyKoiC/L54DbuAAzIEN/9Op0f1Po9X7iCPXGoa/Ah+2aI8Xw==
