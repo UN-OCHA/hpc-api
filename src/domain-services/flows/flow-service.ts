@@ -546,7 +546,7 @@ export class FlowService {
     const childFlowsIDsSet = new Set<FlowId>();
     for (const flowLink of flowLinks) {
       if (filteredParentFlowIds.has(flowLink.parentID)) {
-        childFlowsIDsSet.add(createBrandedValue(flowLink.childID));
+        childFlowsIDsSet.add(flowLink.childID);
       }
     }
 
