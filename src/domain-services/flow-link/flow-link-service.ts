@@ -11,27 +11,29 @@ export class FlowLinkService {
     flowIds: FlowId[],
     models: Database
   ): Promise<Map<number, Array<InstanceOfModel<Database['flowLink']>>>> {
+    // Fetch all flow links in one go
     const flowLinks = await models.flowLink.find({
       where: {
-        childID: {
+        parentID: {
           [Op.IN]: flowIds,
         },
       },
     });
 
-    // Group flowLinks by flow ID for easy mapping
+    // Initialize the map with empty arrays for each flowId
     const flowLinksMap = new Map<
       number,
       Array<InstanceOfModel<Database['flowLink']>>
     >();
 
-    // Populate the map with flowLinks for each flow
-    for (const flowLink of flowLinks) {
-      const flowId = flowLink.childID.valueOf();
-
-      const flowLinksForFlow = getOrCreate(flowLinksMap, flowId, () => []);
-
-      flowLinksForFlow.push(flowLink);
+    // Group flow links by parentID in one pass
+    for (const link of flowLinks) {
+      const flowLinksForFlow = getOrCreate(
+        flowLinksMap,
+        link.parentID,
+        () => []
+      );
+      flowLinksForFlow.push(link);
     }
 
     return flowLinksMap;

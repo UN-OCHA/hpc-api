@@ -72,9 +72,13 @@ export class FlowService {
       const column = orderBy.column as keyof InstanceOfModel<
         Database['externalReference']
       >;
+      const distinctColumns: Array<
+        keyof InstanceOfModel<Database['externalReference']>
+      > = [column, 'flowID', 'versionID'];
+
       const externalReferences = await database.externalReference.find({
         orderBy: { column, order: orderBy.order },
-        distinct: ['flowID', 'versionID'],
+        distinct: distinctColumns,
       });
 
       const uniqueFlowEntities: UniqueFlowEntity[] = externalReferences.map(
