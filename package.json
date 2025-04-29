@@ -52,10 +52,7 @@
     "yarn": ">=1.22.22"
   },
   "lint-staged": {
-    "*.{ts,js,cjs,mjs}": [
-      "prettier --check",
-      "eslint"
-    ],
+    "*.{ts,js,cjs,mjs}": "eslint",
     "*.{js,cjs,mjs,ts,md,json,yml,yaml}": "prettier --check"
   }
 }
