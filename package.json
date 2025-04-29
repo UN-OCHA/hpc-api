@@ -53,6 +53,6 @@
   },
   "lint-staged": {
     "*.{ts,js,cjs,mjs}": "eslint",
-    "*.{js,cjs,mjs,ts,md,json,yml,yaml}": "prettier --check"
+    "*.{js,cjs,mjs,ts,md,json,sh,yml,yaml}": "prettier --check"
   }
 }
