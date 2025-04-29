@@ -1610,10 +1610,10 @@
     pg "^8.13.3"
     ts-node "^10.9.2"
 
-"@unocha/hpc-repo-tools@^6.4.0":
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-repo-tools/-/hpc-repo-tools-6.4.0.tgz#ff6b60b8b869a84e24397905d41720913a1b43a9"
-  integrity sha512-cUT+lsqV70jYBtf8FkUjm9TOKxQCoNQ4cVse47oKZLLtEbvJxbRTXupMlvndINBFgYhakHQCgUfkQuyVstvqhA==
+"@unocha/hpc-repo-tools@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-repo-tools/-/hpc-repo-tools-7.0.0.tgz#6e39011802c714d08b2185271dacb960eef8e634"
+  integrity sha512-I/J8djCQscjRws7MP5B1z2cpEZVZXI+JdhSpNmMEpqHdnxfVgt2YQPjdr8cqqq4bKT3EAJBe3RzwRowSXDEBuw==
   dependencies:
     eslint-config-prettier "10.1.1"
     eslint-plugin-unicorn "58.0.0"
