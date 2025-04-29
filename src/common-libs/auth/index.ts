@@ -25,12 +25,12 @@ const parseBasic = (credentialsPart: string): BasicAuth => {
   }
 
   // Allows for usernameless authentication
-  if (!pieces[0]) {
+  if (pieces[0] === '') {
     pieces[0] = null;
   }
 
   // Allows for passwordless authentication
-  if (!pieces[1]) {
+  if (pieces[1] === '') {
     pieces[1] = null;
   }
 
