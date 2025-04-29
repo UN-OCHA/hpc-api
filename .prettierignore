@@ -1,2 +1,4 @@
 # build artifacts
 schema.graphql
+
+.husky/_/
