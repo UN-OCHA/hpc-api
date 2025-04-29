@@ -29,26 +29,34 @@ function moveToRootDir {
 # Obtain options
 while [ "$1" != "" ]; do
   case $1 in
-    -oc | --only-containers )  ONLY_CONTAINERS=1
-                          ;;
-    -sc | --stop-containers )  STOP_CONTAINERS=1
-                          ;;
-    -k | --keep )         KEEP=1
-                          ;;
-    -c)                   shift
-                          COMMAND_ARGS="${COMMAND_ARGS} --coverage"
-                          ;;
-    -h | --help )         echo "$USAGE"
-                          exit
-                          ;;
-    --)                   shift
-                          while [ "$1" != "" ]; do
-                            COMMAND_ARGS="${COMMAND_ARGS} -- $1"
-                            shift
-                          done
-                          ;;
-    * )                   echo "$USAGE"
-                          exit 1
+    -oc | --only-containers)
+      ONLY_CONTAINERS=1
+      ;;
+    -sc | --stop-containers)
+      STOP_CONTAINERS=1
+      ;;
+    -k | --keep)
+      KEEP=1
+      ;;
+    -c)
+      shift
+      COMMAND_ARGS="${COMMAND_ARGS} --coverage"
+      ;;
+    -h | --help)
+      echo "$USAGE"
+      exit
+      ;;
+    --)
+      shift
+      while [ "$1" != "" ]; do
+        COMMAND_ARGS="${COMMAND_ARGS} -- $1"
+        shift
+      done
+      ;;
+    *)
+      echo "$USAGE"
+      exit 1
+      ;;
   esac
   shift
 done
@@ -66,7 +74,6 @@ if [[ $STOP_CONTAINERS -eq 1 ]]; then
   docker compose down
   exit 0
 fi
-
 
 echo "Starting Docker containers"
 moveToTestDir
