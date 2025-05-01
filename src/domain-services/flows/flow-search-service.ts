@@ -294,7 +294,7 @@ export class FlowSearchService {
 
     return {
       flows: items,
-      hasNextPage: hasNextPage,
+      hasNextPage,
       hasPreviousPage: page > 0,
       page,
       pageSize: flows.length,

@@ -14,18 +14,22 @@ MODE=""
 
 while [ "$1" != "" ]; do
   case $1 in
-    prod )          shift
-                    MODE='prod'
-                    ;;
-    ci )            shift
-                    MODE='ci'
-                    ;;
-    dev )           shift
-                    MODE='dev'
-                    ;;
-    -h | --help )   echo "$USAGE"
-                    exit
-                    ;;
+    prod)
+      shift
+      MODE='prod'
+      ;;
+    ci)
+      shift
+      MODE='ci'
+      ;;
+    dev)
+      shift
+      MODE='dev'
+      ;;
+    -h | --help)
+      echo "$USAGE"
+      exit
+      ;;
   esac
 done
 
