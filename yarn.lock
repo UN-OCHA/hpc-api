@@ -1580,10 +1580,10 @@
     "@typescript-eslint/types" "8.29.0"
     eslint-visitor-keys "^4.2.0"
 
-"@unocha/hpc-api-core@^13.0.0":
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-13.0.0.tgz#756d98fda0c4d20fe279e959e83e40584f953d92"
-  integrity sha512-VhRNY/GQbct6W0vKWoWx2jWnf9leR3jdkUs35Lmd1nm9ViHOIeAZaZkTe5fQTxg3juWc7OaNWWwCc5iehU26wg==
+"@unocha/hpc-api-core@^13.0.1":
+  version "13.0.1"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-13.0.1.tgz#38b64c97bcb06faaa1ab2a7ca40c3e9e00f0dbb7"
+  integrity sha512-UNL8Y2FE7vjcM6U5KAZh4VX0VYbESMMA8A1/P6eX9RTXH8kZrCxj8Wa+/f6QZClwZ/le9W1N+riEKUh1AomCfQ==
   dependencies:
     "@types/lodash" "^4.17.16"
     fp-ts "^2.14.0"
