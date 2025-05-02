@@ -14,14 +14,6 @@ updates:
     reviewers:
       - '@UN-OCHA/hpc-js-reviewers'
     groups:
-      bunyan:
-        applies-to: version-updates
-        patterns:
-          - '*bunyan'
-      pg:
-        applies-to: version-updates
-        patterns:
-          - '*pg'
       jest:
         applies-to: version-updates
         patterns:
