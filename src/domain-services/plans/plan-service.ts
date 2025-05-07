@@ -113,7 +113,7 @@ export class PlanService {
       name: planVersion.name,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),
-      direction: direction,
+      direction,
       startDate: planVersion.startDate.toISOString(),
       endDate: planVersion.endDate.toISOString(),
       comments: planVersion.comments,
