@@ -56,7 +56,7 @@ export class ExternalReferenceService {
       InstanceDataOfModel<Database['externalReference']>
     > = await models.externalReference.find({
       where: {
-        systemID: systemID,
+        systemID,
       },
       skipValidation: true,
     });

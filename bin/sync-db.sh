@@ -19,7 +19,7 @@ DISTANT_DUMP_NAME='latest.pg_restore'
 DISTANT_ENV='prod'
 KEEP_DB=0
 PASSWORD=''
-TIMESTAMP=`date +%Y-%m-%d.%H:%M:%S`
+TIMESTAMP=$(date +%Y-%m-%d.%H:%M:%S)
 USE_LOCAL_DUMP=0
 USERNAME=$USER
 
@@ -27,26 +27,34 @@ DB_DUMP="hpc-$DISTANT_ENV-$TIMESTAMP.sql"
 
 while [ "$1" != "" ]; do
   case $1 in
-    -u | --username )     shift
-                          USERNAME=$1
-                          ;;
-    -p | --password )     shift
-                          PASSWORD=$1
-                          ;;
-    -d | --dump-name )    shift
-                          DISTANT_DUMP_NAME=$1
-                          DB_DUMP=$1
-                          ;;
-    -e | --environment )  shift
-                          DISTANT_ENV=$1
-                          ;;
-    -l | --local )        USE_LOCAL_DUMP=1
-                          ;;
-    -h | --help )         echo "$usage"
-                          exit
-                          ;;
-    * )                   echo "$usage"
-                          exit 1
+    -u | --username)
+      shift
+      USERNAME=$1
+      ;;
+    -p | --password)
+      shift
+      PASSWORD=$1
+      ;;
+    -d | --dump-name)
+      shift
+      DISTANT_DUMP_NAME=$1
+      DB_DUMP=$1
+      ;;
+    -e | --environment)
+      shift
+      DISTANT_ENV=$1
+      ;;
+    -l | --local)
+      USE_LOCAL_DUMP=1
+      ;;
+    -h | --help)
+      echo "$usage"
+      exit
+      ;;
+    *)
+      echo "$usage"
+      exit 1
+      ;;
   esac
   shift
 done
@@ -57,7 +65,10 @@ if [ -z "${PG_CONTAINER}" ] || [ $(docker inspect -f {{.State.Running}} $PG_CONT
   exit 1
 fi
 
-SCRIPT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+SCRIPT_DIR=$(
+  cd "$(dirname "${BASH_SOURCE[0]}")"
+  pwd -P
+)
 BACKUP_PATH="backups/$DISTANT_ENV"
 BACKUP_DIR="$SCRIPT_DIR/../$BACKUP_PATH"
 
@@ -78,7 +89,7 @@ if [ $USE_LOCAL_DUMP -eq 0 ]; then
   fi
 
   if [ -z "${USERNAME}" ] || [ -z "${PASSWORD}" ]; then
-    echo "If not using -l flag, you must provide Sesame username and password to download the file, using -u and -p flags, respectively";
+    echo "If not using -l flag, you must provide Sesame username and password to download the file, using -u and -p flags, respectively"
     exit 1
   fi
 
@@ -99,7 +110,10 @@ if [ $USE_LOCAL_DUMP -eq 0 ]; then
   fi
 
   echo "Copying $DISTANT_ENV HPC DB snapsnot to local, using wget with token authentication"
-  wget --header="Authorization: Bearer ${TOKEN}" https://snapshots.aws.ahconu.org/hpc-sync/$DISTANT_ENV/$DISTANT_DUMP_NAME -O "$BACKUP_DIR/$DB_DUMP" || { echo 'Copying database from source failed' ; exit 1; }
+  wget --header="Authorization: Bearer ${TOKEN}" https://snapshots.aws.ahconu.org/hpc-sync/$DISTANT_ENV/$DISTANT_DUMP_NAME -O "$BACKUP_DIR/$DB_DUMP" || {
+    echo 'Copying database from source failed'
+    exit 1
+  }
   ln -sf "$BACKUP_DIR/$DB_DUMP" "$BACKUP_DIR/latest.pg_restore"
 else
   docker exec -it $PG_CONTAINER [ ! -e "/backups/$DISTANT_ENV/latest.pg_restore" ] && echo -e "There is no previous backup named \"latest.pg_restore\".\nPlease provide Sesame username and password to download latest $DISTANT_ENV snapshot." && exit 1
@@ -109,8 +123,8 @@ else
 fi
 
 echo "Ensure database $PG_DB_NAME exists"
-docker exec -i $PG_CONTAINER psql -U postgres -c "SELECT 1 FROM pg_database WHERE datname = '$PG_DB_NAME'" | \
-  grep -q 1 || docker exec -i $PG_CONTAINER psql -U postgres -c "CREATE DATABASE $PG_DB_NAME"
+docker exec -i $PG_CONTAINER psql -U postgres -c "SELECT 1 FROM pg_database WHERE datname = '$PG_DB_NAME'" \
+  | grep -q 1 || docker exec -i $PG_CONTAINER psql -U postgres -c "CREATE DATABASE $PG_DB_NAME"
 
 echo "Remove and recreate DB"
 docker exec -i $PG_CONTAINER psql -U postgres -c "\

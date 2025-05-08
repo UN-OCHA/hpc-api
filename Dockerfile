@@ -1,4 +1,4 @@
-FROM public.ecr.aws/unocha/nodejs:20-alpine
+FROM public.ecr.aws/unocha/nodejs:22-alpine
 
 ARG COMMIT_SHA
 ARG TREE_SHA
@@ -10,5 +10,5 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN npm run install-and-link prod && \
-  mv start_node /etc/services.d/node/run
+RUN npm run install-and-link prod \
+  && mv start_node /etc/services.d/node/run
