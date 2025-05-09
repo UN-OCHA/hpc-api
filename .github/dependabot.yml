@@ -11,8 +11,6 @@ updates:
       timezone: 'Europe/Zurich'
     open-pull-requests-limit: 10
     versioning-strategy: increase
-    reviewers:
-      - '@UN-OCHA/hpc-js-reviewers'
     groups:
       jest:
         applies-to: version-updates
@@ -32,5 +30,3 @@ updates:
       interval: 'monthly'
       time: '11:00'
       timezone: 'Europe/Zurich'
-    reviewers:
-      - '@UN-OCHA/hpc-js-reviewers'
