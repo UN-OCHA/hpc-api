@@ -386,7 +386,6 @@ export class FlowService {
     if (flowLinksParentsIDs.length === 0) {
       return null;
     }
-
     const parkedCategory = await models.category.findOne({
       where: {
         group: 'flowType',

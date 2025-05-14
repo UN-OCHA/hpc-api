@@ -223,8 +223,6 @@ export class FlowSearchService {
     ]);
 
     const promises = flows.map(async (flow) => {
-      const flowLink = getOrCreate(flowLinksMap, flow.id, () => []);
-
       // Categories Map follows the structure:
       // flowID: { versionID: [categories]}
       // So we need to get the categories for the flow version
@@ -247,16 +245,6 @@ export class FlowSearchService {
       }
 
       let parkedParentSource: FlowParkedParentSource | null = null;
-      const shouldLookAfterParentSource =
-        flowLink.length > 0 && shouldIncludeChildrenOfParkedFlows;
-
-      if (shouldLookAfterParentSource) {
-        parkedParentSource = await this.flowService.getParketParents(
-          flow,
-          flowLink,
-          models
-        );
-      }
 
       const childIDs: number[] =
         flowLinksMap
@@ -266,14 +254,23 @@ export class FlowSearchService {
           )
           .map((flowLink) => flowLink.childID.valueOf()) ?? [];
 
-      const parentIDs: number[] =
+      const parentLinks =
         flowLinksMap
           .get(flow.id)
           ?.filter(
             (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
-          )
-          .map((flowLink) => flowLink.parentID.valueOf()) ?? [];
+          ) ?? [];
+      const parentIDs: number[] = parentLinks.map((flowLink) =>
+        flowLink.parentID.valueOf()
+      );
 
+      if (shouldIncludeChildrenOfParkedFlows) {
+        parkedParentSource = await this.flowService.getParketParents(
+          flow,
+          parentLinks,
+          models
+        );
+      }
       const parsedFlow: Flow = this.buildFlowDTO(
         flow,
         categoriesByVersion,
