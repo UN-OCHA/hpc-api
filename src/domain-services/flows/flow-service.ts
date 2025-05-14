@@ -3,6 +3,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { splitIntoChunks } from '@unocha/hpc-api-core/src/util';
+import { PG_MAX_QUERY_PARAMS } from '@unocha/hpc-api-core/src/util/consts';
 import {
   createBrandedValue,
   getTableColumns,
@@ -25,7 +26,6 @@ import type {
   UniqueFlowEntity,
 } from './model';
 import { buildSearchFlowsConditions } from './strategy/impl/utils';
-
 @Service()
 export class FlowService {
   constructor(private readonly flowObjectService: FlowObjectService) {}
@@ -95,7 +95,6 @@ export class FlowService {
 
     const refDirection = orderBy.direction ?? 'source';
 
-    let flowObjects = [];
     let entityIDsSorted: number[] = [];
 
     switch (entity) {
@@ -329,34 +328,38 @@ export class FlowService {
       orderMap.set(entityID, index);
     }
 
-    const chunks = splitIntoChunks(entityIDsSorted, 1000);
     // Instead of doing a single query that may end up on a 'Memory Error'
     // we will do a progressive search
-    // by chunks of 1000
-    for (const chunk of chunks) {
-      const flowObjectsBatch = await database.flowObject.find({
-        where: {
-          objectType: entityCondKeyFlowObjectType,
-          refDirection,
-          objectID: {
-            [Op.IN]: chunk,
-          },
-        },
-        distinct: ['flowID', 'versionID'],
-      });
-      flowObjects.push(...flowObjectsBatch);
-    }
+    // by chunks of PG_MAX_QUERY_PARAMS - 2 => ( (2 ** 16 - 1) - 2 = 65533 )
+    const flowObjects = (
+      await Promise.all(
+        splitIntoChunks(entityIDsSorted, PG_MAX_QUERY_PARAMS - 2).map(
+          (entityIds) =>
+            database.flowObject.find({
+              where: {
+                objectType: entityCondKeyFlowObjectType,
+                refDirection,
+                objectID: {
+                  [Op.IN]: entityIds,
+                },
+              },
+              distinct: ['flowID', 'versionID'],
+            })
+        )
+      )
+    ).flat();
+
     // Then, we need to filter the results from the flowObject table
     // using the planVersions list as sorted reference
     // this is because we cannot apply the order of a given list
     // to the query directly
-    flowObjects = flowObjects
+    const sortedFlowObjects = flowObjects
       .map((flowObject) => ({
         ...flowObject,
-        sortingKey: orderMap.get(flowObject.objectID.valueOf()),
+        sortingKey: orderMap.get(flowObject.objectID),
       }))
-      .sort((a, b) => (a.sortingKey ?? 0) - (b.sortingKey ?? 0));
-    return this.mapFlowsToUniqueFlowEntities(flowObjects);
+      .toSorted((a, b) => (a.sortingKey ?? 0) - (b.sortingKey ?? 0));
+    return this.mapFlowsToUniqueFlowEntities(sortedFlowObjects);
   }
 
   private mapFlowsToUniqueFlowEntities(
@@ -371,7 +374,7 @@ export class FlowService {
     );
   }
 
-  async getParketParents(
+  async getParkedParents(
     flow: FlowInstance,
     flowLinkArray: Array<InstanceOfModel<Database['flowLink']>>,
     models: Database
@@ -486,7 +489,7 @@ export class FlowService {
     });
 
     // Build list of parent IDs from categoryRefs
-    const parentIDs = categoryRefs.map((ref) =>
+    const parentIDs: FlowId[] = categoryRefs.map((ref) =>
       createBrandedValue(ref.objectID)
     );
 
@@ -501,7 +504,7 @@ export class FlowService {
 
     // Create a reference list of parent flows from the flow links
     const parentFlowsRef: UniqueFlowEntity[] = flowLinks.map((flowLink) => ({
-      id: createBrandedValue(flowLink.parentID),
+      id: flowLink.parentID,
       versionID: null,
     }));
 
@@ -509,7 +512,7 @@ export class FlowService {
     const parentFlows = await this.progresiveSearch(
       models,
       parentFlowsRef,
-      1000,
+      PG_MAX_QUERY_PARAMS - 2, // Use a batch size of PG_MAX_QUERY_PARAMS - 2 to avoid hitting the limit
       0,
       false, // Do not stop on batch size
       [],
@@ -524,7 +527,7 @@ export class FlowService {
       flowObjectsWhere
     );
 
-    // 6. Build a Set for flowObjects for fast lookup\n  (using a composite key of id and versionID)\n
+    // 6. Build a Set for flowObjects for fast lookup (using a composite key of id and versionID)
     const flowObjectsSet = new Set(
       flowObjects.map(
         (flowObject) => `${flowObject.id}|${flowObject.versionID}`
@@ -553,16 +556,15 @@ export class FlowService {
     // 10. Retrieve child flows
     const childFlows = await models.flow.find({
       where: {
-        deletedAt: null,
         activeStatus: true,
-        id: { [Op.IN]: [...childFlowsIDsSet] },
+        id: { [Op.IN]: childFlowsIDsSet },
       },
       distinct: ['id', 'versionID'],
     });
 
     // 11. Map child flows to UniqueFlowEntity and return the result
     const result = childFlows.map((ref) => ({
-      id: createBrandedValue(ref.id),
+      id: ref.id,
       versionID: ref.versionID,
     }));
 

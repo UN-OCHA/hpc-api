@@ -38,11 +38,11 @@ export class FlowLinkService {
 
     // Initialize the map with empty arrays for each flowId
     const flowLinksMap = new Map<
-      number,
+      FlowId,
       Array<InstanceOfModel<Database['flowLink']>>
     >();
 
-    // Group flow links by parentID in one pass
+    // Group flow links by `parentID` and `childID` in one pass
     for (const link of flowLinks) {
       const childFlowLink = getOrCreate(flowLinksMap, link.childID, () => []);
       const parentFlowLink = getOrCreate(flowLinksMap, link.parentID, () => []);

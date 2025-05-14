@@ -246,13 +246,13 @@ export class FlowSearchService {
 
       let parkedParentSource: FlowParkedParentSource | null = null;
 
-      const childIDs: number[] =
+      const childIDs: FlowId[] =
         flowLinksMap
           .get(flow.id)
           ?.filter(
             (flowLink) => flowLink.parentID === flow.id && flowLink.depth > 0
           )
-          .map((flowLink) => flowLink.childID.valueOf()) ?? [];
+          .map((flowLink) => flowLink.childID) ?? [];
 
       const parentLinks =
         flowLinksMap
@@ -260,12 +260,12 @@ export class FlowSearchService {
           ?.filter(
             (flowLink) => flowLink.childID === flow.id && flowLink.depth > 0
           ) ?? [];
-      const parentIDs: number[] = parentLinks.map((flowLink) =>
-        flowLink.parentID.valueOf()
+      const parentIDs: FlowId[] = parentLinks.map(
+        (flowLink) => flowLink.parentID
       );
 
       if (shouldIncludeChildrenOfParkedFlows) {
-        parkedParentSource = await this.flowService.getParketParents(
+        parkedParentSource = await this.flowService.getParkedParents(
           flow,
           parentLinks,
           models
