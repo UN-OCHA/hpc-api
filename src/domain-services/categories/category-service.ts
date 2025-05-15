@@ -110,7 +110,6 @@ export class CategoryService {
       description: category.description ?? '',
       parentID: category.parentID ? category.parentID.valueOf() : null,
       code: category.code ?? '',
-      includeTotals: category.includeTotals ?? false,
       categoryRef: {
         objectID: categoryRef.objectID.valueOf(),
         versionID: categoryRef.versionID,

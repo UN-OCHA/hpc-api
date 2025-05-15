@@ -1580,17 +1580,17 @@
     "@typescript-eslint/types" "8.29.0"
     eslint-visitor-keys "^4.2.0"
 
-"@unocha/hpc-api-core@^13.0.1":
-  version "13.0.1"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-13.0.1.tgz#38b64c97bcb06faaa1ab2a7ca40c3e9e00f0dbb7"
-  integrity sha512-UNL8Y2FE7vjcM6U5KAZh4VX0VYbESMMA8A1/P6eX9RTXH8kZrCxj8Wa+/f6QZClwZ/le9W1N+riEKUh1AomCfQ==
+"@unocha/hpc-api-core@^14.1.0":
+  version "14.1.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.1.0.tgz#41d5de40cb210b549000dc30f86ac6a73c7cabd5"
+  integrity sha512-frW1CQKM5d5YKeXSSYQ1q1sk10wm3PxK8njc4bt9G/A7k7efKIxo7PjsITg0wvhCMBCoV6JIvdpMlkMFdvjnIA==
   dependencies:
     "@types/lodash" "^4.17.16"
     fp-ts "^2.14.0"
     io-ts "2.2.20"
     knex "3.1.0"
     lodash "^4.17.21"
-    pg "^8.14.1"
+    pg "^8.15.6"
     ts-node "^10.9.2"
 
 "@unocha/hpc-repo-tools@^7.0.0":
@@ -4309,7 +4309,7 @@ pg-types@^4.0.1:
     postgres-interval "^3.0.0"
     postgres-range "^1.1.1"
 
-pg@^8.14.1, pg@^8.16.0:
+pg@^8.15.6, pg@^8.16.0:
   version "8.16.0"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.16.0.tgz#40b08eedb5eb1834252cf3e3629503e32e6c6c04"
   integrity sha512-7SKfdvP8CTNXjMUzfcVTaI+TDzBEeaUnVwiVGZQD1Hh33Kpev7liQba9uLd4CfN8r9mCVsD0JIpq03+Unpz+kg==
