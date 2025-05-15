@@ -11,4 +11,4 @@ WORKDIR /var/www/html
 COPY . .
 
 RUN npm run install-and-link prod \
-  && mv start_node /etc/services.d/node/run
+ && mv start_node /etc/services.d/node/run
