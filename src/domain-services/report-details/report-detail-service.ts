@@ -82,9 +82,10 @@ export class ReportDetailService {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
-          refCode: reporterRefCode,
+          refCode: { [models.Op.ILIKE]: `%${reporterRefCode}%` },
         },
         skipValidation: true,
+        distinct: ['flowID', 'versionID'],
       });
 
     const flowIDs: UniqueFlowEntity[] = [];
