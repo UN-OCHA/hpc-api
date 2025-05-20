@@ -11,7 +11,6 @@ import { GetFlowIdsFromCategoryConditionsStrategyImpl } from './get-flowIds-flow
 import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-from-nested-flow-filters-strategy-impl';
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
-  defaultFlowOrderBy,
   defaultSearchFlowFilter,
   intersectUniqueFlowEntities,
   mapFlowFiltersToFlowObjectFiltersGrouped,
@@ -45,46 +44,18 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       shouldIncludeChildrenOfParkedFlows,
     } = args;
 
-    // First, we need to check if we need to sort by a certain entity
+    // We need to check if we need to sort by a certain entity
     // and if so, we need to map the orderBy to be from that entity
     // obtain the entities relation to the flow
     // to be able to sort the flows using the entity
     const isSortByEntity = orderBy && orderBy.entity !== 'flow';
-    const sortByFlowIDs: UniqueFlowEntity[] = [];
+    let sortByFlowIDs: UniqueFlowEntity[] = [];
     const orderByForFlow = mapFlowOrderBy(orderBy);
-
-    if (isSortByEntity) {
-      // Get the flowIDs using the orderBy entity
-      const flowIDsFromSortingEntity: UniqueFlowEntity[] =
-        await this.flowService.getFlowIDsFromEntity(models, orderBy);
-      // Since there can be many flowIDs returned
-      // This can cause 'Maximum call stack size exceeded' error
-      // When using the spread operator - a workaround is to use push fot each element
-      // also, we need to map the FlowEntity to UniqueFlowEntity
-      for (const uniqueFlow of flowIDsFromSortingEntity) {
-        sortByFlowIDs.push(uniqueFlow);
-      }
-    } else {
-      // In this case we fetch the list of flows from the database
-      // using the orderBy
-      const flowsToSort: UniqueFlowEntity[] = await this.flowService.getFlows({
-        models,
-        orderBy: orderByForFlow,
-      });
-
-      // Since there can be many flowIDs returned
-      // This can cause 'Maximum call stack size exceeded' error
-      // When using the spread operator - a workaround is to use push fot each element
-      // also, we need to map the FlowEntity to UniqueFlowEntity
-      for (const flow of flowsToSort) {
-        sortByFlowIDs.push(flow);
-      }
-    }
 
     // We need to fetch the flowIDs by the nestedFlowFilters
     // if there are any
     const isFilterByNestedFilters = nestedFlowFilters !== undefined;
-    const flowIDsFromNestedFlowFilters: UniqueFlowEntity[] = [];
+    let flowIDsFromNestedFlowFilters: UniqueFlowEntity[] = [];
 
     if (isFilterByNestedFilters) {
       const { flows }: FlowIdSearchStrategyResponse =
@@ -97,12 +68,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       if (flows.length === 0) {
         return { flows: [], count: 0 };
       }
-      // Since there can be many flowIDs returned
-      // This can cause 'Maximum call stack size exceeded' error
-      // When using the spread operator - a workaround is to use push fot each element
-      for (const flow of flows) {
-        flowIDsFromNestedFlowFilters.push(flow);
-      }
+      flowIDsFromNestedFlowFilters = flows;
     }
 
     // Now we need to check if we need to filter by category
@@ -114,7 +80,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const isFilterByCategory =
       isSearchByCategoryShotcut || flowCategoryFilters?.length > 0;
 
-    const flowsFromCategoryFilters: UniqueFlowEntity[] = [];
+    let flowsFromCategoryFilters: UniqueFlowEntity[] = [];
 
     if (isFilterByCategory) {
       const { flows }: FlowIdSearchStrategyResponse =
@@ -129,19 +95,14 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         return { flows: [], count: 0 };
       }
 
-      // Since there can be many flowIDs returned
-      // This can cause 'Maximum call stack size exceeded' error
-      // When using the spread operator - a workaround is to use push fot each element
-      for (const flow of flows) {
-        flowsFromCategoryFilters.push(flow);
-      }
+      flowsFromCategoryFilters = flows;
     }
 
     // After that, if we need to filter by flowObjects
     // Obtain the flowIDs from the flowObjects
     const isFilterByFlowObjects = flowObjectFilters?.length > 0;
 
-    const flowsFromObjectFilters: UniqueFlowEntity[] = [];
+    let flowsFromObjectFilters: UniqueFlowEntity[] = [];
     if (isFilterByFlowObjects) {
       // Firts step is to map the filters to the FlowObjectFiltersGrouped
       // To allow doing inclusive filtering between filters of the same type+direction
@@ -160,12 +121,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         return { flows: [], count: 0 };
       }
 
-      // Since there can be many flowIDs returned
-      // This can cause 'Maximum call stack size exceeded' error
-      // When using the spread operator - a workaround is to use push fot each element
-      for (const flow of flows) {
-        flowsFromObjectFilters.push(flow);
-      }
+      flowsFromObjectFilters = flows;
 
       // If 'includeChildrenOfParkedFlows' is defined and true
       // we need to obtain the flowIDs from the childs whose parent flows are parked
@@ -189,7 +145,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const isFilterByFlow = flowFilters !== undefined;
     const isFilterByFlowStatus = statusFilter !== undefined;
 
-    const flowsFromFlowFilters: UniqueFlowEntity[] = [];
+    let flowsFromFlowFilters: UniqueFlowEntity[] = [];
     if (isFilterByFlow || isFilterByFlowStatus) {
       let flowConditions: FlowWhere = prepareFlowConditions(flowFilters);
       // Add status filter conditions if provided
@@ -198,14 +154,9 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         statusFilter
       );
 
-      const orderByForFlowFilter = isSortByEntity
-        ? defaultFlowOrderBy()
-        : orderByForFlow;
-
       const flows: UniqueFlowEntity[] = await this.flowService.getFlows({
         models,
         conditions: flowConditions,
-        orderBy: orderByForFlowFilter,
       });
 
       // If after this filter we have no flows, we can return an empty array
@@ -213,13 +164,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         return { flows: [], count: 0 };
       }
 
-      // Since there can be many flowIDs returned
-      // This can cause 'Maximum call stack size exceeded' error
-      // When using the spread operator - a workaround is to use push fot each element
-      // also, we need to map the FlowEntity to UniqueFlowEntity
-      for (const flow of flows) {
-        flowsFromFlowFilters.push(flow);
-      }
+      flowsFromFlowFilters = flows;
     }
 
     // We need to intersect the flowIDs from the flowObjects, flowCategoryFilters and flowFilters
@@ -233,6 +178,30 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     if (deduplicatedFlows.length === 0) {
       return { flows: [], count: 0 };
+    }
+
+    // Fetch sorted flow IDs only for the filtered subset instead of the whole table
+    if (isSortByEntity) {
+      // Get entity-sorted IDs then intersect with filtered subset
+      const allEntitySorted = await this.flowService.getFlowIDsFromEntity(
+        models,
+        orderBy
+      );
+      sortByFlowIDs = intersectUniqueFlowEntities(
+        allEntitySorted,
+        deduplicatedFlows
+      );
+    } else {
+      // Let the DB sort only the filtered IDs
+      sortByFlowIDs = await this.flowService.getFlows({
+        models,
+        conditions: {
+          [models.Cond.OR]: deduplicatedFlows.map((f) => ({
+            [models.Cond.AND]: [{ id: f.id }, { versionID: f.versionID ?? 1 }],
+          })),
+        },
+        orderBy: orderByForFlow,
+      });
     }
 
     // We are going to sort the deduplicated flows
