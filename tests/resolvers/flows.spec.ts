@@ -88,7 +88,6 @@ function buildFullQuery(
           description
           parentID
           code
-          includeTotals
           categoryRef {
             objectID
             versionID

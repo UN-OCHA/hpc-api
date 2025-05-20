@@ -36,9 +36,6 @@ export class Category extends BaseType {
   @Field({ nullable: true })
   code: string;
 
-  @Field({ nullable: true })
-  includeTotals: boolean;
-
   @Field(() => CategoryRef, { nullable: true })
   categoryRef: CategoryRef;
 
