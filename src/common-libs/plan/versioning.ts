@@ -155,7 +155,7 @@ const updateBaseAndVersionModelTags = async (
     }
   }
 
-  for (const [versionTagsString, rowIds] of activeRows.entries()) {
+  for (const [versionTagsString, rowIds] of activeRows) {
     const versionTags =
       versionTagsString === '' ? [] : versionTagsString.split(',');
 
@@ -231,7 +231,7 @@ const updateBaseAndVersionModelTags = async (
     idSet.add(latestVersion.id);
   }
 
-  for (const [versionTagsString, rowIds] of versionTagsMap.entries()) {
+  for (const [versionTagsString, rowIds] of versionTagsMap) {
     const versionTags =
       versionTagsString === '' ? [] : versionTagsString.split(',');
 
