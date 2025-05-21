@@ -3,6 +3,7 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import type { InstanceDataOf } from '@unocha/hpc-api-core/src/db/util/model-definition';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
+import { objectEntries } from '@unocha/hpc-api-core/src/util';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import type * as t from 'io-ts';
 import { type OrderBy } from '../../../../utils/database-types';
@@ -179,12 +180,17 @@ export const prepareFlowConditions = (
 ): FlowWhere => {
   let flowConditions: FlowWhere = { ...defaultSearchFlowFilter };
 
+  // Cannot be undefined according to type
   if (flowFilters) {
-    for (const [key, value] of Object.entries(flowFilters)) {
+    for (const [key, value] of objectEntries(flowFilters)) {
+      // Cannot be undefined according to type
       if (value !== undefined) {
         if (key === 'id') {
-          const brandedIDs = value.map((id: number) => createBrandedValue(id));
-          flowConditions[key] = { [Op.IN]: brandedIDs };
+          // If `key` is `'id'`, then we know the type of this (`FlowId[] | null`)
+          const flowIds = value as SearchFlowsFilters['id'];
+          // @ts-ignore
+          // Type error, can be `null`
+          flowConditions[key] = { [Op.IN]: flowIds };
         } else {
           const typedKey = key as keyof FlowWhere;
           flowConditions = { ...flowConditions, [typedKey]: value };
@@ -193,7 +199,8 @@ export const prepareFlowConditions = (
     }
   }
 
-  return flowConditions satisfies FlowWhere;
+  // It's of type `FlowWhere` already. No need for `satisfies`, return type of function does type-checking already
+  return flowConditions;
 };
 
 export const mergeUniqueEntities = (
