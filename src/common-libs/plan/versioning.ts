@@ -151,7 +151,7 @@ const updateBaseAndVersionModelTags = async (
       }
       idSet.add(baseRow.id);
     } else {
-      inactiveRows.push(createBrandedValue(baseRow.id));
+      inactiveRows.push(baseRow.id);
     }
   }
 
@@ -329,7 +329,7 @@ const updateBaseModelTags = async (
         },
       });
     } else {
-      inactiveRows.push(createBrandedValue(baseRow.id));
+      inactiveRows.push(baseRow.id);
     }
   }
 

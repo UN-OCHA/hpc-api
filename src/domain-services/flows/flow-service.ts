@@ -376,7 +376,7 @@ export class FlowService {
       },
     });
 
-    const parentFlows: number[] = [];
+    const parentFlows: FlowId[] = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
       const parkedParentCategoryRef = await models.categoryRef.find({
@@ -399,7 +399,7 @@ export class FlowService {
       const parkedParentOrganizationFlowObject =
         await models.flowObject.findOne({
           where: {
-            flowID: createBrandedValue(parentFlow),
+            flowID: parentFlow,
             objectType: 'organization',
             refDirection: 'source',
             versionID: flow.versionID,
@@ -482,7 +482,7 @@ export class FlowService {
     });
 
     const parentFlowsRef: UniqueFlowEntity[] = flowLinks.map((flowLink) => ({
-      id: createBrandedValue(flowLink.parentID),
+      id: flowLink.parentID,
       versionID: null,
     }));
 
@@ -549,7 +549,7 @@ export class FlowService {
     // using the flowObjectFilters
     // This search needs to be also done by chunks
     return childFlows.map((ref) => ({
-      id: createBrandedValue(ref.id),
+      id: ref.id,
       versionID: ref.versionID,
     }));
   }
