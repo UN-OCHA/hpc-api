@@ -67,14 +67,9 @@ export class CategoryService {
         () => new Map<number, Category[]>()
       );
 
-      const flowVersion = catRef.versionID;
-      if (!flowVersionMap.has(flowVersion)) {
-        flowVersionMap.set(flowVersion, []);
-      }
-
       const categoriesPerFlowVersion = getOrCreate(
         flowVersionMap,
-        flowVersion,
+        catRef.versionID,
         () => []
       );
 
