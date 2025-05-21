@@ -8,6 +8,7 @@ import {
 } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type ReportDetail } from '../report-details/graphql/types';
 import { type Category } from './graphql/types';
@@ -26,13 +27,13 @@ export class CategoryService {
   async getCategoriesForFlows(
     flowWithVersion: Map<FlowId, number[]>,
     models: Database
-  ): Promise<Map<number, Map<number, Category[]>>> {
+  ): Promise<Map<FlowId, Map<number, Category[]>>> {
     // Group of flowIDs and its versions
     // Structure:
     // flowID: {
     //   versionID: [categories]
     // }
-    const flowVersionCategoryMap = new Map<number, Map<number, Category[]>>();
+    const flowVersionCategoryMap = new Map<FlowId, Map<number, Category[]>>();
 
     const categoriesRef = await models.categoryRef.find({
       where: {
@@ -53,7 +54,7 @@ export class CategoryService {
 
     // Populate the map with categories for each flow
     for (const catRef of categoriesRef) {
-      const flowId = catRef.objectID;
+      const flowId: FlowId = createBrandedValue(catRef.objectID);
 
       if (!flowVersionCategoryMap.has(flowId)) {
         flowVersionCategoryMap.set(flowId, new Map());
