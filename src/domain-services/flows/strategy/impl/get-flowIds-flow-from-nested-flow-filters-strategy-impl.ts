@@ -17,7 +17,7 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
   constructor(
     private readonly reportDetailService: ReportDetailService,
     private readonly legacyService: LegacyService,
-    private readonly externalRefenceService: ExternalReferenceService,
+    private readonly externalReferenceService: ExternalReferenceService,
     private readonly flowService: FlowService
   ) {}
 
@@ -49,10 +49,10 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
         );
     }
 
-    // Get the flowIDs using 'systemID' from 'externalRefecence'
+    // Get the flowIDs using 'systemID' from 'externalReference'
     if (nestedFlowFilters?.systemID) {
       flowsSystemId =
-        await this.externalRefenceService.getUniqueFlowIDsBySystemID(
+        await this.externalReferenceService.getUniqueFlowIDsBySystemID(
           models,
           nestedFlowFilters.systemID
         );

@@ -5,7 +5,7 @@ import { type FlowObjectFilterGrouped } from './model';
 /**
  *  This alg iterates over the flowObjectFilters and creates a join for each flowObjectType
  *  and refDirection allowing to filter the flowObjects by the flowObjectType and refDirection
- * inclusivelly for each
+ * inclusively for each
  * @param flowObjectFiltersGrouped
  * @returns FlowObjectWhere
  */
