@@ -1,3 +1,4 @@
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
@@ -53,7 +54,7 @@ export class PlanService {
   async getPlansForFlows(
     plansFO: Array<InstanceDataOfModel<Database['flowObject']>>,
     models: Database
-  ): Promise<Map<number, BasePlan[]>> {
+  ): Promise<Map<FlowId, BasePlan[]>> {
     const planObjectsIDs: PlanId[] = plansFO.map((planFO) =>
       createBrandedValue(planFO.objectID)
     );
@@ -66,7 +67,7 @@ export class PlanService {
         },
       });
 
-    const plansMap = new Map<number, BasePlan[]>();
+    const plansMap = new Map<FlowId, BasePlan[]>();
 
     for (const plan of plans) {
       const planVersion = await models.planVersion.find({

@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import type { CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import {
   Cond,
@@ -136,7 +137,10 @@ export class CategoryService {
       },
     });
 
-    const mapOfCategoriesAndReportDetails = new Map<number, ReportDetail[]>();
+    const mapOfCategoriesAndReportDetails = new Map<
+      CategoryId,
+      ReportDetail[]
+    >();
 
     for (const categoryRef of categoriesRef) {
       const reportDetail = reportDetails.find(

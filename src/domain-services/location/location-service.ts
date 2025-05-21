@@ -1,3 +1,4 @@
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { type LocationId } from '@unocha/hpc-api-core/src/db/models/location';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
@@ -34,7 +35,7 @@ export class LocationService {
   async getLocationsForFlows(
     locationsFO: Array<InstanceDataOfModel<Database['flowObject']>>,
     models: Database
-  ): Promise<Map<number, BaseLocationWithDirection[]>> {
+  ): Promise<Map<FlowId, BaseLocationWithDirection[]>> {
     const locationObjectsIDs: LocationId[] = locationsFO.map((locFO) =>
       createBrandedValue(locFO.objectID)
     );
@@ -48,7 +49,7 @@ export class LocationService {
         },
       });
 
-    const locationsMap = new Map<number, BaseLocationWithDirection[]>();
+    const locationsMap = new Map<FlowId, BaseLocationWithDirection[]>();
 
     for (const locFO of locationsFO) {
       const flowId = locFO.flowID;

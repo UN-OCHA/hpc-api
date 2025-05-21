@@ -20,7 +20,7 @@ export class ExternalReferenceService {
       skipValidation: true,
     });
 
-    const externalReferencesMap = new Map<number, FlowExternalReference[]>();
+    const externalReferencesMap = new Map<FlowId, FlowExternalReference[]>();
 
     // First we add all flowIDs to the map
     // Since there might be flows without external references

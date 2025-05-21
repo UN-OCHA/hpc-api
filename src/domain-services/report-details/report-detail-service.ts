@@ -12,7 +12,7 @@ export class ReportDetailService {
   async getReportDetailsForFlows(
     flowIds: FlowId[],
     models: Database
-  ): Promise<Map<number, ReportDetail[]>> {
+  ): Promise<Map<FlowId, ReportDetail[]>> {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
@@ -23,7 +23,7 @@ export class ReportDetailService {
         skipValidation: true,
       });
 
-    const reportDetailsMap = new Map<number, ReportDetail[]>();
+    const reportDetailsMap = new Map<FlowId, ReportDetail[]>();
 
     for (const flowId of flowIds) {
       if (!reportDetailsMap.has(flowId)) {
