@@ -13,8 +13,8 @@ export function buildWhereConditionsForFlowObjectFilters(
   flowObjectFiltersGrouped: FlowObjectFilterGrouped
 ): FlowObjectWhere {
   const ANDConditions = [];
-  for (const [flowObjectType, group] of flowObjectFiltersGrouped.entries()) {
-    for (const [direction, ids] of group.entries()) {
+  for (const [flowObjectType, group] of flowObjectFiltersGrouped) {
+    for (const [direction, ids] of group) {
       const condition = {
         [Cond.AND]: [
           {

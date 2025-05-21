@@ -24,8 +24,8 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
 
     let intersectedFlows: Set<string> = new Set<string>();
 
-    for (const [flowObjectType, group] of flowObjectFilterGrouped.entries()) {
-      for (const [direction, ids] of group.entries()) {
+    for (const [flowObjectType, group] of flowObjectFilterGrouped) {
+      for (const [direction, ids] of group) {
         const condition = {
           objectType: flowObjectType,
           refDirection: direction,

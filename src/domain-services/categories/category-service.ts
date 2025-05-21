@@ -171,10 +171,7 @@ export class CategoryService {
       },
     });
 
-    for (const [
-      category,
-      reportDetails,
-    ] of mapOfCategoriesAndReportDetails.entries()) {
+    for (const [category, reportDetails] of mapOfCategoriesAndReportDetails) {
       const categoryObj = categories.find((cat) => cat.id === category);
 
       if (!categoryObj) {
