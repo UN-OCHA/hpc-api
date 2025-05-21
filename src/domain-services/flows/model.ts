@@ -8,11 +8,13 @@ import type {
 } from '@unocha/hpc-api-core/src/db/util/types';
 import { type SortOrder } from '../../utils/graphql/pagination';
 import { type EntityDirection } from '../base-types';
+import { type FlowObjectType } from '../flow-object/model';
 
 export type FlowModel = Database['flow'];
 export type FlowInstance = InstanceOfModel<FlowModel>;
 export type FlowWhere = Condition<FlowInstance>;
 export type FlowFieldsDefinition = FieldsOfModel<FlowModel>;
+export type FlowKeys = Extract<keyof FlowInstance, string>;
 export type FlowOrderByCond = OrderByCond<FlowFieldsDefinition>; // Can this be simplified somehow?
 export type UniqueFlowEntity = {
   id: FlowId;
@@ -20,10 +22,20 @@ export type UniqueFlowEntity = {
 };
 
 export type FlowOrderByWithSubEntity = {
-  column: keyof FlowInstance | string;
+  column:
+    | keyof FlowInstance
+    | keyof InstanceOfModel<Database['emergency']>
+    | keyof InstanceOfModel<Database['globalCluster']>
+    | keyof InstanceOfModel<Database['governingEntity']>
+    | keyof InstanceOfModel<Database['location']>
+    | keyof InstanceOfModel<Database['plan']>
+    | keyof InstanceOfModel<Database['planVersion']>
+    | keyof InstanceOfModel<Database['project']>
+    | keyof InstanceOfModel<Database['organization']>
+    | keyof InstanceOfModel<Database['usageYear']>;
   order: SortOrder;
-  entity: string;
-  subEntity?: string;
+  entity: 'flow' | 'externalReference';
+  subEntity?: FlowObjectType | 'planVersion';
   direction?: EntityDirection;
 };
 

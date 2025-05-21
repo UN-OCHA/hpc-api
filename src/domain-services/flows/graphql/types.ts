@@ -8,6 +8,7 @@ import { Organization } from '../../organizations/graphql/types';
 import { BasePlan } from '../../plans/graphql/types';
 import { ReportDetail } from '../../report-details/graphql/types';
 import { UsageYear } from '../../usage-years/graphql/types';
+import { FlowKeys } from '../model';
 
 @ObjectType()
 export class FlowExternalReference {
@@ -176,26 +177,6 @@ export class FlowSearchResultNonPaginated {
   flowsCount: number;
 }
 
-export type FlowSortField =
-  | 'flow.id'
-  | 'flow.versionID'
-  | 'flow.amountUSD'
-  | 'flow.updatedAt'
-  | 'flow.activeStatus'
-  | 'flow.restricted'
-  | 'flow.newMoney'
-  | 'flow.flowDate'
-  | 'flow.decisionDate'
-  | 'flow.firstReportedDate'
-  | 'flow.budgetYear'
-  | 'flow.origAmount'
-  | 'flow.origCurrency'
-  | 'flow.exchangeRate'
-  | 'flow.description'
-  | 'flow.notes'
-  | 'flow.versionStartDate'
-  | 'flow.versionEndDate'
-  | 'flow.createdAt'
-  | 'flow.deletedAt';
+export type FlowSortField = `flow.${FlowKeys}`
 
 export type FlowStatusFilter = 'new' | 'updated' | undefined;

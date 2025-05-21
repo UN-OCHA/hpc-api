@@ -96,7 +96,7 @@ export class FlowService {
     const refDirection = orderBy.direction ?? 'source';
 
     let entityIDsSorted: number[] = [];
-
+    let entityCondKeyFlowObjectType: FlowObjectType;
     switch (entity) {
       case 'emergency': {
         columns = getTableColumns(database.emergency);
@@ -119,6 +119,7 @@ export class FlowService {
         });
 
         entityIDsSorted = emergencies.map((emergency) => emergency.id);
+        entityCondKeyFlowObjectType = 'emergency' satisfies FlowObjectType;
         break;
       }
       case 'globalCluster': {
@@ -143,6 +144,8 @@ export class FlowService {
         entityIDsSorted = globalClusters.map(
           (globalCluster) => globalCluster.id
         );
+        entityCondKeyFlowObjectType = 'globalCluster' satisfies FlowObjectType;
+
         break;
       }
       case 'governingEntity': {
@@ -167,6 +170,9 @@ export class FlowService {
         entityIDsSorted = governingEntities.map(
           (governingEntity) => governingEntity.id
         );
+        entityCondKeyFlowObjectType =
+          'governingEntity' satisfies FlowObjectType;
+
         break;
       }
       case 'location': {
@@ -189,6 +195,8 @@ export class FlowService {
         });
 
         entityIDsSorted = locations.map((location) => location.id);
+        entityCondKeyFlowObjectType = 'location' satisfies FlowObjectType;
+
         break;
       }
       case 'organization': {
@@ -211,6 +219,8 @@ export class FlowService {
         });
 
         entityIDsSorted = organizations.map((organization) => organization.id);
+        entityCondKeyFlowObjectType = 'organization' satisfies FlowObjectType;
+
         break;
       }
       case 'plan': {
@@ -233,6 +243,8 @@ export class FlowService {
         });
 
         entityIDsSorted = plans.map((plan) => plan.id);
+        entityCondKeyFlowObjectType = 'plan' satisfies FlowObjectType;
+
         break;
       }
       case 'project': {
@@ -255,6 +267,8 @@ export class FlowService {
         });
 
         entityIDsSorted = projects.map((project) => project.id);
+        entityCondKeyFlowObjectType = 'project' satisfies FlowObjectType;
+
         break;
       }
       case 'usageYear': {
@@ -277,6 +291,8 @@ export class FlowService {
         });
 
         entityIDsSorted = usageYears.map((usageYear) => usageYear.id);
+        entityCondKeyFlowObjectType = 'usageYear' satisfies FlowObjectType;
+
         break;
       }
       case 'planVersion': {
@@ -304,6 +320,8 @@ export class FlowService {
         });
 
         entityIDsSorted = planVersions.map((planVersion) => planVersion.planId);
+        entityCondKeyFlowObjectType = 'plan' satisfies FlowObjectType;
+
         break;
       }
       default: {
@@ -313,8 +331,6 @@ export class FlowService {
 
     // After getting the sorted entityID list
     // we can now get the flowObjects
-    const entityCondKey = orderBy.entity as unknown;
-    const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
 
     // Order map
     const orderMap = new Map<number, number>();
