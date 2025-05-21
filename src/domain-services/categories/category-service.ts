@@ -33,15 +33,10 @@ export class CategoryService {
     // }
     const flowVersionCategoryMap = new Map<number, Map<number, Category[]>>();
 
-    const flowIDs: FlowId[] = [];
-    for (const flowID of flowWithVersion.keys()) {
-      flowIDs.push(flowID);
-    }
-
     const categoriesRef: CategoryRefInstance[] = await models.categoryRef.find({
       where: {
         objectID: {
-          [Op.IN]: flowIDs,
+          [Op.IN]: flowWithVersion.keys(),
         },
         objectType: 'flow',
       },
