@@ -34,7 +34,7 @@ export class CategoryService {
     // }
     const flowVersionCategoryMap = new Map<number, Map<number, Category[]>>();
 
-    const categoriesRef: CategoryRefInstance[] = await models.categoryRef.find({
+    const categoriesRef = await models.categoryRef.find({
       where: {
         objectID: {
           [Op.IN]: flowWithVersion.keys(),
@@ -43,7 +43,7 @@ export class CategoryService {
       },
     });
 
-    const categories: CategoryInstance[] = await models.category.find({
+    const categories = await models.category.find({
       where: {
         id: {
           [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),
@@ -131,7 +131,7 @@ export class CategoryService {
       listOfCategoryRefORs.push(orClause);
     }
 
-    const categoriesRef: CategoryRefInstance[] = await models.categoryRef.find({
+    const categoriesRef = await models.categoryRef.find({
       where: {
         [Cond.OR]: listOfCategoryRefORs,
       },
@@ -163,7 +163,7 @@ export class CategoryService {
       reportDetailsPerCategory.push(reportDetail);
     }
 
-    const categories: CategoryInstance[] = await models.category.find({
+    const categories = await models.category.find({
       where: {
         id: {
           [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),

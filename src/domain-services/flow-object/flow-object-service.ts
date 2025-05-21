@@ -92,7 +92,7 @@ export class FlowObjectService {
       distinctColumns.reverse();
     }
 
-    const flowsObjects: FlowObjectInstance[] = await models.flowObject.find({
+    const flowsObjects = await models.flowObject.find({
       orderBy,
       where: whereClauses,
       distinct: distinctColumns,
