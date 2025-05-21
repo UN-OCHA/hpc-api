@@ -1,10 +1,11 @@
-import { Field, ObjectType } from 'type-graphql';
+import type { OrganizationId } from '@unocha/hpc-api-core/src/db/models/organization';
+import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseTypeWithDirection } from '../../base-types';
 
 @ObjectType()
 export class Organization extends BaseTypeWithDirection {
-  @Field(() => Number, { nullable: false })
-  id: number;
+  @Field(() => ID, { nullable: false })
+  id: OrganizationId;
 
   @Field({ nullable: true })
   name: string;

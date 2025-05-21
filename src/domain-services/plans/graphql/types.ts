@@ -1,4 +1,6 @@
-import { Brand } from '@unocha/hpc-api-core/src/util/types';
+import type { AttachmentId } from '@unocha/hpc-api-core/src/db/models/attachment';
+import type { GoverningEntityId } from '@unocha/hpc-api-core/src/db/models/governingEntity';
+import type { PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { MaxLength } from 'class-validator';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseTypeWithDirection } from '../../base-types';
@@ -7,7 +9,7 @@ import PlanTag from '../../plan-tag/graphql/types';
 @ObjectType()
 export class PlanCaseload {
   @Field(() => ID)
-  id: number;
+  id: AttachmentId;
 
   @Field()
   name: string;
@@ -37,7 +39,7 @@ export class PlanCaseload {
 @ObjectType()
 export class PlanCluster {
   @Field(() => ID)
-  id: number;
+  id: GoverningEntityId;
 
   @Field()
   name: string;
@@ -72,7 +74,7 @@ export class PlanFunding {
 @ObjectType()
 export default class Plan {
   @Field(() => ID)
-  id: Brand<number, { readonly s: unique symbol }, 'Plan ID'>;
+  id: PlanId;
 
   @Field()
   @MaxLength(255)
@@ -99,8 +101,8 @@ export default class Plan {
 
 @ObjectType()
 export class BasePlan extends BaseTypeWithDirection {
-  @Field(() => Number, { nullable: true })
-  id: number;
+  @Field(() => ID, { nullable: true })
+  id: PlanId | null;
 
   @Field({ nullable: true })
   name: string;

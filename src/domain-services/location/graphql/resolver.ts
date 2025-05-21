@@ -1,3 +1,4 @@
+import type { LocationId } from '@unocha/hpc-api-core/src/db/models/location';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { MinLength } from 'class-validator';
@@ -21,7 +22,7 @@ export default class LocationResolver {
 
   @Query(() => Location)
   async location(
-    @Arg('id') id: number,
+    @Arg('id') id: LocationId,
     @Ctx() context: Context
   ): Promise<InstanceDataOfModel<Database['location']>> {
     return await this.locationService.findById(context.models, id);

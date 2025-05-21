@@ -1,3 +1,4 @@
+import type { PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { type PlanTagId } from '@unocha/hpc-api-core/src/db/models/planTag';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
@@ -15,9 +16,9 @@ import { type AddPlanTagInput } from './graphql/types';
 export class PlanTagService {
   async findById(
     models: Database,
-    id: number
+    id: PlanTagId
   ): Promise<{ id: PlanTagId; name?: string | null }> {
-    const planTag = await models.planTag.get(createBrandedValue(id));
+    const planTag = await models.planTag.get(id);
 
     if (!planTag) {
       throw new Error(`Plan tag with ID ${id} does not exist`);
@@ -28,11 +29,11 @@ export class PlanTagService {
 
   async findByPlanId(
     models: Database,
-    planId: number
+    planId: PlanId
   ): Promise<Array<InstanceDataOfModel<Database['planTag']>>> {
     return await models.planTag.find({
       where: {
-        planId: createBrandedValue(planId),
+        planId,
       },
     });
   }

@@ -1,4 +1,5 @@
-import { Field, Int, ObjectType } from 'type-graphql';
+import type { CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
+import { Field, ID, Int, ObjectType } from 'type-graphql';
 import { BaseType } from '../../base-types';
 
 @ObjectType()
@@ -18,8 +19,8 @@ export class CategoryRef extends BaseType {
 
 @ObjectType()
 export class Category extends BaseType {
-  @Field({ nullable: true })
-  id: number;
+  @Field(() => ID, { nullable: true })
+  id: CategoryId | null;
 
   @Field({ nullable: false })
   name: string;
