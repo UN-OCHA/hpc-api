@@ -10,7 +10,7 @@ export class FlowLinkService {
   async getFlowLinksForFlows(
     flowIds: FlowId[],
     models: Database
-  ): Promise<Map<number, Array<InstanceOfModel<Database['flowLink']>>>> {
+  ): Promise<Map<FlowId, Array<InstanceOfModel<Database['flowLink']>>>> {
     // Fetch all flow links in one go
     const flowLinks = await models.flowLink.find({
       where: {

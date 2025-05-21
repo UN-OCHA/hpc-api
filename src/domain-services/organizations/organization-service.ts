@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
@@ -28,7 +29,7 @@ export class OrganizationService {
         },
       });
 
-    const organizationsMap = new Map<number, Organization[]>();
+    const organizationsMap = new Map<FlowId, Organization[]>();
 
     for (const orgFO of organizationsFO) {
       const flowId = orgFO.flowID;
