@@ -18,16 +18,15 @@ export class OrganizationService {
     organizationsFO: FlowObject[],
     models: Database
   ) {
-    const organizations: OrganizationInstance[] =
-      await models.organization.find({
-        where: {
-          id: {
-            [Op.IN]: organizationsFO.map((orgFO) =>
-              createBrandedValue(orgFO.objectID)
-            ),
-          },
+    const organizations = await models.organization.find({
+      where: {
+        id: {
+          [Op.IN]: organizationsFO.map((orgFO) =>
+            createBrandedValue(orgFO.objectID)
+          ),
         },
-      });
+      },
+    });
 
     const organizationsMap = new Map<FlowId, Organization[]>();
 
