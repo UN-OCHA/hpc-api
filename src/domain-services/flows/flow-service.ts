@@ -390,7 +390,7 @@ export class FlowService {
       },
     });
 
-    const parentFlows: number[] = [];
+    const parentFlows: FlowId[] = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
       const parkedParentCategoryRef = await models.categoryRef.find({
@@ -413,7 +413,7 @@ export class FlowService {
       const parkedParentOrganizationFlowObject =
         await models.flowObject.findOne({
           where: {
-            flowID: createBrandedValue(parentFlow),
+            flowID: parentFlow,
             objectType: 'organization',
             refDirection: 'source',
             versionID: flow.versionID,

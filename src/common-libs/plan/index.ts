@@ -10,7 +10,7 @@ export const getNextTag = async (
 ): Promise<string> => {
   const latestPlanTag = await models.planTag.find({
     where: {
-      planId: createBrandedValue(planTag.planId),
+      planId: planTag.planId,
     },
     orderBy: { column: 'createdAt', order: 'desc' },
   });
@@ -38,7 +38,7 @@ export const setPlanReportingPeriod = async (
 ) => {
   const reportingPeriods = await models.planReportingPeriod.find({
     where: {
-      planId: createBrandedValue(planTag.planId),
+      planId: planTag.planId,
     },
     orderBy: { column: 'periodNumber', order: 'asc' },
   });
@@ -51,7 +51,7 @@ export const setPlanReportingPeriod = async (
 
   const latestPlanVersion = await models.planVersion.findOne({
     where: {
-      planId: createBrandedValue(planTag.planId),
+      planId: planTag.planId,
       latestVersion: true,
     },
   });

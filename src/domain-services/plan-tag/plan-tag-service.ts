@@ -48,14 +48,14 @@ export class PlanTagService {
         revisionState: 'none',
       },
       where: {
-        id: createBrandedValue(planTag.planId),
+        id: planTag.planId,
       },
     });
 
     const createdPlanTag = await models.planTag.create({
       name: await getNextTag(models, planTag),
       public: true,
-      planId: createBrandedValue(planTag.planId),
+      planId: planTag.planId,
       revisionState: planTag.revisionState,
       comment: planTag.comments,
       type: planTag.type,

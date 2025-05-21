@@ -50,14 +50,14 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
 
     if (shortcutFilters) {
       for (const shortcut of shortcutFilters) {
+        if (!shortcut.id) {
+          continue;
+        }
+
         if (shortcut.operation === Op.IN) {
-          categoriesIdsFromShortcutFilterIN.push(
-            createBrandedValue(shortcut.id)
-          );
+          categoriesIdsFromShortcutFilterIN.push(shortcut.id);
         } else {
-          categoriesIdsFromShortcutFilterNOTIN.push(
-            createBrandedValue(shortcut.id)
-          );
+          categoriesIdsFromShortcutFilterNOTIN.push(shortcut.id);
         }
       }
     }
