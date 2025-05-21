@@ -239,7 +239,7 @@ describe('Query should return Flow search', () => {
 
     await models.category.createMany(categoriesProt);
 
-    // Asign categories to flows
+    // Assign categories to flows
     const activeFlowRelationCategory = activeFlows.map((flow) => {
       return {
         objectID: flow.id,
