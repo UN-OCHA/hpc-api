@@ -109,7 +109,7 @@ export class PlanService {
     direction: EntityDirection
   ): BasePlan {
     return {
-      id: plan.id.valueOf(),
+      id: plan.id,
       name: planVersion.name,
       createdAt: plan.createdAt.toISOString(),
       updatedAt: plan.updatedAt.toISOString(),

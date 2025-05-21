@@ -57,7 +57,7 @@ export class CategoryService {
 
     // Populate the map with categories for each flow
     for (const catRef of categoriesRef) {
-      const flowId = catRef.objectID.valueOf();
+      const flowId = catRef.objectID;
 
       if (!flowVersionCategoryMap.has(flowId)) {
         flowVersionCategoryMap.set(flowId, new Map());
@@ -85,9 +85,7 @@ export class CategoryService {
 
       if (
         category &&
-        !categoriesPerFlowVersion.some(
-          (cat) => cat.id === category.id.valueOf()
-        )
+        !categoriesPerFlowVersion.some((cat) => cat.id === category.id)
       ) {
         const mappedCategory = this.mapCategoryToFlowCategory(category, catRef);
         categoriesPerFlowVersion.push(mappedCategory);
@@ -108,13 +106,13 @@ export class CategoryService {
       createdAt: category.createdAt.toISOString(),
       updatedAt: category.updatedAt.toISOString(),
       description: category.description ?? '',
-      parentID: category.parentID ? category.parentID.valueOf() : null,
+      parentID: category.parentID,
       code: category.code ?? '',
       categoryRef: {
-        objectID: categoryRef.objectID.valueOf(),
+        objectID: categoryRef.objectID,
         versionID: categoryRef.versionID,
         objectType: categoryRef.objectType,
-        categoryID: category.id.valueOf(),
+        categoryID: category.id,
         createdAt: categoryRef.createdAt.toISOString(),
         updatedAt: categoryRef.updatedAt.toISOString(),
       },
@@ -147,25 +145,20 @@ export class CategoryService {
 
     for (const categoryRef of categoriesRef) {
       const reportDetail = reportDetails.find(
-        (reportDetail) => reportDetail.id === categoryRef.objectID.valueOf()
+        (reportDetail) => reportDetail.id === categoryRef.objectID
       );
 
       if (!reportDetail) {
         continue;
       }
 
-      if (
-        !mapOfCategoriesAndReportDetails.has(categoryRef.categoryID.valueOf())
-      ) {
-        mapOfCategoriesAndReportDetails.set(
-          categoryRef.categoryID.valueOf(),
-          []
-        );
+      if (!mapOfCategoriesAndReportDetails.has(categoryRef.categoryID)) {
+        mapOfCategoriesAndReportDetails.set(categoryRef.categoryID, []);
       }
 
       const reportDetailsPerCategory = getOrCreate(
         mapOfCategoriesAndReportDetails,
-        categoryRef.categoryID.valueOf(),
+        categoryRef.categoryID,
         () => []
       );
       reportDetailsPerCategory.push(reportDetail);
@@ -249,9 +242,9 @@ export class CategoryService {
 
     const shortcutFilters: ShortcutCategoryFilter[] = usedFilters
       .map((filter) => {
-        const categoryId = categories
-          .find((category) => category.name.includes(filter.category))
-          ?.id.valueOf();
+        const categoryId = categories.find((category) =>
+          category.name.includes(filter.category)
+        )?.id;
 
         return {
           category: filter.category,
