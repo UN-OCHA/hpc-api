@@ -385,7 +385,7 @@ export class FlowSearchService {
   ): Flow {
     return {
       // Mandatory fields
-      id: flow.id.valueOf(),
+      id: flow.id,
       versionID: flow.versionID,
       amountUSD: flow.amountUSD.toString(),
       createdAt: flow.createdAt.toISOString(),
@@ -494,14 +494,14 @@ export class FlowSearchService {
           const sourceUsageYearFilter: FlowObjectFilters = {
             objectType: 'usageYear',
             direction: 'source',
-            objectID: usageYear.id.valueOf(),
+            objectID: usageYear.id,
             inclusive: true,
           };
 
           const destinationUsageYearFilter: FlowObjectFilters = {
             objectType: 'usageYear',
             direction: 'destination',
-            objectID: usageYear.id.valueOf(),
+            objectID: usageYear.id,
             inclusive: true,
           };
 

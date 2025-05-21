@@ -49,8 +49,7 @@ export class OrganizationService {
         if (
           !organizationPerFlow.some(
             (org) =>
-              org.id === organization.id.valueOf() &&
-              org.direction === orgFO.refDirection
+              org.id === organization.id && org.direction === orgFO.refDirection
           )
         ) {
           const organizationMapped: Organization =
@@ -84,12 +83,12 @@ export class OrganizationService {
       updatedAt: organization.updatedAt.toISOString(),
       abbreviation: organization.abbreviation,
       url: organization.url,
-      parentID: organization.parentID?.valueOf() ?? null,
+      parentID: organization.parentID ?? null,
       nativeName: organization.nativeName,
       comments: organization.comments,
       collectiveInd: organization.collectiveInd,
       active: organization.active,
-      newOrganizationId: organization.newOrganizationId?.valueOf() ?? null,
+      newOrganizationId: organization.newOrganizationId ?? null,
       verified: organization.verified,
       notes: organization.notes,
     };

@@ -118,9 +118,7 @@ export class FlowService {
           orderBy: orderByEmergency,
         });
 
-        entityIDsSorted = emergencies.map((emergency) =>
-          emergency.id.valueOf()
-        );
+        entityIDsSorted = emergencies.map((emergency) => emergency.id);
         break;
       }
       case 'globalCluster': {
@@ -142,8 +140,8 @@ export class FlowService {
           orderBy: orderByGlobalCluster,
         });
 
-        entityIDsSorted = globalClusters.map((globalCluster) =>
-          globalCluster.id.valueOf()
+        entityIDsSorted = globalClusters.map(
+          (globalCluster) => globalCluster.id
         );
         break;
       }
@@ -166,8 +164,8 @@ export class FlowService {
           orderBy: orderByGoverningEntity,
         });
 
-        entityIDsSorted = governingEntities.map((governingEntity) =>
-          governingEntity.id.valueOf()
+        entityIDsSorted = governingEntities.map(
+          (governingEntity) => governingEntity.id
         );
         break;
       }
@@ -190,7 +188,7 @@ export class FlowService {
           orderBy: orderByLocation,
         });
 
-        entityIDsSorted = locations.map((location) => location.id.valueOf());
+        entityIDsSorted = locations.map((location) => location.id);
         break;
       }
       case 'organization': {
@@ -212,9 +210,7 @@ export class FlowService {
           orderBy: orderByOrganization,
         });
 
-        entityIDsSorted = organizations.map((organization) =>
-          organization.id.valueOf()
-        );
+        entityIDsSorted = organizations.map((organization) => organization.id);
         break;
       }
       case 'plan': {
@@ -236,7 +232,7 @@ export class FlowService {
           orderBy: orderByPlan,
         });
 
-        entityIDsSorted = plans.map((plan) => plan.id.valueOf());
+        entityIDsSorted = plans.map((plan) => plan.id);
         break;
       }
       case 'project': {
@@ -258,7 +254,7 @@ export class FlowService {
           orderBy: orderByProject,
         });
 
-        entityIDsSorted = projects.map((project) => project.id.valueOf());
+        entityIDsSorted = projects.map((project) => project.id);
         break;
       }
       case 'usageYear': {
@@ -280,7 +276,7 @@ export class FlowService {
           orderBy: orderByUsageYear,
         });
 
-        entityIDsSorted = usageYears.map((usageYear) => usageYear.id.valueOf());
+        entityIDsSorted = usageYears.map((usageYear) => usageYear.id);
         break;
       }
       case 'planVersion': {
@@ -307,9 +303,7 @@ export class FlowService {
           orderBy: orderByPlanVersion,
         });
 
-        entityIDsSorted = planVersions.map((planVersion) =>
-          planVersion.planId.valueOf()
-        );
+        entityIDsSorted = planVersions.map((planVersion) => planVersion.planId);
         break;
       }
       default: {
@@ -384,7 +378,7 @@ export class FlowService {
         (flowLink) =>
           flowLink.parentID !== flow.id && flowLink.childID === flow.id
       )
-      .map((flowLink) => flowLink.parentID.valueOf());
+      .map((flowLink) => flowLink.parentID);
 
     if (flowLinksParentsIDs.length === 0) {
       return null;
@@ -451,7 +445,7 @@ export class FlowService {
 
     for (const parkedParentOrganization of parkedParentOrganizations) {
       mappedParkedParentOrganizations.organization.push(
-        parkedParentOrganization.id.valueOf()
+        parkedParentOrganization.id
       );
       mappedParkedParentOrganizations.orgName.push(
         parkedParentOrganization.name
