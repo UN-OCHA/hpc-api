@@ -1,4 +1,6 @@
-import { Brand } from '@unocha/hpc-api-core/src/util/types';
+import type { PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
+import type { PlanReportingPeriodId } from '@unocha/hpc-api-core/src/db/models/planReportingPeriod';
+import type { PlanTagId } from '@unocha/hpc-api-core/src/db/models/planTag';
 import { IsEnum, MaxLength } from 'class-validator';
 import {
   Field,
@@ -30,7 +32,7 @@ registerEnumType(PlanTagType, {
 @ObjectType()
 export default class PlanTag {
   @Field(() => ID)
-  id: Brand<number, { readonly s: unique symbol }, 'planTag.id'>;
+  id: PlanTagId;
 
   @Field()
   planId: number;
@@ -58,7 +60,7 @@ export default class PlanTag {
 @InputType({ description: 'New plan tag data' })
 export class AddPlanTagInput implements Partial<PlanTag> {
   @Field(() => ID)
-  planId: Brand<number, { readonly s: unique symbol }, 'Plan ID'>;
+  planId: PlanId;
 
   @Field()
   @MaxLength(50)
@@ -76,9 +78,7 @@ export class AddPlanTagInput implements Partial<PlanTag> {
   revisionState: RevisionState;
 
   @Field(() => [ID], { nullable: true })
-  reportingPeriodIds: Array<
-    Brand<number, { readonly s: unique symbol }, 'planReportingPeriod ID'>
-  >;
+  reportingPeriodIds: PlanReportingPeriodId[];
 
   @Field()
   publishMeasurements: boolean;

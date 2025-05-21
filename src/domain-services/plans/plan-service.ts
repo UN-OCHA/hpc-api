@@ -13,9 +13,9 @@ import { type BasePlan } from './graphql/types';
 export class PlanService {
   async findById(
     models: Database,
-    id: number
+    id: PlanId
   ): Promise<{ id: PlanId; name?: string | null }> {
-    const plan = await models.plan.get(createBrandedValue(id));
+    const plan = await models.plan.get(id);
 
     if (!plan) {
       throw new Error(`Plan with ID ${id} does not exist`);
@@ -34,10 +34,10 @@ export class PlanService {
     return { id: planId, name: currentPlanVersion.name };
   }
 
-  async findPlanYears(models: Database, planId: number): Promise<string[]> {
+  async findPlanYears(models: Database, planId: PlanId): Promise<string[]> {
     const planYears = await models.planYear.find({
       where: {
-        planId: createBrandedValue(planId),
+        planId,
       },
     });
 

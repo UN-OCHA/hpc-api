@@ -11,9 +11,9 @@ import { type BaseLocationWithDirection } from './graphql/types';
 export class LocationService {
   async findById(
     models: Database,
-    id: number
+    id: LocationId
   ): Promise<InstanceDataOfModel<Database['location']>> {
-    const location = await models.location.get(createBrandedValue(id));
+    const location = await models.location.get(id);
 
     if (!location) {
       throw new Error(`Location with ID ${id} does not exist`);

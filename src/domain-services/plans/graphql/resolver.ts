@@ -1,3 +1,4 @@
+import type { PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import {
   Arg,
   Ctx,
@@ -23,7 +24,7 @@ export default class PlanResolver {
   ) {}
 
   @Query(() => Plan)
-  async plan(@Arg('id') id: number, @Ctx() context: Context) {
+  async plan(@Arg('id') id: PlanId, @Ctx() context: Context) {
     return await this.planService.findById(context.models, id);
   }
 
