@@ -313,6 +313,7 @@ export class FlowService {
 
     // After getting the sorted entityID list
     // we can now get the flowObjects
+    // Don't do this, but strongly type `entity` and `subEntity` in `FlowOrderByWithSubEntity`
     const entityCondKey = orderBy.entity as unknown;
     const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
 
