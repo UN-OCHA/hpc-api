@@ -3,7 +3,6 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type FlowExternalReference } from '../flows/graphql/types';
 import { type UniqueFlowEntity } from '../flows/model';
@@ -21,7 +20,7 @@ export class ExternalReferenceService {
       skipValidation: true,
     });
 
-    const externalReferencesMap = new Map<number, FlowExternalReference[]>();
+    const externalReferencesMap = new Map<FlowId, FlowExternalReference[]>();
 
     // First we add all flowIDs to the map
     // Since there might be flows without external references
@@ -88,7 +87,7 @@ export class ExternalReferenceService {
     external: InstanceDataOfModel<Database['externalReference']>
   ): UniqueFlowEntity {
     return {
-      id: createBrandedValue(external.flowID),
+      id: external.flowID,
       versionID: external.versionID,
     };
   }

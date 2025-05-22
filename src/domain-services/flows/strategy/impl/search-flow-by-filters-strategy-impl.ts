@@ -106,7 +106,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     }
 
     // Now we need to check if we need to filter by category
-    // if it's using any of the shorcuts
+    // if it's using any of the shortcuts
     // or if there are any flowCategoryFilters
     const isSearchByCategoryShotcut =
       shortcutFilters !== null && shortcutFilters.length > 0;
@@ -143,7 +143,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     const flowsFromObjectFilters: UniqueFlowEntity[] = [];
     if (isFilterByFlowObjects) {
-      // Firts step is to map the filters to the FlowObjectFiltersGrouped
+      // First step is to map the filters to the FlowObjectFiltersGrouped
       // To allow doing inclusive filtering between filters of the same type+direction
       // But exclusive filtering between filters of different type+direction
       const flowObjectFiltersGrouped =
@@ -168,9 +168,9 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       }
 
       // If 'includeChildrenOfParkedFlows' is defined and true
-      // we need to obtain the flowIDs from the childs whose parent flows are parked
+      // we need to obtain the flowIDs from the children whose parent flows are parked
       if (shouldIncludeChildrenOfParkedFlows) {
-        // We need to obtain the flowIDs from the childs whose parent flows are parked
+        // We need to obtain the flowIDs from the children whose parent flows are parked
         const childs =
           await this.flowService.getParkedParentFlowsByFlowObjectFilter(
             models,

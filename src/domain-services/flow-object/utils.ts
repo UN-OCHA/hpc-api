@@ -5,7 +5,7 @@ import { type FlowObjectFilterGrouped } from './model';
 /**
  *  This alg iterates over the flowObjectFilters and creates a join for each flowObjectType
  *  and refDirection allowing to filter the flowObjects by the flowObjectType and refDirection
- * inclusivelly for each
+ * inclusively for each
  * @param flowObjectFiltersGrouped
  * @returns FlowObjectWhere
  */
@@ -13,8 +13,8 @@ export function buildWhereConditionsForFlowObjectFilters(
   flowObjectFiltersGrouped: FlowObjectFilterGrouped
 ): FlowObjectWhere {
   const ANDConditions = [];
-  for (const [flowObjectType, group] of flowObjectFiltersGrouped.entries()) {
-    for (const [direction, ids] of group.entries()) {
+  for (const [flowObjectType, group] of flowObjectFiltersGrouped) {
+    for (const [direction, ids] of group) {
       const condition = {
         [Cond.AND]: [
           {

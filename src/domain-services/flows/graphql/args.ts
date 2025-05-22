@@ -1,4 +1,6 @@
-import { ArgsType, Field, InputType, Int } from 'type-graphql';
+import type { CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { ArgsType, Field, ID, InputType, Int } from 'type-graphql';
 import { PaginationArgs } from '../../../utils/graphql/pagination';
 import { FlowObjectType } from '../../flow-object/model';
 import { type SystemID } from '../../report-details/graphql/types';
@@ -6,8 +8,8 @@ import { type FlowSortField, type FlowStatusFilter } from './types';
 
 @InputType()
 export class SearchFlowsFilters {
-  @Field(() => [Int], { nullable: true })
-  id: number[] | null;
+  @Field(() => [ID], { nullable: true })
+  id: FlowId[] | null;
 
   @Field(() => Boolean, { nullable: true })
   activeStatus: boolean | null;
@@ -57,8 +59,8 @@ export class FlowObjectFilters {
 
 @InputType()
 export class FlowCategory {
-  @Field(() => Number, { nullable: true })
-  id: number;
+  @Field(() => ID, { nullable: true })
+  id: CategoryId | null;
 
   @Field({ nullable: true })
   group: string;

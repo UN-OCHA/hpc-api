@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import type { CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import {
   Cond,
@@ -7,6 +8,7 @@ import {
 } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
+import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type ReportDetail } from '../report-details/graphql/types';
 import { type Category } from './graphql/types';
@@ -25,29 +27,24 @@ export class CategoryService {
   async getCategoriesForFlows(
     flowWithVersion: Map<FlowId, number[]>,
     models: Database
-  ): Promise<Map<number, Map<number, Category[]>>> {
+  ): Promise<Map<FlowId, Map<number, Category[]>>> {
     // Group of flowIDs and its versions
     // Structure:
     // flowID: {
     //   versionID: [categories]
     // }
-    const flowVersionCategoryMap = new Map<number, Map<number, Category[]>>();
+    const flowVersionCategoryMap = new Map<FlowId, Map<number, Category[]>>();
 
-    const flowIDs: FlowId[] = [];
-    for (const flowID of flowWithVersion.keys()) {
-      flowIDs.push(flowID);
-    }
-
-    const categoriesRef: CategoryRefInstance[] = await models.categoryRef.find({
+    const categoriesRef = await models.categoryRef.find({
       where: {
         objectID: {
-          [Op.IN]: flowIDs,
+          [Op.IN]: flowWithVersion.keys(),
         },
         objectType: 'flow',
       },
     });
 
-    const categories: CategoryInstance[] = await models.category.find({
+    const categories = await models.category.find({
       where: {
         id: {
           [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),
@@ -57,7 +54,7 @@ export class CategoryService {
 
     // Populate the map with categories for each flow
     for (const catRef of categoriesRef) {
-      const flowId = catRef.objectID.valueOf();
+      const flowId: FlowId = createBrandedValue(catRef.objectID);
 
       if (!flowVersionCategoryMap.has(flowId)) {
         flowVersionCategoryMap.set(flowId, new Map());
@@ -70,14 +67,9 @@ export class CategoryService {
         () => new Map<number, Category[]>()
       );
 
-      const flowVersion = catRef.versionID;
-      if (!flowVersionMap.has(flowVersion)) {
-        flowVersionMap.set(flowVersion, []);
-      }
-
       const categoriesPerFlowVersion = getOrCreate(
         flowVersionMap,
-        flowVersion,
+        catRef.versionID,
         () => []
       );
 
@@ -85,9 +77,7 @@ export class CategoryService {
 
       if (
         category &&
-        !categoriesPerFlowVersion.some(
-          (cat) => cat.id === category.id.valueOf()
-        )
+        !categoriesPerFlowVersion.some((cat) => cat.id === category.id)
       ) {
         const mappedCategory = this.mapCategoryToFlowCategory(category, catRef);
         categoriesPerFlowVersion.push(mappedCategory);
@@ -108,13 +98,13 @@ export class CategoryService {
       createdAt: category.createdAt.toISOString(),
       updatedAt: category.updatedAt.toISOString(),
       description: category.description ?? '',
-      parentID: category.parentID ? category.parentID.valueOf() : null,
+      parentID: category.parentID,
       code: category.code ?? '',
       categoryRef: {
-        objectID: categoryRef.objectID.valueOf(),
+        objectID: categoryRef.objectID,
         versionID: categoryRef.versionID,
         objectType: categoryRef.objectType,
-        categoryID: category.id.valueOf(),
+        categoryID: category.id,
         createdAt: categoryRef.createdAt.toISOString(),
         updatedAt: categoryRef.updatedAt.toISOString(),
       },
@@ -137,41 +127,39 @@ export class CategoryService {
       listOfCategoryRefORs.push(orClause);
     }
 
-    const categoriesRef: CategoryRefInstance[] = await models.categoryRef.find({
+    const categoriesRef = await models.categoryRef.find({
       where: {
         [Cond.OR]: listOfCategoryRefORs,
       },
     });
 
-    const mapOfCategoriesAndReportDetails = new Map<number, ReportDetail[]>();
+    const mapOfCategoriesAndReportDetails = new Map<
+      CategoryId,
+      ReportDetail[]
+    >();
 
     for (const categoryRef of categoriesRef) {
       const reportDetail = reportDetails.find(
-        (reportDetail) => reportDetail.id === categoryRef.objectID.valueOf()
+        (reportDetail) => reportDetail.id === categoryRef.objectID
       );
 
       if (!reportDetail) {
         continue;
       }
 
-      if (
-        !mapOfCategoriesAndReportDetails.has(categoryRef.categoryID.valueOf())
-      ) {
-        mapOfCategoriesAndReportDetails.set(
-          categoryRef.categoryID.valueOf(),
-          []
-        );
+      if (!mapOfCategoriesAndReportDetails.has(categoryRef.categoryID)) {
+        mapOfCategoriesAndReportDetails.set(categoryRef.categoryID, []);
       }
 
       const reportDetailsPerCategory = getOrCreate(
         mapOfCategoriesAndReportDetails,
-        categoryRef.categoryID.valueOf(),
+        categoryRef.categoryID,
         () => []
       );
       reportDetailsPerCategory.push(reportDetail);
     }
 
-    const categories: CategoryInstance[] = await models.category.find({
+    const categories = await models.category.find({
       where: {
         id: {
           [Op.IN]: categoriesRef.map((catRef) => catRef.categoryID),
@@ -179,10 +167,7 @@ export class CategoryService {
       },
     });
 
-    for (const [
-      category,
-      reportDetails,
-    ] of mapOfCategoriesAndReportDetails.entries()) {
+    for (const [category, reportDetails] of mapOfCategoriesAndReportDetails) {
       const categoryObj = categories.find((cat) => cat.id === category);
 
       if (!categoryObj) {
@@ -249,9 +234,9 @@ export class CategoryService {
 
     const shortcutFilters: ShortcutCategoryFilter[] = usedFilters
       .map((filter) => {
-        const categoryId = categories
-          .find((category) => category.name.includes(filter.category))
-          ?.id.valueOf();
+        const categoryId = categories.find((category) =>
+          category.name.includes(filter.category)
+        )?.id;
 
         return {
           category: filter.category,

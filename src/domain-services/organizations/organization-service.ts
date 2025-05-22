@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
@@ -17,18 +18,17 @@ export class OrganizationService {
     organizationsFO: FlowObject[],
     models: Database
   ) {
-    const organizations: OrganizationInstance[] =
-      await models.organization.find({
-        where: {
-          id: {
-            [Op.IN]: organizationsFO.map((orgFO) =>
-              createBrandedValue(orgFO.objectID)
-            ),
-          },
+    const organizations = await models.organization.find({
+      where: {
+        id: {
+          [Op.IN]: organizationsFO.map((orgFO) =>
+            createBrandedValue(orgFO.objectID)
+          ),
         },
-      });
+      },
+    });
 
-    const organizationsMap = new Map<number, Organization[]>();
+    const organizationsMap = new Map<FlowId, Organization[]>();
 
     for (const orgFO of organizationsFO) {
       const flowId = orgFO.flowID;
@@ -49,8 +49,7 @@ export class OrganizationService {
         if (
           !organizationPerFlow.some(
             (org) =>
-              org.id === organization.id.valueOf() &&
-              org.direction === orgFO.refDirection
+              org.id === organization.id && org.direction === orgFO.refDirection
           )
         ) {
           const organizationMapped: Organization =
@@ -84,12 +83,12 @@ export class OrganizationService {
       updatedAt: organization.updatedAt.toISOString(),
       abbreviation: organization.abbreviation,
       url: organization.url,
-      parentID: organization.parentID?.valueOf() ?? null,
+      parentID: organization.parentID,
       nativeName: organization.nativeName,
       comments: organization.comments,
       collectiveInd: organization.collectiveInd,
       active: organization.active,
-      newOrganizationId: organization.newOrganizationId?.valueOf() ?? null,
+      newOrganizationId: organization.newOrganizationId,
       verified: organization.verified,
       notes: organization.notes,
     };

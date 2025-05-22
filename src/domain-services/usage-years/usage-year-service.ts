@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
@@ -15,7 +16,7 @@ export class UsageYearService {
   async getUsageYearsForFlows(
     usageYearsFO: FlowObject[],
     models: Database
-  ): Promise<Map<number, UsageYear[]>> {
+  ): Promise<Map<FlowId, UsageYear[]>> {
     const usageYears: UsageYearInstance[] = await models.usageYear.find({
       where: {
         id: {
@@ -26,7 +27,7 @@ export class UsageYearService {
       },
     });
 
-    const usageYearsMap = new Map<number, UsageYear[]>();
+    const usageYearsMap = new Map<FlowId, UsageYear[]>();
 
     for (const usageYearFO of usageYearsFO) {
       const flowId = usageYearFO.flowID;

@@ -9,7 +9,6 @@ import type {
   FieldsOfModel,
   InstanceOfModel,
 } from '@unocha/hpc-api-core/src/db/util/types';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type UniqueFlowEntity } from '../flows/model';
 import { buildSearchFlowsObjectConditions } from '../flows/strategy/impl/utils';
@@ -22,6 +21,7 @@ type FlowObjectInstance = InstanceOfModel<FlowObjectModel>;
 export type FlowObjectsFieldsDefinition = FieldsOfModel<FlowObjectModel>;
 export type FlowObjectOrderByCond = OrderByCond<FlowObjectsFieldsDefinition>;
 export type FlowObjectWhere = Condition<FlowObjectInstance>;
+
 @Service()
 export class FlowObjectService {
   // Merge with getFlowsObjectsByFlows
@@ -48,7 +48,7 @@ export class FlowObjectService {
       ...new Set(
         flowObjects.map((flowObject) => {
           return {
-            id: createBrandedValue(flowObject.flowID),
+            id: flowObject.flowID,
             versionID: flowObject.versionID,
           };
         })
@@ -92,7 +92,7 @@ export class FlowObjectService {
       distinctColumns.reverse();
     }
 
-    const flowsObjects: FlowObjectInstance[] = await models.flowObject.find({
+    const flowsObjects = await models.flowObject.find({
       orderBy,
       where: whereClauses,
       distinct: distinctColumns,

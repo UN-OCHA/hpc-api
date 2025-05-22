@@ -1,4 +1,4 @@
-import { Brand } from '@unocha/hpc-api-core/src/util/types';
+import type { LocationId } from '@unocha/hpc-api-core/src/db/models/location';
 import { MaxLength } from 'class-validator';
 import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import { BaseType, BaseTypeWithDirection } from '../../base-types';
@@ -15,7 +15,7 @@ registerEnumType(LocationStatus, {
 @ObjectType()
 export default class Location extends BaseType {
   @Field(() => ID)
-  id: Brand<number, { readonly s: unique symbol }, 'Location ID'>;
+  id: LocationId;
 
   @Field({ nullable: true })
   @MaxLength(255)
@@ -56,8 +56,8 @@ export default class Location extends BaseType {
 
 @ObjectType()
 export class BaseLocationWithDirection extends BaseTypeWithDirection {
-  @Field(() => Number, { nullable: true })
-  id: number;
+  @Field(() => ID, { nullable: true })
+  id: LocationId | null;
 
   @Field(() => String, { nullable: true })
   name: string | null;

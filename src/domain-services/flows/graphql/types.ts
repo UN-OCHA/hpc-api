@@ -1,4 +1,5 @@
-import { Field, ObjectType } from 'type-graphql';
+import type { FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
+import { Field, ID, ObjectType } from 'type-graphql';
 import { PageInfo } from '../../../utils/graphql/pagination';
 import { BaseType } from '../../base-types';
 import { Category } from '../../categories/graphql/types';
@@ -46,8 +47,8 @@ export class FlowParkedParentSource {
 
 @ObjectType()
 export class BaseFlow extends BaseType {
-  @Field(() => Number, { nullable: false })
-  id: number;
+  @Field(() => ID, { nullable: false })
+  id: FlowId;
 
   @Field(() => Number, { nullable: false })
   versionID: number;

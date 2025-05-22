@@ -118,9 +118,7 @@ export class FlowService {
           orderBy: orderByEmergency,
         });
 
-        entityIDsSorted = emergencies.map((emergency) =>
-          emergency.id.valueOf()
-        );
+        entityIDsSorted = emergencies.map((emergency) => emergency.id);
         break;
       }
       case 'globalCluster': {
@@ -142,8 +140,8 @@ export class FlowService {
           orderBy: orderByGlobalCluster,
         });
 
-        entityIDsSorted = globalClusters.map((globalCluster) =>
-          globalCluster.id.valueOf()
+        entityIDsSorted = globalClusters.map(
+          (globalCluster) => globalCluster.id
         );
         break;
       }
@@ -166,8 +164,8 @@ export class FlowService {
           orderBy: orderByGoverningEntity,
         });
 
-        entityIDsSorted = governingEntities.map((governingEntity) =>
-          governingEntity.id.valueOf()
+        entityIDsSorted = governingEntities.map(
+          (governingEntity) => governingEntity.id
         );
         break;
       }
@@ -190,7 +188,7 @@ export class FlowService {
           orderBy: orderByLocation,
         });
 
-        entityIDsSorted = locations.map((location) => location.id.valueOf());
+        entityIDsSorted = locations.map((location) => location.id);
         break;
       }
       case 'organization': {
@@ -212,9 +210,7 @@ export class FlowService {
           orderBy: orderByOrganization,
         });
 
-        entityIDsSorted = organizations.map((organization) =>
-          organization.id.valueOf()
-        );
+        entityIDsSorted = organizations.map((organization) => organization.id);
         break;
       }
       case 'plan': {
@@ -236,7 +232,7 @@ export class FlowService {
           orderBy: orderByPlan,
         });
 
-        entityIDsSorted = plans.map((plan) => plan.id.valueOf());
+        entityIDsSorted = plans.map((plan) => plan.id);
         break;
       }
       case 'project': {
@@ -258,7 +254,7 @@ export class FlowService {
           orderBy: orderByProject,
         });
 
-        entityIDsSorted = projects.map((project) => project.id.valueOf());
+        entityIDsSorted = projects.map((project) => project.id);
         break;
       }
       case 'usageYear': {
@@ -280,7 +276,7 @@ export class FlowService {
           orderBy: orderByUsageYear,
         });
 
-        entityIDsSorted = usageYears.map((usageYear) => usageYear.id.valueOf());
+        entityIDsSorted = usageYears.map((usageYear) => usageYear.id);
         break;
       }
       case 'planVersion': {
@@ -292,7 +288,7 @@ export class FlowService {
           );
         }
         // Get planVersion entities sorted
-        // Collect fisrt part of the entity key by the fisrt Case letter
+        // Collect first part of the entity key by the first Case letter
         const entityKey = `${
           entity.split(/[A-Z]/)[0]
         }Id` as keyof InstanceOfModel<Database['planVersion']>;
@@ -307,9 +303,7 @@ export class FlowService {
           orderBy: orderByPlanVersion,
         });
 
-        entityIDsSorted = planVersions.map((planVersion) =>
-          planVersion.planId.valueOf()
-        );
+        entityIDsSorted = planVersions.map((planVersion) => planVersion.planId);
         break;
       }
       default: {
@@ -319,6 +313,7 @@ export class FlowService {
 
     // After getting the sorted entityID list
     // we can now get the flowObjects
+    // Don't do this, but strongly type `entity` and `subEntity` in `FlowOrderByWithSubEntity`
     const entityCondKey = orderBy.entity as unknown;
     const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
 
@@ -340,7 +335,7 @@ export class FlowService {
     flowObjects = flowObjects
       .map((flowObject) => ({
         ...flowObject,
-        sortingKey: entityIDsSorted.indexOf(flowObject.objectID.valueOf()),
+        sortingKey: entityIDsSorted.indexOf(flowObject.objectID),
       }))
       .sort((a, b) => a.sortingKey - b.sortingKey);
 
@@ -369,7 +364,7 @@ export class FlowService {
         (flowLink) =>
           flowLink.parentID !== flow.id && flowLink.childID === flow.id
       )
-      .map((flowLink) => flowLink.parentID.valueOf());
+      .map((flowLink) => flowLink.parentID);
 
     if (flowLinksParentsIDs.length === 0) {
       return null;
@@ -382,7 +377,7 @@ export class FlowService {
       },
     });
 
-    const parentFlows: number[] = [];
+    const parentFlows: FlowId[] = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
       const parkedParentCategoryRef = await models.categoryRef.find({
@@ -405,7 +400,7 @@ export class FlowService {
       const parkedParentOrganizationFlowObject =
         await models.flowObject.findOne({
           where: {
-            flowID: createBrandedValue(parentFlow),
+            flowID: parentFlow,
             objectType: 'organization',
             refDirection: 'source',
             versionID: flow.versionID,
@@ -437,7 +432,7 @@ export class FlowService {
 
     for (const parkedParentOrganization of parkedParentOrganizations) {
       mappedParkedParentOrganizations.organization.push(
-        parkedParentOrganization.id.valueOf()
+        parkedParentOrganization.id
       );
       mappedParkedParentOrganizations.orgName.push(
         parkedParentOrganization.name
@@ -488,7 +483,7 @@ export class FlowService {
     });
 
     const parentFlowsRef: UniqueFlowEntity[] = flowLinks.map((flowLink) => ({
-      id: createBrandedValue(flowLink.parentID),
+      id: flowLink.parentID,
       versionID: null,
     }));
 
@@ -555,7 +550,7 @@ export class FlowService {
     // using the flowObjectFilters
     // This search needs to be also done by chunks
     return childFlows.map((ref) => ({
-      id: createBrandedValue(ref.id),
+      id: ref.id,
       versionID: ref.versionID,
     }));
   }

@@ -151,11 +151,11 @@ const updateBaseAndVersionModelTags = async (
       }
       idSet.add(baseRow.id);
     } else {
-      inactiveRows.push(createBrandedValue(baseRow.id));
+      inactiveRows.push(baseRow.id);
     }
   }
 
-  for (const [versionTagsString, rowIds] of activeRows.entries()) {
+  for (const [versionTagsString, rowIds] of activeRows) {
     const versionTags =
       versionTagsString === '' ? [] : versionTagsString.split(',');
 
@@ -231,7 +231,7 @@ const updateBaseAndVersionModelTags = async (
     idSet.add(latestVersion.id);
   }
 
-  for (const [versionTagsString, rowIds] of versionTagsMap.entries()) {
+  for (const [versionTagsString, rowIds] of versionTagsMap) {
     const versionTags =
       versionTagsString === '' ? [] : versionTagsString.split(',');
 
@@ -329,7 +329,7 @@ const updateBaseModelTags = async (
         },
       });
     } else {
-      inactiveRows.push(createBrandedValue(baseRow.id));
+      inactiveRows.push(baseRow.id);
     }
   }
 

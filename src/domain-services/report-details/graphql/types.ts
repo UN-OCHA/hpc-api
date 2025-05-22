@@ -1,11 +1,13 @@
 import { type EXTERNAL_DATA_SYSTEM_ID } from '@unocha/hpc-api-core/src/db/models/externalData';
+import type { ReportDetailId } from '@unocha/hpc-api-core/src/db/models/reportDetail';
 import type * as t from 'io-ts';
-import { Field, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType } from 'type-graphql';
 import { BaseType } from '../../base-types';
+
 @ObjectType()
 export class ReportDetail extends BaseType {
-  @Field(() => Number, { nullable: false })
-  id: number;
+  @Field(() => ID, { nullable: false })
+  id: ReportDetailId;
 
   @Field({ nullable: false })
   flowID: number;
