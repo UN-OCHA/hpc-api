@@ -26,6 +26,7 @@ import type {
   FlowWhere,
   UniqueFlowEntity,
 } from '../../model';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 
 export const sortingColumnMapping: Map<string, string> = new Map<
   string,
@@ -222,6 +223,7 @@ export const mergeUniqueEntities = (
   return mapUniqueFlowEntitisSetKeyToUniqueFlowEntity(entityMapListA);
 };
 
+/** @deprecated - use _intersectSets_ instead*/
 export const intersectUniqueFlowEntities = (
   ...lists: UniqueFlowEntity[][]
 ): UniqueFlowEntity[] => {
@@ -253,6 +255,23 @@ export const intersectUniqueFlowEntities = (
 
   // Convert the keys back to UniqueFlowEntity objects
   return mapUniqueFlowEntitisSetKeyToUniqueFlowEntity(initialSet);
+};
+
+export const intersectSets = <T>(...sets: Array<Set<T>>): Set<T> => {
+  // We need to iterate over the collection of sets
+  // and perform the intersection only for those
+  // sets that are not empty
+  let intersectedSet = new Set<T>();
+  for (const set of sets) {
+    if (set.size > 0) {
+      if (intersectedSet.size === 0) {
+        intersectedSet = set;
+      } else {
+        intersectedSet = intersectedSet.intersection(set);
+      }
+    }
+  }
+  return intersectedSet;
 };
 
 export const mapUniqueFlowEntitisSetKeyToSetkey = (
@@ -414,3 +433,18 @@ export const buildOrderBy = (
 
   return orderBy;
 };
+
+/**
+ * Converts a Set of "id:versionID" strings into the array
+ * of UniqueFlowEntity objects your existing search method expects.
+ */
+export const parseFlowIdVersionSet = (idVersionSet: Set<string>): UniqueFlowEntity[] => {
+  return [...idVersionSet].map((entry) => {
+    const [idStr, versionStr] = entry.split(':');
+    const id: FlowId = createBrandedValue(Number(idStr));
+    return ({
+      id,
+      versionID: versionStr !== undefined ? Number(versionStr) : 0,
+    }) satisfies UniqueFlowEntity;
+  });
+}

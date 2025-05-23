@@ -3,13 +3,12 @@ import { ExternalReferenceService } from '../../../external-reference/external-r
 import { LegacyService } from '../../../legacy/legacy-service';
 import { ReportDetailService } from '../../../report-details/report-detail-service';
 import { FlowService } from '../../flow-service';
-import type { UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
-import { intersectUniqueFlowEntities } from './utils';
+import { intersectSets, parseFlowIdVersionSet } from './utils';
 
 @Service()
 export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
@@ -27,10 +26,10 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
   ): Promise<FlowIdSearchStrategyResponse> {
     const { models, nestedFlowFilters } = args;
 
-    let flowsReporterReferenceCode: UniqueFlowEntity[] = [];
-    let flowsSourceSystemId: UniqueFlowEntity[] = [];
-    let flowsSystemId: UniqueFlowEntity[] = [];
-    const flowsLegacyId: UniqueFlowEntity[] = [];
+    let flowsReporterReferenceCode: Set<string> = new Set<string>();
+    let flowsSourceSystemId: Set<string> = new Set<string>();
+    let flowsSystemId: Set<string> = new Set<string>();
+    const flowsLegacyId: Set<string> = new Set<string>();
 
     // Get the flowIDs using 'reporterReferenceCode'
     if (nestedFlowFilters?.reporterRefCode) {
@@ -67,30 +66,27 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
       );
 
       if (flowID) {
-        flowsLegacyId.push({
-          id: flowID,
-          versionID: 1,
-        });
+        flowsLegacyId.add(`${flowID}:1`);
       }
     }
 
     // Intersect the flowIDs from the nestedFlowFilters
-    const flowIDsFromNestedFlowFilters: UniqueFlowEntity[] =
-      intersectUniqueFlowEntities(
+    const flowIDsFromNestedFlowFilters: Set<string> =
+      intersectSets(
         flowsReporterReferenceCode,
         flowsSourceSystemId,
         flowsSystemId,
         flowsLegacyId
       );
 
-    if (flowIDsFromNestedFlowFilters.length === 0) {
+    if (flowIDsFromNestedFlowFilters.size === 0) {
       return { flows: [] };
     }
     // Once gathered and disjoined the flowIDs from the nestedFlowFilters
     // Look after this uniqueFlows in the flow table
     const flows = await this.flowService.progresiveSearch(
       models,
-      flowIDsFromNestedFlowFilters,
+      parseFlowIdVersionSet(flowIDsFromNestedFlowFilters),
       1000,
       0,
       false, // Stop when we have the limit
