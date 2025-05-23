@@ -12,10 +12,10 @@ import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
   defaultSearchFlowFilter,
-  intersectUniqueFlowEntities,
+  intersectSets,
   mapFlowFiltersToFlowObjectFiltersGrouped,
   mapFlowOrderBy,
-  mergeUniqueEntities,
+  parseFlowIdVersionSet,
   prepareFlowConditions,
   prepareFlowStatusConditions,
 } from './utils';
@@ -49,13 +49,33 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // obtain the entities relation to the flow
     // to be able to sort the flows using the entity
     const isSortByEntity = orderBy && orderBy.entity !== 'flow';
-    let sortByFlowIDs: UniqueFlowEntity[] = [];
+    let sortByFlowIDsSet = new Set<string>();
     const orderByForFlow = mapFlowOrderBy(orderBy);
 
+    // Fetch sorted flow IDs only for the filtered subset instead of the whole table
+    if (isSortByEntity) {
+      // Get entity-sorted IDs then intersect with filtered subset
+      const sortByFlowIDs = await this.flowService.getFlowIDsFromEntity(
+        models,
+        orderBy
+      );
+      sortByFlowIDsSet = new Set(
+        [...sortByFlowIDs].map((o) => `${o.id}:${o.versionID}`)
+      );
+    } else {
+      // Let the DB sort only the filtered IDs
+      const sortByFlowIDs = await this.flowService.getFlows({
+        models,
+        orderBy: orderByForFlow,
+      });
+      sortByFlowIDsSet = new Set(
+        [...sortByFlowIDs].map((o) => `${o.id}:${o.versionID}`)
+      );
+    }
     // We need to fetch the flowIDs by the nestedFlowFilters
     // if there are any
     const isFilterByNestedFilters = nestedFlowFilters !== undefined;
-    let flowIDsFromNestedFlowFilters: UniqueFlowEntity[] = [];
+    let flowIDsFromNestedFlowFiltersSet = new Set<string>();
 
     if (isFilterByNestedFilters) {
       const { flows }: FlowIdSearchStrategyResponse =
@@ -68,7 +88,9 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       if (flows.length === 0) {
         return { flows: [], count: 0 };
       }
-      flowIDsFromNestedFlowFilters = flows;
+      flowIDsFromNestedFlowFiltersSet = new Set(
+        [...flows].map((o) => `${o.id}:${o.versionID}`)
+      );
     }
 
     // Now we need to check if we need to filter by category
@@ -80,7 +102,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const isFilterByCategory =
       isSearchByCategoryShotcut || flowCategoryFilters?.length > 0;
 
-    let flowsFromCategoryFilters: UniqueFlowEntity[] = [];
+    let flowIDsFromCategoryFiltersSet = new Set<string>();
 
     if (isFilterByCategory) {
       const { flows }: FlowIdSearchStrategyResponse =
@@ -95,14 +117,17 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         return { flows: [], count: 0 };
       }
 
-      flowsFromCategoryFilters = flows;
+      flowIDsFromCategoryFiltersSet = new Set(
+        [...flows].map((o) => `${o.id}:${o.versionID}`)
+      );
     }
 
     // After that, if we need to filter by flowObjects
     // Obtain the flowIDs from the flowObjects
     const isFilterByFlowObjects = flowObjectFilters?.length > 0;
 
-    let flowsFromObjectFilters: UniqueFlowEntity[] = [];
+    let flowIDsFromObjectFiltersSet = new Set<string>();
+
     if (isFilterByFlowObjects) {
       // Firts step is to map the filters to the FlowObjectFiltersGrouped
       // To allow doing inclusive filtering between filters of the same type+direction
@@ -110,18 +135,16 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       const flowObjectFiltersGrouped =
         mapFlowFiltersToFlowObjectFiltersGrouped(flowObjectFilters);
 
-      const { flows }: FlowIdSearchStrategyResponse =
+      const { flows: flowsFromObjectFilters }: FlowIdSearchStrategyResponse =
         await this.getFlowIdsFromObjectConditions.search({
           models,
           flowObjectFilterGrouped: flowObjectFiltersGrouped,
         });
 
       // If after this filter we have no flows, we can return an empty array
-      if (flows.length === 0) {
+      if (flowsFromObjectFilters.length === 0) {
         return { flows: [], count: 0 };
       }
-
-      flowsFromObjectFilters = flows;
 
       // If 'includeChildrenOfParkedFlows' is defined and true
       // we need to obtain the flowIDs from the childs whose parent flows are parked
@@ -137,6 +160,10 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
           flowsFromObjectFilters.push(child);
         }
       }
+
+      flowIDsFromObjectFiltersSet = new Set(
+        [...flowsFromObjectFilters].map((o) => `${o.id}:${o.versionID}`)
+      );
     }
 
     // Lastly, we need to check if we need to filter by flow
@@ -145,7 +172,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const isFilterByFlow = flowFilters !== undefined;
     const isFilterByFlowStatus = statusFilter !== undefined;
 
-    let flowsFromFlowFilters: UniqueFlowEntity[] = [];
+    let flowIDsFromFlowFiltersSet = new Set<string>();
+
     if (isFilterByFlow || isFilterByFlowStatus) {
       let flowConditions: FlowWhere = prepareFlowConditions(flowFilters);
       // Add status filter conditions if provided
@@ -164,62 +192,36 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         return { flows: [], count: 0 };
       }
 
-      flowsFromFlowFilters = flows;
+      flowIDsFromFlowFiltersSet = new Set(
+        [...flows].map((o) => `${o.id}:${o.versionID}`)
+      );
     }
 
     // We need to intersect the flowIDs from the flowObjects, flowCategoryFilters and flowFilters
     // to obtain the flowIDs that match all the filters
-    const deduplicatedFlows: UniqueFlowEntity[] = intersectUniqueFlowEntities(
-      flowsFromCategoryFilters,
-      flowsFromObjectFilters,
-      flowsFromFlowFilters,
-      flowIDsFromNestedFlowFilters
+    const intersectedFlows: Set<string> = intersectSets(
+      flowIDsFromCategoryFiltersSet,
+      flowIDsFromFlowFiltersSet,
+      flowIDsFromNestedFlowFiltersSet,
+      flowIDsFromObjectFiltersSet
     );
 
-    if (deduplicatedFlows.length === 0) {
+    if (intersectedFlows.size === 0) {
       return { flows: [], count: 0 };
     }
+    
+    // The method Set.prototype.intersection(...) compares the bigger set with the smaller one
+    // and returns the smaller one, so we need to do the opposite
+    // More likely the `sortedFlows` will be smaller than the `intersectedFlows`,
+    // since `intersectedFlows` is the intersection of all the filters
+    // so we need to reverse the list of `sortedFlows`
+    const sortedFlows: Set<string> = intersectSets(intersectedFlows, sortByFlowIDsSet);
+    const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows).reverse();
 
-    // Fetch sorted flow IDs only for the filtered subset instead of the whole table
-    if (isSortByEntity) {
-      // Get entity-sorted IDs then intersect with filtered subset
-      const allEntitySorted = await this.flowService.getFlowIDsFromEntity(
-        models,
-        orderBy
-      );
-      sortByFlowIDs = intersectUniqueFlowEntities(
-        allEntitySorted,
-        deduplicatedFlows
-      );
-    } else {
-      // Let the DB sort only the filtered IDs
-      sortByFlowIDs = await this.flowService.getFlows({
-        models,
-        conditions: {
-          [models.Cond.OR]: deduplicatedFlows.map((f) => ({
-            [models.Cond.AND]: [{ id: f.id }, { versionID: f.versionID ?? 1 }],
-          })),
-        },
-        orderBy: orderByForFlow,
-      });
-    }
-
-    // We are going to sort the deduplicated flows
-    // using the sortByFlowIDs if there are any
-    let sortedFlows: UniqueFlowEntity[] = [];
-    // While sorting we have the same amount or less flows 'sorted' than deduplicatedFlows
-    // That means we need to keep the sortedFilters and then keep the rest of deduplicatedFlows thar are not in sortedFlows
-    // If we don't do this it may cause that just changing the orderBy we get different results
-    // Because we get rid of those flows that are not present in the sortedFlows list
-    sortedFlows = intersectUniqueFlowEntities(sortByFlowIDs, deduplicatedFlows);
-
-    sortedFlows = mergeUniqueEntities(sortedFlows, deduplicatedFlows);
-
-    const count = sortedFlows.length;
-
+    const count = sortedFlows.size;
     const flows = await this.flowService.progresiveSearch(
       models,
-      sortedFlows,
+      parsedSortedFlows,
       limit,
       offset ?? 0,
       true, // Stop when we have the limit
@@ -231,8 +233,8 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     if (isSortByEntity) {
       // Sort the flows using the sortedFlows as referenceList
       flows.sort((a, b) => {
-        const aIndex = sortedFlows.findIndex((flow) => flow.id === a.id);
-        const bIndex = sortedFlows.findIndex((flow) => flow.id === b.id);
+        const aIndex = parsedSortedFlows.findIndex((flow) => flow.id === a.id);
+        const bIndex = parsedSortedFlows.findIndex((flow) => flow.id === b.id);
         return aIndex - bIndex;
       });
     }
