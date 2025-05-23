@@ -448,3 +448,12 @@ export const parseFlowIdVersionSet = (idVersionSet: Set<string>): UniqueFlowEnti
     }) satisfies UniqueFlowEntity;
   });
 }
+
+/**
+ * Converts an array of UniqueFlowEntity objects into a Set of "id:versionID" strings.
+ */
+export const stringifyFlowIdVersionArray = (flowEntities: UniqueFlowEntity[]): Set<string> => {
+  return new Set(
+    flowEntities.map((entity) => `${entity.id}:${entity.versionID}`)
+  );
+}
