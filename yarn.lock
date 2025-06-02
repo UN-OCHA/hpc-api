@@ -1618,10 +1618,10 @@
     "@typescript-eslint/types" "8.32.0"
     eslint-visitor-keys "^4.2.0"
 
-"@unocha/hpc-api-core@^14.1.0":
-  version "14.1.0"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.1.0.tgz#41d5de40cb210b549000dc30f86ac6a73c7cabd5"
-  integrity sha512-frW1CQKM5d5YKeXSSYQ1q1sk10wm3PxK8njc4bt9G/A7k7efKIxo7PjsITg0wvhCMBCoV6JIvdpMlkMFdvjnIA==
+"@unocha/hpc-api-core@^14.3.0":
+  version "14.3.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.3.0.tgz#3781ec24a08afb2ccf6f228b840c40d12676e4a7"
+  integrity sha512-lAxfIZgEosc2Ec30EJ1c0bd6TbYuRXCYTyq6CBoIzGv/yHGiHfZF/gna5Uzl9sevgjwrlrw8ZMe+ru5buYSQMA==
   dependencies:
     "@types/lodash" "^4.17.16"
     fp-ts "^2.14.0"
