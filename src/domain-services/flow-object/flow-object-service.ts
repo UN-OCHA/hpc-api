@@ -12,7 +12,6 @@ import type {
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type UniqueFlowEntity } from '../flows/model';
-import { buildSearchFlowsObjectConditions } from '../flows/strategy/impl/utils';
 import { type FlowObjectFilterGrouped } from './model';
 import { buildWhereConditionsForFlowObjectFilters } from './utils';
 
@@ -99,52 +98,5 @@ export class FlowObjectService {
     });
 
     return flowsObjects;
-  }
-
-  async progresiveSearch(
-    models: Database,
-    referenceList: UniqueFlowEntity[],
-    batchSize: number,
-    offset: number,
-    stopOnBatchSize: boolean,
-    responseList: FlowObjectInstance[],
-    flowObjectsWhere: FlowObjectWhere,
-    orderBy?: FlowObjectOrderByCond
-  ): Promise<FlowObjectInstance[]> {
-    const reducedFlows = referenceList.slice(offset, offset + batchSize);
-
-    const whereConditions = buildSearchFlowsObjectConditions(
-      reducedFlows,
-      flowObjectsWhere
-    );
-
-    const flowObjects = await this.getFlowsObjectsByFlows(
-      models,
-      whereConditions,
-      orderBy
-    );
-
-    responseList.push(...flowObjects);
-
-    if (
-      (stopOnBatchSize && responseList.length === batchSize) ||
-      reducedFlows.length < batchSize
-    ) {
-      return responseList;
-    }
-
-    // Recursive call to get the next batch of flows
-    offset += batchSize;
-
-    return this.progresiveSearch(
-      models,
-      referenceList,
-      batchSize,
-      offset,
-      stopOnBatchSize,
-      responseList,
-      flowObjectsWhere,
-      orderBy
-    );
   }
 }
