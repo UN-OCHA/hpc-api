@@ -512,7 +512,7 @@ export class FlowService {
     const parentFlows = await this.progresiveSearch(
       models,
       parentFlowsRef,
-      PG_MAX_QUERY_PARAMS - 2, // Use a batch size of PG_MAX_QUERY_PARAMS - 2 to avoid hitting the limit
+      1000,
       0,
       false, // Do not stop on batch size
       [],
