@@ -238,7 +238,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
 
     // We need to intersect the flowIDs from the flowObjects, flowCategoryFilters and flowFilters
     // to obtain the flowIDs that match all the filters
-    const intersectedFlows: Set<string> = intersectSets(
+    const intersectedFlows = intersectSets(
       flowIDsFromCategoryFiltersSet,
       flowIDsFromFlowFiltersSet,
       flowIDsFromNestedFlowFiltersSet,
@@ -254,10 +254,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // More likely the `sortedFlows` will be smaller than the `intersectedFlows`,
     // since `intersectedFlows` is the intersection of all the filters
     // so we need to reverse the list of `sortedFlows`
-    const sortedFlows: Set<string> = intersectSets(
-      intersectedFlows,
-      sortByFlowIDsSet
-    );
+    const sortedFlows = intersectSets(intersectedFlows, sortByFlowIDsSet);
     const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows).reverse();
 
     const count = sortedFlows.size;

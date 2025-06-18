@@ -26,10 +26,10 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
   ): Promise<FlowIdSearchStrategyResponse> {
     const { models, nestedFlowFilters } = args;
 
-    let flowsReporterReferenceCode: Set<string> = new Set<string>();
-    let flowsSourceSystemId: Set<string> = new Set<string>();
-    let flowsSystemId: Set<string> = new Set<string>();
-    const flowsLegacyId: Set<string> = new Set<string>();
+    let flowsReporterReferenceCode = new Set<string>();
+    let flowsSourceSystemId = new Set<string>();
+    let flowsSystemId = new Set<string>();
+    const flowsLegacyId = new Set<string>();
 
     // Get the flowIDs using 'reporterReferenceCode'
     if (nestedFlowFilters?.reporterRefCode) {
@@ -71,7 +71,7 @@ export class GetFlowIdsFromNestedFlowFiltersStrategyImpl
     }
 
     // Intersect the flowIDs from the nestedFlowFilters
-    const flowIDsFromNestedFlowFilters: Set<string> = intersectSets(
+    const flowIDsFromNestedFlowFilters = intersectSets(
       flowsReporterReferenceCode,
       flowsSourceSystemId,
       flowsSystemId,

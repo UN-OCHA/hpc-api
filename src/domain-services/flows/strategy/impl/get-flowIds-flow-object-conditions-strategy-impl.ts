@@ -22,7 +22,7 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
       return { flows: [] };
     }
 
-    let intersectedFlows: Set<string> = new Set<string>();
+    let intersectedFlows = new Set<string>();
 
     for (const [flowObjectType, group] of flowObjectFilterGrouped.entries()) {
       for (const [direction, ids] of group.entries()) {
@@ -35,7 +35,7 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
           where: condition,
         });
 
-        const uniqueFlowObjectsEntities: Set<string> = new Set<string>(
+        const uniqueFlowObjectsEntities = new Set<string>(
           flowObjectsFound.map(
             (flowObject) => `${flowObject.flowID}:${flowObject.versionID}`
           )
