@@ -3,10 +3,8 @@ import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { type FlowExternalReference } from '../flows/graphql/types';
-import { type UniqueFlowEntity } from '../flows/model';
 import { type SystemID } from '../report-details/graphql/types';
 
 @Service()
@@ -51,7 +49,7 @@ export class ExternalReferenceService {
   async getUniqueFlowIDsBySystemID(
     models: Database,
     systemID: SystemID
-  ): Promise<UniqueFlowEntity[]> {
+  ): Promise<Set<string>> {
     const externalRefences: Array<
       InstanceDataOfModel<Database['externalReference']>
     > = await models.externalReference.find({
@@ -61,13 +59,11 @@ export class ExternalReferenceService {
       skipValidation: true,
     });
 
-    const flowIDs: UniqueFlowEntity[] = [];
-
-    for (const reference of externalRefences) {
-      flowIDs.push(this.mapExternalDataToUniqueFlowEntity(reference));
-    }
-
-    return flowIDs;
+    return new Set(
+      externalRefences.map((externalReference) => {
+        return `${externalReference.flowID}:${externalReference.versionID}`;
+      })
+    );
   }
 
   private mapExternalReferenceToExternalReferenceFlows(
@@ -81,15 +77,6 @@ export class ExternalReferenceService {
       createdAt: externalReference.createdAt.toISOString(),
       updatedAt: externalReference.updatedAt.toISOString(),
       versionID: externalReference.versionID ?? 0,
-    };
-  }
-
-  private mapExternalDataToUniqueFlowEntity(
-    external: InstanceDataOfModel<Database['externalReference']>
-  ): UniqueFlowEntity {
-    return {
-      id: createBrandedValue(external.flowID),
-      versionID: external.versionID,
     };
   }
 }

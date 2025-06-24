@@ -1,12 +1,11 @@
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { Service } from 'typedi';
-import { type UniqueFlowEntity } from '../../model';
 import {
   type FlowIDSearchStrategy,
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
-import { intersectUniqueFlowEntities } from './utils';
+import { intersectSets, parseFlowIdVersionSet } from './utils';
 
 @Service()
 export class GetFlowIdsFromObjectConditionsStrategyImpl
@@ -23,7 +22,7 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
       return { flows: [] };
     }
 
-    let intersectedFlows: UniqueFlowEntity[] = [];
+    let intersectedFlows = new Set<string>();
 
     for (const [flowObjectType, group] of flowObjectFilterGrouped.entries()) {
       for (const [direction, ids] of group.entries()) {
@@ -36,22 +35,19 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
           where: condition,
         });
 
-        const uniqueFlowObjectsEntities: UniqueFlowEntity[] =
+        const uniqueFlowObjectsEntities = new Set<string>(
           flowObjectsFound.map(
-            (flowObject) =>
-              ({
-                id: flowObject.flowID,
-                versionID: flowObject.versionID,
-              }) satisfies UniqueFlowEntity
-          );
+            (flowObject) => `${flowObject.flowID}:${flowObject.versionID}`
+          )
+        );
 
-        intersectedFlows = intersectUniqueFlowEntities(
+        intersectedFlows = intersectSets(
           intersectedFlows,
           uniqueFlowObjectsEntities
         );
       }
     }
 
-    return { flows: intersectedFlows };
+    return { flows: parseFlowIdVersionSet(intersectedFlows) };
   }
 }

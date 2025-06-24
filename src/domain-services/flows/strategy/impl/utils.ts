@@ -1,4 +1,5 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Cond, Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import type { InstanceDataOf } from '@unocha/hpc-api-core/src/db/util/model-definition';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
@@ -222,6 +223,7 @@ export const mergeUniqueEntities = (
   return mapUniqueFlowEntitisSetKeyToUniqueFlowEntity(entityMapListA);
 };
 
+/** @deprecated - use _intersectSets_ instead*/
 export const intersectUniqueFlowEntities = (
   ...lists: UniqueFlowEntity[][]
 ): UniqueFlowEntity[] => {
@@ -253,6 +255,23 @@ export const intersectUniqueFlowEntities = (
 
   // Convert the keys back to UniqueFlowEntity objects
   return mapUniqueFlowEntitisSetKeyToUniqueFlowEntity(initialSet);
+};
+
+export const intersectSets = <T>(...sets: Array<Set<T>>): Set<T> => {
+  // We need to iterate over the collection of sets
+  // and perform the intersection only for those
+  // sets that are not empty
+  let intersectedSet = new Set<T>();
+  for (const set of sets) {
+    if (set.size > 0) {
+      if (intersectedSet.size === 0) {
+        intersectedSet = set;
+      } else {
+        intersectedSet = intersectedSet.intersection(set);
+      }
+    }
+  }
+  return intersectedSet;
 };
 
 export const mapUniqueFlowEntitisSetKeyToSetkey = (
@@ -413,4 +432,32 @@ export const buildOrderBy = (
   }
 
   return orderBy;
+};
+
+/**
+ * Converts a Set of "id:versionID" strings into the array
+ * of UniqueFlowEntity objects your existing search method expects.
+ */
+export const parseFlowIdVersionSet = (
+  idVersionSet: Set<string>
+): UniqueFlowEntity[] => {
+  return [...idVersionSet].map((entry) => {
+    const [idStr, versionStr] = entry.split(':');
+    const id: FlowId = createBrandedValue(Number(idStr));
+    return {
+      id,
+      versionID: versionStr !== undefined ? Number(versionStr) : 0,
+    } satisfies UniqueFlowEntity;
+  });
+};
+
+/**
+ * Converts an array of UniqueFlowEntity objects into a Set of "id:versionID" strings.
+ */
+export const stringifyFlowIdVersionArray = (
+  flowEntities: UniqueFlowEntity[]
+): Set<string> => {
+  return new Set(
+    flowEntities.map((entity) => `${entity.id}:${entity.versionID}`)
+  );
 };
