@@ -78,28 +78,27 @@ export class ReportDetailService {
   async getUniqueFlowIDsFromReportDetailsByReporterReferenceCode(
     models: Database,
     reporterRefCode: string
-  ): Promise<UniqueFlowEntity[]> {
+  ): Promise<Set<string>> {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
-          refCode: reporterRefCode,
+          refCode: { [models.Op.ILIKE]: `%${reporterRefCode}%` },
         },
         skipValidation: true,
+        distinct: ['flowID', 'versionID'],
       });
 
-    const flowIDs: UniqueFlowEntity[] = [];
-
-    for (const reportDetail of reportDetails) {
-      flowIDs.push(this.mapReportDetailToUniqueFlowEntity(reportDetail));
-    }
-
-    return flowIDs;
+    return new Set(
+      reportDetails.map((report) => {
+        return `${report.flowID}:${report.versionID}`;
+      })
+    );
   }
 
   async getUniqueFlowIDsFromReportDetailsBySourceSystemID(
     models: Database,
     sourceSystemID: string
-  ): Promise<UniqueFlowEntity[]> {
+  ): Promise<Set<string>> {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
@@ -108,13 +107,11 @@ export class ReportDetailService {
         skipValidation: true,
       });
 
-    const flowIDs: UniqueFlowEntity[] = [];
-
-    for (const report of reportDetails) {
-      flowIDs.push(this.mapReportDetailToUniqueFlowEntity(report));
-    }
-
-    return flowIDs;
+    return new Set(
+      reportDetails.map((report) => {
+        return `${report.flowID}:${report.versionID}`;
+      })
+    );
   }
 
   private mapReportDetailToUniqueFlowEntity(
