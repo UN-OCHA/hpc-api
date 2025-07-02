@@ -1681,10 +1681,10 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/lodash@^4.17.16":
-  version "4.17.16"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.16.tgz#94ae78fab4a38d73086e962d0b65c30d816bfb0a"
-  integrity sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==
+"@types/lodash@^4.17.20":
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.20.tgz#1ca77361d7363432d29f5e55950d9ec1e1c6ea93"
+  integrity sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==
 
 "@types/long@^4.0.0":
   version "4.0.2"
@@ -1866,17 +1866,17 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
 
-"@unocha/hpc-api-core@^14.3.0":
-  version "14.3.0"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.3.0.tgz#3781ec24a08afb2ccf6f228b840c40d12676e4a7"
-  integrity sha512-lAxfIZgEosc2Ec30EJ1c0bd6TbYuRXCYTyq6CBoIzGv/yHGiHfZF/gna5Uzl9sevgjwrlrw8ZMe+ru5buYSQMA==
+"@unocha/hpc-api-core@^14.4.0":
+  version "14.4.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.4.0.tgz#885292224f378c78ce6750d014ae26763fc513a9"
+  integrity sha512-wtEDmeJ9+mihdSMwL1+0+ooYRf5w3DE+PKzdrSQNdU/gCAFeqgOaE+k/heYGc9pFr7hypepwik56ziRK+YbCIA==
   dependencies:
-    "@types/lodash" "^4.17.16"
-    fp-ts "^2.14.0"
-    io-ts "2.2.20"
+    "@types/lodash" "^4.17.20"
+    fp-ts "2.16.10"
+    io-ts "2.2.22"
     knex "3.1.0"
     lodash "^4.17.21"
-    pg "^8.15.6"
+    pg "^8.16.3"
     ts-node "^10.9.2"
 
 "@unocha/hpc-repo-tools@^7.1.1":
@@ -3152,10 +3152,10 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.6"
     signal-exit "^4.0.1"
 
-fp-ts@^2.14.0:
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.14.0.tgz#97ac3d9f002dcd02f93ca1269ae14a7fcb805582"
-  integrity sha512-QLagLSYAgMA00pZzUzeksH/78Sd14y7+Gc2A8Yaja3/IpGOFMdm/gYBuDMxYqLsJ58iT5lz+bJb953RAeFfp1A==
+fp-ts@2.16.10:
+  version "2.16.10"
+  resolved "https://registry.yarnpkg.com/fp-ts/-/fp-ts-2.16.10.tgz#829b82a46571c2dc202bed38a9c2eeec603e38c4"
+  integrity sha512-vuROzbNVfCmUkZSUbnWSltR1sbheyQbTzug7LB/46fEa1c0EucLeBaCEUE0gF3ZGUGBt9lVUiziGOhhj6K1ORA==
 
 fs.realpath@^1.0.0:
   version "1.0.0"
@@ -3464,10 +3464,10 @@ interpret@^2.2.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-2.2.0.tgz#1a78a0b5965c40a5416d007ad6f50ad27c417df9"
   integrity sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==
 
-io-ts@2.2.20:
-  version "2.2.20"
-  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.20.tgz#be42b75f6668a2c44f706f72ee6e4c906777c7f5"
-  integrity sha512-Rq2BsYmtwS5vVttie4rqrOCIfHCS9TgpRLFpKQCM1wZBBRY9nWVGmEvm2FnDbSE2un1UE39DvFpTR5UL47YDcA==
+io-ts@2.2.22:
+  version "2.2.22"
+  resolved "https://registry.yarnpkg.com/io-ts/-/io-ts-2.2.22.tgz#5ab0d3636fe8494a275f0266461ab019da4b8d0b"
+  integrity sha512-FHCCztTkHoV9mdBsHpocLpdTAfh956ZQcIkWQxxS0U5HT53vtrcuYdQneEJKH6xILaLNzXVl2Cvwtoy8XNN0AA==
 
 ip-address@^9.0.5:
   version "9.0.5"
@@ -4651,7 +4651,7 @@ pg-types@2.2.0, pg-types@^2.2.0:
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
-pg@^8.15.6, pg@^8.16.3:
+pg@^8.16.3:
   version "8.16.3"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.16.3.tgz#160741d0b44fdf64680e45374b06d632e86c99fd"
   integrity sha512-enxc1h0jA/aq5oSDMvqyW3q89ra6XIIDZgCX9vkMrnz5DFTw/Ny3Li2lFQ+pt3L6MCgm/5o2o8HW9hiJji+xvw==
