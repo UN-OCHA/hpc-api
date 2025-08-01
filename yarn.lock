@@ -1893,10 +1893,10 @@
   resolved "https://registry.yarnpkg.com/@ungap/structured-clone/-/structured-clone-1.3.0.tgz#d06bbb384ebcf6c505fde1c3d0ed4ddffe0aaff8"
   integrity sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==
 
-"@unocha/hpc-api-core@^14.4.0":
-  version "14.4.0"
-  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.4.0.tgz#885292224f378c78ce6750d014ae26763fc513a9"
-  integrity sha512-wtEDmeJ9+mihdSMwL1+0+ooYRf5w3DE+PKzdrSQNdU/gCAFeqgOaE+k/heYGc9pFr7hypepwik56ziRK+YbCIA==
+"@unocha/hpc-api-core@^14.5.0":
+  version "14.5.0"
+  resolved "https://registry.yarnpkg.com/@unocha/hpc-api-core/-/hpc-api-core-14.5.0.tgz#c6c0a18058388d684b781cbc7aa3efbb9aae0c72"
+  integrity sha512-S8yVW56bQgLB2jOCFlghU8yl2F5kP66mhcLeTdFNMxmGdIOM3DtYEvgEEXxgIpwprsL5nUqT/7GdqvIt5pMDxA==
   dependencies:
     "@types/lodash" "^4.17.20"
     fp-ts "2.16.10"
