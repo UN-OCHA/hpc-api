@@ -292,7 +292,7 @@ export class FlowService {
           );
         }
         // Get planVersion entities sorted
-        // Collect fisrt part of the entity key by the fisrt Case letter
+        // Collect first part of the entity key by the first Case letter
         const entityKey = `${
           entity.split(/[A-Z]/)[0]
         }Id` as keyof InstanceOfModel<Database['planVersion']>;
