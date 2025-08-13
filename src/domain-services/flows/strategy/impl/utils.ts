@@ -161,6 +161,13 @@ export const mapFlowOrderBy = (
     return defaultFlowOrderBy();
   }
 
+  if (orderBy.entity === 'flow' && orderBy.column === 'status') {
+    return {
+      column: 'versionID',
+      order: orderBy.order,
+    };
+  }
+
   return {
     column: orderBy.column as keyof InstanceDataOf<FlowFieldsDefinition>,
     order: orderBy.order,
