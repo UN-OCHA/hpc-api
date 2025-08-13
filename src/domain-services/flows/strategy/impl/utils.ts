@@ -393,8 +393,8 @@ export const buildOrderBy = (
 ): FlowOrderByWithSubEntity => {
   const orderBy: FlowOrderByWithSubEntity = {
     column: sortField ?? 'updatedAt',
-    order: sortOrder ?? ('desc' as SortOrder),
-    direction: 'source' as EntityDirection,
+    order: sortOrder ?? 'desc',
+    direction: 'source',
     entity: 'flow',
   } satisfies FlowOrderByWithSubEntity;
 
