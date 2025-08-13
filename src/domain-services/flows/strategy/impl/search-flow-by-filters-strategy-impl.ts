@@ -249,11 +249,11 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       return { flows: [], count: 0 };
     }
 
-    // The method Set.prototype.intersection(...) compares the bigger set with the smaller one
-    // and returns the smaller one, so we need to do the opposite
-    // More likely the `sortedFlows` will be smaller than the `intersectedFlows`,
-    // since `intersectedFlows` is the intersection of all the filters
-    // so we need to reverse the list of `sortedFlows`
+    // The method `Set.prototype.intersection()` compares the bigger set with
+    // the smaller one and returns the smaller one, but we cannot guarantee
+    // which one is bigger and which is smaller. Thus, we need to manually
+    // make sure that sorting order from `sortByFlowIDsSet` is applied
+    // to the final result of the intersection.
     const intersected = intersectSets(intersectedFlows, sortByFlowIDsSet);
     let sortedFlows = intersected;
     if (sortByFlowIDsSet.size > 0) {
