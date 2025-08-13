@@ -254,8 +254,14 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // More likely the `sortedFlows` will be smaller than the `intersectedFlows`,
     // since `intersectedFlows` is the intersection of all the filters
     // so we need to reverse the list of `sortedFlows`
-    const sortedFlows = intersectSets(intersectedFlows, sortByFlowIDsSet);
-    const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows).reverse();
+    const intersected = intersectSets(intersectedFlows, sortByFlowIDsSet);
+    let sortedFlows = intersected;
+    if (sortByFlowIDsSet.size > 0) {
+      sortedFlows = new Set(
+        [...sortByFlowIDsSet].filter((flowID) => intersected.has(flowID))
+      );
+    }
+    const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows);
 
     const count = sortedFlows.size;
     const flows = await this.flowService.progresiveSearch(
