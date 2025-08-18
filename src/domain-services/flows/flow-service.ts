@@ -386,7 +386,7 @@ export class FlowService {
         (flowLink) =>
           flowLink.parentID !== flow.id && flowLink.childID === flow.id
       )
-      .map((flowLink) => flowLink.parentID.valueOf());
+      .map((flowLink) => flowLink.parentID);
 
     if (flowLinksParentsIDs.length === 0) {
       return null;
