@@ -180,7 +180,7 @@ export class FlowSearchService {
     // Obtain external references and flow objects in parallel
     const [externalReferencesMap, flowObjects] = await Promise.all([
       this.externalReferenceService.getExternalReferencesForFlows(
-        flowIds,
+        flowVersions,
         models
       ),
       this.flowObjectService.getFlowObjectByFlowId(models, flowVersions),
