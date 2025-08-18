@@ -398,7 +398,7 @@ export class FlowService {
       },
     });
 
-    const parentFlows: number[] = [];
+    const parentFlowIds: FlowId[] = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
       const parkedParentCategoryRef = await models.categoryRef.find({
@@ -411,17 +411,17 @@ export class FlowService {
       });
 
       if (parkedParentCategoryRef && parkedParentCategoryRef.length > 0) {
-        parentFlows.push(flowLinkParentID);
+        parentFlowIds.push(flowLinkParentID);
       }
     }
 
     const parkedParentFlowObjectsOrganizationSource: FlowObject[] = [];
 
-    for (const parentFlow of parentFlows) {
+    for (const parentFlowId of parentFlowIds) {
       const parkedParentOrganizationFlowObject =
         await models.flowObject.findOne({
           where: {
-            flowID: createBrandedValue(parentFlow),
+            flowID: parentFlowId,
             objectType: 'organization',
             refDirection: 'source',
             versionID: flow.versionID,
