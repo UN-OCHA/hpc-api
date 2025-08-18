@@ -2,7 +2,10 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import { splitIntoChunks } from '@unocha/hpc-api-core/src/util';
+import {
+  organizeObjectsByUniqueProperty,
+  splitIntoChunks,
+} from '@unocha/hpc-api-core/src/util';
 import { PG_MAX_QUERY_PARAMS } from '@unocha/hpc-api-core/src/util/consts';
 import {
   createBrandedValue,
@@ -398,13 +401,31 @@ export class FlowService {
       },
     });
 
+    const parentFlowsByLatestVersion = organizeObjectsByUniqueProperty(
+      await models.flow.find({
+        where: {
+          id: { [Op.IN]: flowLinksParentsIDs },
+          activeStatus: true,
+        },
+      }),
+      'id'
+    );
+
     const parentFlowIds: FlowId[] = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
+      const flowLinkParent = parentFlowsByLatestVersion.get(flowLinkParentID);
+
+      if (!flowLinkParent) {
+        throw new Error(
+          `Cannot find latest version of flow with ID ${flowLinkParentID}`
+        );
+      }
+
       const parkedParentCategoryRef = await models.categoryRef.find({
         where: {
           categoryID: parkedCategory?.id,
-          versionID: flow.versionID,
+          versionID: flowLinkParent.versionID,
           objectID: flowLinkParentID,
           objectType: 'flow',
         },
