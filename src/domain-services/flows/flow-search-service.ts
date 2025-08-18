@@ -223,7 +223,7 @@ export class FlowSearchService {
       this.locationService.getLocationsForFlows(locationsFO, models),
       this.planService.getPlansForFlows(plansFO, models),
       this.usageYearService.getUsageYearsForFlows(usageYearsFO, models),
-      this.reportDetailService.getReportDetailsForFlows(flowIds, models),
+      this.reportDetailService.getReportDetailsForFlows(flowVersions, models),
     ]);
 
     const promises = flows.map(async (flow) => {
