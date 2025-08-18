@@ -411,7 +411,7 @@ export class FlowService {
       'id'
     );
 
-    const parentFlowIds: FlowId[] = [];
+    const parentFlowVersions: Array<{ flowID: FlowId; versionID: number }> = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
       const flowLinkParent = parentFlowsByLatestVersion.get(flowLinkParentID);
@@ -432,20 +432,23 @@ export class FlowService {
       });
 
       if (parkedParentCategoryRef && parkedParentCategoryRef.length > 0) {
-        parentFlowIds.push(flowLinkParentID);
+        parentFlowVersions.push({
+          flowID: flowLinkParentID,
+          versionID: flowLinkParent.versionID,
+        });
       }
     }
 
     const parkedParentFlowObjectsOrganizationSource: FlowObject[] = [];
 
-    for (const parentFlowId of parentFlowIds) {
+    for (const { flowID, versionID } of parentFlowVersions) {
       const parkedParentOrganizationFlowObject =
         await models.flowObject.findOne({
           where: {
-            flowID: parentFlowId,
+            flowID,
             objectType: 'organization',
             refDirection: 'source',
-            versionID: flow.versionID,
+            versionID,
           },
         });
 
