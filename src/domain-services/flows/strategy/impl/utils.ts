@@ -161,6 +161,13 @@ export const mapFlowOrderBy = (
     return defaultFlowOrderBy();
   }
 
+  if (orderBy.entity === 'flow' && orderBy.column === 'status') {
+    return {
+      column: 'versionID',
+      order: orderBy.order,
+    };
+  }
+
   return {
     column: orderBy.column as keyof InstanceDataOf<FlowFieldsDefinition>,
     order: orderBy.order,
@@ -393,8 +400,8 @@ export const buildOrderBy = (
 ): FlowOrderByWithSubEntity => {
   const orderBy: FlowOrderByWithSubEntity = {
     column: sortField ?? 'updatedAt',
-    order: sortOrder ?? ('desc' as SortOrder),
-    direction: 'source' as EntityDirection,
+    order: sortOrder ?? 'desc',
+    direction: 'source',
     entity: 'flow',
   } satisfies FlowOrderByWithSubEntity;
 

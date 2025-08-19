@@ -85,7 +85,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     }
 
     // Now we need to check if we need to filter by category
-    // if it's using any of the shorcuts
+    // if it's using any of the shortcuts
     // or if there are any flowCategoryFilters
     const isSearchByCategoryShotcut =
       shortcutFilters !== null && shortcutFilters.length > 0;
@@ -119,7 +119,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     let flowObjectFiltersGrouped: FlowObjectFilterGrouped | null = null;
 
     if (isFilterByFlowObjects) {
-      // Firts step is to map the filters to the FlowObjectFiltersGrouped
+      // First step is to map the filters to the FlowObjectFiltersGrouped
       // To allow doing inclusive filtering between filters of the same type+direction
       // But exclusive filtering between filters of different type+direction
       flowObjectFiltersGrouped =
@@ -214,9 +214,9 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     );
 
     // If 'includeChildrenOfParkedFlows' is defined and true
-    // we need to obtain the flowIDs from the childs whose parent flows are parked
+    // we need to obtain the flowIDs from the children whose parent flows are parked
     // if (shouldIncludeChildrenOfParkedFlows) {
-    // We need to obtain the flowIDs from the childs whose parent flows are parked
+    // We need to obtain the flowIDs from the children whose parent flows are parked
     if (shouldIncludeChildrenOfParkedFlows && flowObjectFiltersGrouped) {
       const childs =
         await this.flowService.getParkedParentFlowsByFlowObjectFilter(
@@ -249,13 +249,19 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       return { flows: [], count: 0 };
     }
 
-    // The method Set.prototype.intersection(...) compares the bigger set with the smaller one
-    // and returns the smaller one, so we need to do the opposite
-    // More likely the `sortedFlows` will be smaller than the `intersectedFlows`,
-    // since `intersectedFlows` is the intersection of all the filters
-    // so we need to reverse the list of `sortedFlows`
-    const sortedFlows = intersectSets(intersectedFlows, sortByFlowIDsSet);
-    const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows).reverse();
+    // The method `Set.prototype.intersection()` compares the bigger set with
+    // the smaller one and returns the smaller one, but we cannot guarantee
+    // which one is bigger and which is smaller. Thus, we need to manually
+    // make sure that sorting order from `sortByFlowIDsSet` is applied
+    // to the final result of the intersection.
+    const intersected = intersectSets(intersectedFlows, sortByFlowIDsSet);
+    let sortedFlows = intersected;
+    if (sortByFlowIDsSet.size > 0) {
+      sortedFlows = new Set(
+        [...sortByFlowIDsSet].filter((flowID) => intersected.has(flowID))
+      );
+    }
+    const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows);
 
     const count = sortedFlows.size;
     const flows = await this.flowService.progresiveSearch(

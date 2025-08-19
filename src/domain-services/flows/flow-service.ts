@@ -292,7 +292,7 @@ export class FlowService {
           );
         }
         // Get planVersion entities sorted
-        // Collect fisrt part of the entity key by the fisrt Case letter
+        // Collect first part of the entity key by the first Case letter
         const entityKey = `${
           entity.split(/[A-Z]/)[0]
         }Id` as keyof InstanceOfModel<Database['planVersion']>;
@@ -319,8 +319,10 @@ export class FlowService {
 
     // After getting the sorted entityID list
     // we can now get the flowObjects
-    const entityCondKey = orderBy.entity as unknown;
-    const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
+    const entityCondKey = orderBy.entity;
+    const entityCondKeyFlowObjectType = (
+      entityCondKey === 'planVersion' ? 'plan' : entityCondKey
+    ) as FlowObjectType;
 
     // Order map
     const orderMap = new Map<number, number>();
