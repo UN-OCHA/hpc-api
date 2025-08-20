@@ -1,6 +1,6 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
@@ -11,34 +11,38 @@ import { type ReportDetail } from './graphql/types';
 @Service()
 export class ReportDetailService {
   async getReportDetailsForFlows(
-    flowIds: FlowId[],
+    flowVersions: Array<{ flowID: FlowId; versionID: number }>,
     models: Database
   ): Promise<Map<number, ReportDetail[]>> {
-    const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
-      await models.reportDetail.find({
-        where: {
-          flowID: {
-            [Op.IN]: flowIds,
-          },
-        },
-        skipValidation: true,
-      });
-
     const reportDetailsMap = new Map<number, ReportDetail[]>();
 
-    for (const flowId of flowIds) {
-      if (!reportDetailsMap.has(flowId)) {
-        reportDetailsMap.set(flowId, []);
+    if (flowVersions.length === 0) {
+      return reportDetailsMap;
+    }
+
+    const reportDetails = await models.reportDetail.find({
+      where: {
+        [Cond.OR]: flowVersions.map(({ flowID, versionID }) => ({
+          flowID,
+          versionID,
+        })),
+      },
+      skipValidation: true,
+    });
+
+    for (const { flowID } of flowVersions) {
+      if (!reportDetailsMap.has(flowID)) {
+        reportDetailsMap.set(flowID, []);
       }
 
       const flowsReportingDetails = reportDetails.filter(
-        (report) => report.flowID === flowId
+        (report) => report.flowID === flowID
       );
 
       if (flowsReportingDetails && flowsReportingDetails.length > 0) {
         const reportDetailsPerFlow = getOrCreate(
           reportDetailsMap,
-          flowId,
+          flowID,
           () => []
         );
 
