@@ -2,7 +2,10 @@ import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
-import { splitIntoChunks } from '@unocha/hpc-api-core/src/util';
+import {
+  organizeObjectsByUniqueProperty,
+  splitIntoChunks,
+} from '@unocha/hpc-api-core/src/util';
 import { PG_MAX_QUERY_PARAMS } from '@unocha/hpc-api-core/src/util/consts';
 import {
   createBrandedValue,
@@ -292,7 +295,7 @@ export class FlowService {
           );
         }
         // Get planVersion entities sorted
-        // Collect fisrt part of the entity key by the fisrt Case letter
+        // Collect first part of the entity key by the first Case letter
         const entityKey = `${
           entity.split(/[A-Z]/)[0]
         }Id` as keyof InstanceOfModel<Database['planVersion']>;
@@ -319,8 +322,10 @@ export class FlowService {
 
     // After getting the sorted entityID list
     // we can now get the flowObjects
-    const entityCondKey = orderBy.entity as unknown;
-    const entityCondKeyFlowObjectType = entityCondKey as FlowObjectType;
+    const entityCondKey = orderBy.entity;
+    const entityCondKeyFlowObjectType = (
+      entityCondKey === 'planVersion' ? 'plan' : entityCondKey
+    ) as FlowObjectType;
 
     // Order map
     const orderMap = new Map<number, number>();
@@ -384,7 +389,7 @@ export class FlowService {
         (flowLink) =>
           flowLink.parentID !== flow.id && flowLink.childID === flow.id
       )
-      .map((flowLink) => flowLink.parentID.valueOf());
+      .map((flowLink) => flowLink.parentID);
 
     if (flowLinksParentsIDs.length === 0) {
       return null;
@@ -396,33 +401,54 @@ export class FlowService {
       },
     });
 
-    const parentFlows: number[] = [];
+    const parentFlowsByLatestVersion = organizeObjectsByUniqueProperty(
+      await models.flow.find({
+        where: {
+          id: { [Op.IN]: flowLinksParentsIDs },
+          activeStatus: true,
+        },
+      }),
+      'id'
+    );
+
+    const parentFlowVersions: Array<{ flowID: FlowId; versionID: number }> = [];
 
     for (const flowLinkParentID of flowLinksParentsIDs) {
+      const flowLinkParent = parentFlowsByLatestVersion.get(flowLinkParentID);
+
+      if (!flowLinkParent) {
+        throw new Error(
+          `Cannot find latest version of flow with ID ${flowLinkParentID}`
+        );
+      }
+
       const parkedParentCategoryRef = await models.categoryRef.find({
         where: {
           categoryID: parkedCategory?.id,
-          versionID: flow.versionID,
+          versionID: flowLinkParent.versionID,
           objectID: flowLinkParentID,
           objectType: 'flow',
         },
       });
 
       if (parkedParentCategoryRef && parkedParentCategoryRef.length > 0) {
-        parentFlows.push(flowLinkParentID);
+        parentFlowVersions.push({
+          flowID: flowLinkParentID,
+          versionID: flowLinkParent.versionID,
+        });
       }
     }
 
     const parkedParentFlowObjectsOrganizationSource: FlowObject[] = [];
 
-    for (const parentFlow of parentFlows) {
+    for (const { flowID, versionID } of parentFlowVersions) {
       const parkedParentOrganizationFlowObject =
         await models.flowObject.findOne({
           where: {
-            flowID: createBrandedValue(parentFlow),
+            flowID,
             objectType: 'organization',
             refDirection: 'source',
-            versionID: flow.versionID,
+            versionID,
           },
         });
 

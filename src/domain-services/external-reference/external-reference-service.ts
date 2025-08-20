@@ -1,6 +1,6 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
+import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { Service } from 'typedi';
@@ -9,22 +9,30 @@ import { type SystemID } from '../report-details/graphql/types';
 
 @Service()
 export class ExternalReferenceService {
-  async getExternalReferencesForFlows(flowIDs: FlowId[], models: Database) {
+  async getExternalReferencesForFlows(
+    flowVersions: Array<{ flowID: FlowId; versionID: number }>,
+    models: Database
+  ) {
+    const externalReferencesMap = new Map<number, FlowExternalReference[]>();
+
+    if (flowVersions.length === 0) {
+      return externalReferencesMap;
+    }
+
     const externalReferences = await models.externalReference.find({
       where: {
-        flowID: {
-          [Op.IN]: flowIDs,
-        },
+        [Cond.OR]: flowVersions.map(({ flowID, versionID }) => ({
+          flowID,
+          versionID,
+        })),
       },
       skipValidation: true,
     });
 
-    const externalReferencesMap = new Map<number, FlowExternalReference[]>();
-
     // First we add all flowIDs to the map
     // Since there might be flows without external references
     // thus we want to keep them in the map
-    for (const flowID of flowIDs) {
+    for (const { flowID } of flowVersions) {
       externalReferencesMap.set(flowID, []);
     }
 
