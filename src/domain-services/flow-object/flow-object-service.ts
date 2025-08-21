@@ -1,7 +1,7 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import {
-  Op,
+  Cond,
   type Condition,
 } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type OrderByCond } from '@unocha/hpc-api-core/src/db/util/raw-model';
@@ -55,12 +55,20 @@ export class FlowObjectService {
     ];
   }
 
-  async getFlowObjectByFlowId(models: Database, flowIds: FlowId[]) {
+  async getFlowObjectByFlowId(
+    models: Database,
+    flowVersions: Array<{ flowID: FlowId; versionID: number }>
+  ) {
+    if (flowVersions.length === 0) {
+      return [];
+    }
+
     return await models.flowObject.find({
       where: {
-        flowID: {
-          [Op.IN]: flowIds,
-        },
+        [Cond.OR]: flowVersions.map(({ flowID, versionID }) => ({
+          flowID,
+          versionID,
+        })),
       },
     });
   }

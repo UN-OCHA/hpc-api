@@ -173,13 +173,17 @@ export class FlowSearchService {
       flowVersionIDs.push(flow.versionID);
     }
 
+    const flowVersions = [...flowWithVersion].flatMap(([flowID, versionIDs]) =>
+      versionIDs.map((versionID) => ({ flowID, versionID }))
+    );
+
     // Obtain external references and flow objects in parallel
     const [externalReferencesMap, flowObjects] = await Promise.all([
       this.externalReferenceService.getExternalReferencesForFlows(
-        flowIds,
+        flowVersions,
         models
       ),
-      this.flowObjectService.getFlowObjectByFlowId(models, flowIds),
+      this.flowObjectService.getFlowObjectByFlowId(models, flowVersions),
     ]);
 
     // Map flow objects to their respective arrays
@@ -219,7 +223,7 @@ export class FlowSearchService {
       this.locationService.getLocationsForFlows(locationsFO, models),
       this.planService.getPlansForFlows(plansFO, models),
       this.usageYearService.getUsageYearsForFlows(usageYearsFO, models),
-      this.reportDetailService.getReportDetailsForFlows(flowIds, models),
+      this.reportDetailService.getReportDetailsForFlows(flowVersions, models),
     ]);
 
     const promises = flows.map(async (flow) => {
