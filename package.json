@@ -17,7 +17,7 @@
     "lint": "yarn lint-prettier && yarn lint-eslint"
   },
   "dependencies": {
-    "@unocha/hpc-api-core": "^14.8.1",
+    "@unocha/hpc-api-core": "^15.0.0",
     "apollo-server-hapi": "^3.13.0",
     "bunyan": "^1.8.15",
     "class-validator": "^0.14.2",
@@ -48,7 +48,7 @@
     "ts-node-dev": "^2.0.0"
   },
   "engines": {
-    "node": ">=20.19.0 || >=22.14.0",
+    "node": ">=22.18.0",
     "yarn": ">=1.22.22"
   },
   "lint-staged": {
