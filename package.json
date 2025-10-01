@@ -39,7 +39,7 @@
     "@types/node": "^24.3.1",
     "@types/pg": "^8.15.5",
     "@unocha/hpc-repo-tools": "^8.0.0",
-    "eslint": "9.34.0",
+    "eslint": "9.36.0",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "lint-staged": "^16.1.6",
