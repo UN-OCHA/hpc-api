@@ -1,8 +1,10 @@
 import { type PlanId } from '@unocha/hpc-api-core/src/db/models/plan';
 import { type Database } from '@unocha/hpc-api-core/src/db/type';
-import { Op } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
-import { getOrCreate } from '@unocha/hpc-api-core/src/util';
+import {
+  getOrCreate,
+  organizeObjectsByUniqueProperty,
+} from '@unocha/hpc-api-core/src/util';
 import { NotFoundError } from '@unocha/hpc-api-core/src/util/error';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
@@ -57,25 +59,35 @@ export class PlanService {
     const planObjectsIDs: PlanId[] = plansFO.map((planFO) =>
       createBrandedValue(planFO.objectID)
     );
-    const plans: Array<InstanceDataOfModel<Database['plan']>> =
-      await models.plan.find({
+    const [plans, planVersions] = await Promise.all([
+      models.plan.find({
         where: {
           id: {
-            [Op.IN]: planObjectsIDs,
+            [models.Op.IN]: planObjectsIDs,
           },
         },
-      });
+      }),
+      models.planVersion.find({
+        where: {
+          planId: {
+            [models.Op.IN]: planObjectsIDs,
+          },
+          currentVersion: true,
+        },
+      }),
+    ]);
+    const planVersionsByPlanId = organizeObjectsByUniqueProperty(
+      planVersions,
+      'planId'
+    );
 
     const plansMap = new Map<number, BasePlan[]>();
 
     for (const plan of plans) {
-      const planVersion = await models.planVersion.find({
-        where: {
-          planId: plan.id,
-          currentVersion: true,
-        },
-      });
-
+      const planVersion = planVersionsByPlanId.get(plan.id);
+      if (!planVersion) {
+        continue;
+      }
       for (const planFO of plansFO) {
         if (planFO.objectID === plan.id) {
           const flowId = planFO.flowID;
@@ -91,7 +103,7 @@ export class PlanService {
           ) {
             const planMapped = this.mapPlansToFlowPlans(
               plan,
-              planVersion[0],
+              planVersion,
               planFO.refDirection
             );
             plansPerFlow.push(planMapped);
