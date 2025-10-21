@@ -4,9 +4,7 @@ import { Cond } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceDataOfModel } from '@unocha/hpc-api-core/src/db/util/raw-model';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
 import { getOrCreate } from '@unocha/hpc-api-core/src/util';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
-import { type UniqueFlowEntity } from '../flows/model';
 import { type ReportDetail } from './graphql/types';
 @Service()
 export class ReportDetailService {
@@ -116,14 +114,5 @@ export class ReportDetailService {
         return `${report.flowID}:${report.versionID}`;
       })
     );
-  }
-
-  private mapReportDetailToUniqueFlowEntity(
-    reportDetail: InstanceDataOfModel<Database['reportDetail']>
-  ): UniqueFlowEntity {
-    return {
-      id: createBrandedValue(reportDetail.flowID),
-      versionID: reportDetail.versionID,
-    };
   }
 }
