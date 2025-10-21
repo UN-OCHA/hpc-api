@@ -9,7 +9,7 @@ import type {
   FieldsOfModel,
   InstanceOfModel,
 } from '@unocha/hpc-api-core/src/db/util/types';
-import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
+import { groupObjectsByProperty } from '@unocha/hpc-api-core/src/util';
 import { Service } from 'typedi';
 import { type UniqueFlowEntity } from '../flows/model';
 import { type FlowObjectFilterGrouped } from './model';
@@ -35,24 +35,36 @@ export class FlowObjectService {
     return [...new Set(flowObjects.map((flowObject) => flowObject.flowID))];
   }
 
+  /**
+   * Get flows given flowObjects `OR` conditions and the number of conditions.
+   * This will return only flows that match all the conditions.
+   */
   async getFlowFromFlowObjects(
     models: Database,
-    where: FlowObjectWhere
+    where: FlowObjectWhere,
+    numberOfConditions: number
   ): Promise<UniqueFlowEntity[]> {
     const flowObjects = await models.flowObject.find({
       where,
     });
-    // Keep only not duplicated flowIDs
-    return [
-      ...new Set(
-        flowObjects.map((flowObject) => {
-          return {
-            id: createBrandedValue(flowObject.flowID),
-            versionID: flowObject.versionID,
-          };
-        })
-      ),
-    ];
+    const uniqueFlows: UniqueFlowEntity[] = [];
+
+    // Group by flowID
+    const flowIDGroups = groupObjectsByProperty(flowObjects, 'flowID');
+
+    for (const [flowID, flowGroup] of flowIDGroups.entries()) {
+      // Group each flowGroup by versionID
+      const versionIDGroups = groupObjectsByProperty(flowGroup, 'versionID');
+
+      for (const [versionID, objs] of versionIDGroups.entries()) {
+        if (objs.length === numberOfConditions) {
+          // Only add the flowID+versionID if all conditions are met
+          uniqueFlows.push({ id: flowID, versionID });
+        }
+      }
+    }
+
+    return uniqueFlows;
   }
 
   async getFlowObjectByFlowId(

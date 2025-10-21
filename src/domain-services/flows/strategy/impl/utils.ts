@@ -369,9 +369,11 @@ export const mapFlowFiltersToFlowObjectFiltersGrouped = (
   >();
 
   for (const flowObjectFilter of flowObjectFilters) {
-    const objectType = flowObjectFilter.objectType;
-    const flowDirection = flowObjectFilter.direction;
-    const objectId = flowObjectFilter.objectID;
+    const {
+      objectType,
+      direction: flowDirection,
+      objectID: objectId,
+    } = flowObjectFilter;
 
     // Get the map of flow object IDs for the given object type
     // Or create a new map if it doesn't exist

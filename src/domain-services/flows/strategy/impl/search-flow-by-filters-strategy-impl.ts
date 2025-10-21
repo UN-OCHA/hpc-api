@@ -218,13 +218,13 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // if (shouldIncludeChildrenOfParkedFlows) {
     // We need to obtain the flowIDs from the children whose parent flows are parked
     if (shouldIncludeChildrenOfParkedFlows && flowObjectFiltersGrouped) {
-      const childs =
-        await this.flowService.getParkedParentFlowsByFlowObjectFilter(
+      const children =
+        await this.flowService.getParkedParentsChildrenByFlowObjectFilter(
           models,
           flowObjectFiltersGrouped
         );
 
-      for (const child of childs) {
+      for (const child of children) {
         flowsFromObjectFilters.flows.push(child);
       }
     }
