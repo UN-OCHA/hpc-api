@@ -1,5 +1,6 @@
 import { type Database } from '@unocha/hpc-api-core/src/db';
 import { type CategoryId } from '@unocha/hpc-api-core/src/db/models/category';
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import {
   Op,
   type Condition,
@@ -62,39 +63,91 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
       }
     }
 
-    // Search categoriesRef with categoriesID IN and categoriesIdsFromShortcutFilterIN
-    // and categoriesIdsFromShortcutFilterNOTIN
+    // Search categoryRef rows for the relevant categories, then post-process
+    // so multiple IN filters are treated with AND semantics. We fetch rows
+    // (not distinct) so we can count which categories each flow has, then
+    // only keep flows that contain all required IN categories and none of the
+    // forbidden NOT_IN categories.
     const where: Condition<InstanceOfModel<Database['categoryRef']>> = {
       objectType: 'flow',
     };
-
-    if (categoriesIdsFromShortcutFilterNOTIN.length > 0) {
-      where['categoryID'] = {
-        [Op.NOT_IN]: categoriesIdsFromShortcutFilterNOTIN,
-      };
-    }
 
     const categoriesIDsIN = [
       ...categoriesIds,
       ...categoriesIdsFromShortcutFilterIN,
     ];
+    const categoriesIDsNOTIN = categoriesIdsFromShortcutFilterNOTIN;
 
-    if (categoriesIDsIN.length > 0) {
-      where['categoryID'] = { [Op.IN]: categoriesIDsIN };
+    // To limit the rows fetched, request refs whose categoryID is in the
+    // union of required IN and forbidden NOT_IN (if any). If there are no
+    // constraints, the where will only include objectType and return all refs
+    const fetchCategoryIDs = [
+      ...new Set([...categoriesIDsIN, ...categoriesIDsNOTIN]),
+    ];
+
+    if (fetchCategoryIDs.length > 0) {
+      // Use the raw values from DB for the IN filter. We'll stringify for
+      // comparisons when grouping below.
+      where['categoryID'] = { [Op.IN]: fetchCategoryIDs };
     }
 
-    const categoriesRef = await models.categoryRef.find({
-      where,
-      distinct: ['objectID', 'versionID'],
-    });
+    // Fetch all matching categoryRef rows so we can
+    // determine which categories each flow has.
+    const categoriesRef = await models.categoryRef.find({ where });
 
-    // Map categoryRef to UniqueFlowEntity (flowId and versionID)
-    const flowIDsFromCategoryRef: UniqueFlowEntity[] = categoriesRef.map(
-      (catRef) => ({
-        id: createBrandedValue(catRef.objectID),
-        versionID: catRef.versionID,
-      })
-    );
+    // Group refs by flow (objectID + versionID) and collect the set of
+    // categoryIDs attached to each flow.
+    const flowMap = new Map<
+      string,
+      { id: FlowId; versionID: number; categorySet: Set<string> }
+    >();
+
+    for (const catRef of categoriesRef) {
+      const key = `${catRef.objectID}::${catRef.versionID}`;
+      let entry = flowMap.get(key);
+      if (!entry) {
+        entry = {
+          id: createBrandedValue(catRef.objectID),
+          versionID: catRef.versionID,
+          categorySet: new Set<string>(),
+        };
+        flowMap.set(key, entry);
+      }
+      entry.categorySet.add(String(catRef.categoryID));
+    }
+
+    const requiredSet = new Set(categoriesIDsIN.map(String));
+    const forbiddenSet = new Set(categoriesIDsNOTIN.map(String));
+
+    const flowIDsFromCategoryRef: UniqueFlowEntity[] = [];
+
+    for (const entry of flowMap.values()) {
+      // Exclude flows that contain any forbidden category
+      let hasForbidden = false;
+      for (const f of forbiddenSet) {
+        if (entry.categorySet.has(f)) {
+          hasForbidden = true;
+          break;
+        }
+      }
+      if (hasForbidden) {
+        continue;
+      }
+
+      // Ensure the flow contains all required categories (AND semantics).
+      let hasAllRequired = true;
+      for (const r of requiredSet) {
+        if (!entry.categorySet.has(r)) {
+          hasAllRequired = false;
+          break;
+        }
+      }
+      if (!hasAllRequired) {
+        continue;
+      }
+
+      flowIDsFromCategoryRef.push({ id: entry.id, versionID: entry.versionID });
+    }
     return { flows: flowIDsFromCategoryRef };
   }
 }
