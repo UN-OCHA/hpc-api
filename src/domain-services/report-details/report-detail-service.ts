@@ -104,7 +104,9 @@ export class ReportDetailService {
     const reportDetails: Array<InstanceDataOfModel<Database['reportDetail']>> =
       await models.reportDetail.find({
         where: {
-          sourceID: sourceSystemID,
+          sourceID: {
+            [models.Op.ILIKE]: `%${sourceSystemID}%`,
+          },
         },
         skipValidation: true,
       });
