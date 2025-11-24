@@ -6,6 +6,7 @@ import {
   type Condition,
 } from '@unocha/hpc-api-core/src/db/util/conditions';
 import { type InstanceOfModel } from '@unocha/hpc-api-core/src/db/util/types';
+import { getOrCreate } from '@unocha/hpc-api-core/src/util';
 import { createBrandedValue } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { FlowService } from '../../flow-service';
@@ -103,17 +104,11 @@ export class GetFlowIdsFromCategoryConditionsStrategyImpl
     >();
 
     for (const catRef of categoriesRef) {
-      const key = `${catRef.objectID}::${catRef.versionID}`;
-      let entry = flowMap.get(key);
-      if (!entry) {
-        entry = {
-          id: createBrandedValue(catRef.objectID),
-          versionID: catRef.versionID,
-          categorySet: new Set<string>(),
-        };
-        flowMap.set(key, entry);
-      }
-      entry.categorySet.add(String(catRef.categoryID));
+      getOrCreate(flowMap, `${catRef.objectID}::${catRef.versionID}`, () => ({
+        id: createBrandedValue(catRef.objectID),
+        versionID: catRef.versionID,
+        categorySet: new Set<string>(),
+      })).categorySet.add(String(catRef.categoryID));
     }
 
     const requiredSet = new Set(categoriesIDsIN.map(String));
