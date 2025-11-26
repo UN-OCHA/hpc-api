@@ -52,22 +52,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     // to be able to sort the flows using the entity
     const isSortByEntity = orderBy && orderBy.entity !== 'flow';
     let sortByFlowIDsPromise: Promise<UniqueFlowEntity[]> = Promise.resolve([]);
-    const orderByForFlow = mapFlowOrderBy(orderBy);
-
-    // Fetch sorted flow IDs only for the filtered subset instead of the whole table
-    if (isSortByEntity) {
-      // Get entity-sorted IDs then intersect with filtered subset
-      sortByFlowIDsPromise = this.flowService.getFlowIDsFromEntity(
-        models,
-        orderBy
-      );
-    } else {
-      // Let the DB sort only the filtered IDs
-      sortByFlowIDsPromise = this.flowService.getFlows({
-        models,
-        orderBy: orderByForFlow,
-      });
-    }
     // We need to fetch the flowIDs by the nestedFlowFilters
     // if there are any
     const isFilterByNestedFilters = nestedFlowFilters !== undefined;
@@ -118,21 +102,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     let didFlowsFromObjectFiltersPromiseCreated = false;
     let flowObjectFiltersGrouped: FlowObjectFilterGrouped | null = null;
 
-    if (isFilterByFlowObjects) {
-      // First step is to map the filters to the FlowObjectFiltersGrouped
-      // To allow doing inclusive filtering between filters of the same type+direction
-      // But exclusive filtering between filters of different type+direction
-      flowObjectFiltersGrouped =
-        mapFlowFiltersToFlowObjectFiltersGrouped(flowObjectFilters);
-
-      flowsFromObjectFiltersPromise =
-        this.getFlowIdsFromObjectConditions.search({
-          models,
-          flowObjectFilterGrouped: flowObjectFiltersGrouped,
-        });
-      didFlowsFromObjectFiltersPromiseCreated = true;
-    }
-
     // Lastly, we need to check if we need to filter by flow
     // And if we didn't did it before when sorting by entity
     // if so, we need to obtain the flowIDs from the flowFilters
@@ -163,16 +132,61 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     const [
       flowsFromCategoryFilters,
       flowsFromNestedFilters,
-      flowsFromObjectFilters,
       flowsFromFlowFilters,
-      sortByFlowIDs,
     ] = await Promise.all([
       flowsFromCategoryFiltersPromise,
       flowsFromNestedFiltersPromise,
-      flowsFromObjectFiltersPromise,
       flowsFromFlowFiltersPromise,
-      sortByFlowIDsPromise,
     ]);
+
+    const intersectCandidates = intersectSets(
+      new Set(flowsFromCategoryFilters.flows.map((f) => f.id)),
+      new Set(flowsFromNestedFilters.flows.map((f) => f.id)),
+      new Set(flowsFromFlowFilters.map((f) => f.id))
+    );
+
+    if (isFilterByFlowObjects) {
+      // First step is to map the filters to the FlowObjectFiltersGrouped
+      // To allow doing inclusive filtering between filters of the same type+direction
+      // But exclusive filtering between filters of different type+direction
+      flowObjectFiltersGrouped =
+        mapFlowFiltersToFlowObjectFiltersGrouped(flowObjectFilters);
+
+      flowsFromObjectFiltersPromise =
+        this.getFlowIdsFromObjectConditions.search({
+          models,
+          flowObjectFilterGrouped: flowObjectFiltersGrouped,
+          candidates: intersectCandidates,
+        });
+      didFlowsFromObjectFiltersPromiseCreated = true;
+    }
+    const flowsFromObjectFilters = await flowsFromObjectFiltersPromise;
+
+    const orderByForFlow = mapFlowOrderBy(orderBy);
+
+    // Fetch sorted flow IDs only for the filtered subset instead of the whole table
+    if (isSortByEntity) {
+      // Get entity-sorted IDs then intersect with filtered subset
+      sortByFlowIDsPromise = this.flowService.getFlowIDsFromEntity(
+        models,
+        orderBy
+      );
+    } else {
+      // Let the DB sort only the filtered IDs
+      sortByFlowIDsPromise = this.flowService.getFlows({
+        models,
+        conditions: {
+          id: {
+            [models.Op.IN]: intersectSets(
+              intersectCandidates,
+              new Set(flowsFromObjectFilters.flows.map((f) => f.id))
+            ),
+          },
+        },
+        orderBy: orderByForFlow,
+      });
+    }
+    const sortByFlowIDs = await sortByFlowIDsPromise;
 
     // First check if we have created the promises
     // and if so, check if the flows are empty
