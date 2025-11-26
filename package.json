@@ -1,6 +1,6 @@
 {
   "name": "hpc-api",
-  "version": "4.11.2-hotfix-1",
+  "version": "4.11.3",
   "description": "api for HPC applications",
   "main": "src/server.ts",
   "license": "MIT",
@@ -36,15 +36,15 @@
     "@types/bunyan": "^1.8.11",
     "@types/hapi__hapi": "^20.0.9",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.6.2",
-    "@types/pg": "^8.15.5",
+    "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.6",
     "@unocha/hpc-repo-tools": "^8.0.0",
-    "eslint": "9.36.0",
+    "eslint": "9.39.1",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
-    "lint-staged": "^16.2.3",
+    "lint-staged": "^16.2.6",
     "prettier": "3.6.2",
-    "ts-jest": "^29.4.4",
+    "ts-jest": "^29.4.5",
     "ts-node-dev": "^2.0.0"
   },
   "engines": {
