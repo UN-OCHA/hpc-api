@@ -288,7 +288,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       }
     }
 
-    const count = sortedFlows.size;
+    const count = parsedSortedFlows.length;
     const flows = await this.flowService.progresiveSearch(
       models,
       parsedSortedFlows,
