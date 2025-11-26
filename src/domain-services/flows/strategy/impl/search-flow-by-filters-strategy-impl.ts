@@ -161,6 +161,10 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       didFlowsFromObjectFiltersPromiseCreated = true;
     }
     const flowsFromObjectFilters = await flowsFromObjectFiltersPromise;
+    const flowSearchIds = intersectSets(
+      intersectCandidates,
+      new Set(flowsFromObjectFilters.flows.map((f) => f.id))
+    );
 
     const orderByForFlow = mapFlowOrderBy(orderBy);
 
@@ -177,10 +181,7 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
         models,
         conditions: {
           id: {
-            [models.Op.IN]: intersectSets(
-              intersectCandidates,
-              new Set(flowsFromObjectFilters.flows.map((f) => f.id))
-            ),
+            [models.Op.IN]: flowSearchIds,
           },
         },
         orderBy: orderByForFlow,
@@ -188,6 +189,20 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     }
     const sortByFlowIDs = await sortByFlowIDsPromise;
 
+    // If 'includeChildrenOfParkedFlows' is defined and true
+    // we need to obtain the flowIDs from the children whose parent flows are parked
+    if (shouldIncludeChildrenOfParkedFlows) {
+      const children =
+        await this.flowService.getParkedParentsChildrenByFlowObjectFilter(
+          models,
+          flowSearchIds
+        );
+
+      for (const child of children) {
+        flowsFromObjectFilters.flows.push(child);
+        sortByFlowIDs.push(child);
+      }
+    }
     // First check if we have created the promises
     // and if so, check if the flows are empty
     // If they are empty, we can return an empty array
@@ -227,21 +242,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       flowsFromCategoryFilters.flows
     );
 
-    // If 'includeChildrenOfParkedFlows' is defined and true
-    // we need to obtain the flowIDs from the children whose parent flows are parked
-    // if (shouldIncludeChildrenOfParkedFlows) {
-    // We need to obtain the flowIDs from the children whose parent flows are parked
-    if (shouldIncludeChildrenOfParkedFlows && flowObjectFiltersGrouped) {
-      const children =
-        await this.flowService.getParkedParentsChildrenByFlowObjectFilter(
-          models,
-          flowObjectFiltersGrouped
-        );
-
-      for (const child of children) {
-        flowsFromObjectFilters.flows.push(child);
-      }
-    }
     flowIDsFromObjectFiltersSet = stringifyFlowIdVersionArray(
       flowsFromObjectFilters.flows
     );

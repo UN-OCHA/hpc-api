@@ -13,12 +13,7 @@ import {
 } from '@unocha/hpc-api-core/src/util/types';
 import { Service } from 'typedi';
 import { FlowObjectService } from '../flow-object/flow-object-service';
-import type {
-  FlowObject,
-  FlowObjectFilterGrouped,
-  FlowObjectType,
-} from '../flow-object/model';
-import { buildWhereConditionsForFlowObjectFilters } from '../flow-object/utils';
+import type { FlowObject, FlowObjectType } from '../flow-object/model';
 import { type FlowParkedParentSource } from './graphql/types';
 import type {
   FlowInstance,
@@ -495,38 +490,20 @@ export class FlowService {
    */
   async getParkedParentsChildrenByFlowObjectFilter(
     models: Database,
-    flowObjectFilters: FlowObjectFilterGrouped
+    flowSearchIds: Set<FlowId>
   ): Promise<UniqueFlowEntity[]> {
-    // 1. Create where conditions from flow object filters
-    const flowObjectsWhere =
-      buildWhereConditionsForFlowObjectFilters(flowObjectFilters);
-
-    // 2. Extract number of conditions from flow object filters
-    const numberOfConditions = flowObjectFilters
-      .values()
-      .flatMap((m) => [...m.values()])
-      .toArray()
-      .flat().length;
-
-    // 3. Retrieve flow objects matching the conditions
-    const flowObjects = await this.flowObjectService.getFlowFromFlowObjects(
-      models,
-      flowObjectsWhere,
-      numberOfConditions
-    );
-
-    // 4. Retrieve flow links where the parent is among those references and depth > 0
+    // 1. Retrieve flow links where the parent is among those references and depth > 0
     const flowLinks = await models.flowLink.find({
       where: {
         depth: { [Op.GT]: 0 },
         parentID: {
-          [Op.IN]: flowObjects.map((fo) => createBrandedValue(fo.id)),
+          [Op.IN]: flowSearchIds,
         },
       },
       distinct: ['parentID', 'childID'],
     });
     const childFlowsIDsSet = new Set<FlowId>(flowLinks.map((fl) => fl.childID));
-    // 5. Retrieve child flows that are active
+    // 2. Retrieve child flows that are active
     const childFlows = await models.flow.find({
       where: {
         activeStatus: true,
@@ -534,8 +511,7 @@ export class FlowService {
       },
       distinct: ['id', 'versionID'],
     });
-
-    // 6. Map child flows to UniqueFlowEntity and return the result
+    // 3. Map child flows to UniqueFlowEntity and return the result
     return childFlows.map(
       (ref) =>
         ({
