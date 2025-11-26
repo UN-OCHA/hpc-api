@@ -264,6 +264,30 @@ export const intersectUniqueFlowEntities = (
   return mapUniqueFlowEntitisSetKeyToUniqueFlowEntity(initialSet);
 };
 
+/**
+ * Iterate over the collection of sets and use empty
+ * sets to exclude items from the intersection.
+ * (It doesn't consider first set for the rule)
+ */
+export const intersectExclusiveSets = <T>(
+  set: Set<T>,
+  ...sets: Array<Set<T>>
+): Set<T> => {
+  let intersectedSet = set;
+  for (const set of sets) {
+    if (set.size > 0) {
+      if (intersectedSet.size === 0) {
+        intersectedSet = set;
+      } else {
+        intersectedSet = intersectedSet.intersection(set);
+      }
+    } else {
+      return new Set<T>();
+    }
+  }
+  return intersectedSet;
+};
+
 export const intersectSets = <T>(...sets: Array<Set<T>>): Set<T> => {
   // We need to iterate over the collection of sets
   // and perform the intersection only for those

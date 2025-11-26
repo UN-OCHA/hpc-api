@@ -8,7 +8,7 @@ import {
   type FlowIdSearchStrategyArgs,
   type FlowIdSearchStrategyResponse,
 } from '../flowID-search-strategy';
-import { intersectSets, parseFlowIdVersionSet } from './utils';
+import { intersectExclusiveSets, parseFlowIdVersionSet } from './utils';
 
 @Service()
 export class GetFlowIdsFromObjectConditionsStrategyImpl
@@ -52,11 +52,11 @@ export class GetFlowIdsFromObjectConditionsStrategyImpl
             (flowObject) => `${flowObject.flowID}:${flowObject.versionID}`
           )
         );
-        flowCandidates = intersectSets(
+        flowCandidates = intersectExclusiveSets(
           flowCandidates,
           new Set(flowObjectsFound.map((flowObject) => flowObject.flowID))
         );
-        intersectedFlows = intersectSets(
+        intersectedFlows = intersectExclusiveSets(
           intersectedFlows,
           uniqueFlowObjectsEntities
         );
