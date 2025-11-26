@@ -1,3 +1,4 @@
+import { type FlowId } from '@unocha/hpc-api-core/src/db/models/flow';
 import { Service } from 'typedi';
 import { FlowObjectFilterGrouped } from '../../../flow-object/model';
 import { FlowService } from '../../flow-service';
@@ -13,6 +14,7 @@ import { GetFlowIdsFromNestedFlowFiltersStrategyImpl } from './get-flowIds-flow-
 import { GetFlowIdsFromObjectConditionsStrategyImpl } from './get-flowIds-flow-object-conditions-strategy-impl';
 import {
   defaultSearchFlowFilter,
+  intersectExclusiveSets,
   intersectSets,
   mapFlowFiltersToFlowObjectFiltersGrouped,
   mapFlowOrderBy,
@@ -161,10 +163,19 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       didFlowsFromObjectFiltersPromiseCreated = true;
     }
     const flowsFromObjectFilters = await flowsFromObjectFiltersPromise;
-    const flowSearchIds = intersectSets(
-      intersectCandidates,
-      new Set(flowsFromObjectFilters.flows.map((f) => f.id))
-    );
+
+    let flowSearchIds = new Set<FlowId>();
+    if (isFilterByFlowObjects) {
+      flowSearchIds = intersectExclusiveSets(
+        intersectCandidates,
+        new Set(flowsFromObjectFilters.flows.map((f) => f.id))
+      );
+    } else {
+      flowSearchIds = intersectSets(
+        intersectCandidates,
+        new Set(flowsFromObjectFilters.flows.map((f) => f.id))
+      );
+    }
 
     const orderByForFlow = mapFlowOrderBy(orderBy);
 
@@ -189,20 +200,6 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
     }
     const sortByFlowIDs = await sortByFlowIDsPromise;
 
-    // If 'includeChildrenOfParkedFlows' is defined and true
-    // we need to obtain the flowIDs from the children whose parent flows are parked
-    if (shouldIncludeChildrenOfParkedFlows) {
-      const children =
-        await this.flowService.getParkedParentsChildrenByFlowObjectFilter(
-          models,
-          flowSearchIds
-        );
-
-      for (const child of children) {
-        flowsFromObjectFilters.flows.push(child);
-        sortByFlowIDs.push(child);
-      }
-    }
     // First check if we have created the promises
     // and if so, check if the flows are empty
     // If they are empty, we can return an empty array
@@ -276,6 +273,20 @@ export class SearchFlowByFiltersStrategy implements FlowSearchStrategy {
       );
     }
     const parsedSortedFlows = parseFlowIdVersionSet(sortedFlows);
+
+    // If 'includeChildrenOfParkedFlows' is defined and true
+    // we need to obtain the flowIDs from the children whose parent flows are parked
+    if (shouldIncludeChildrenOfParkedFlows) {
+      const children =
+        await this.flowService.getParkedParentsChildrenByFlowObjectFilter(
+          models,
+          flowSearchIds
+        );
+
+      for (const child of children) {
+        parsedSortedFlows.push(child);
+      }
+    }
 
     const count = sortedFlows.size;
     const flows = await this.flowService.progresiveSearch(
