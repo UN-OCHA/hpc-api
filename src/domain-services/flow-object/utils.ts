@@ -3,11 +3,9 @@ import { type FlowObjectWhere } from './flow-object-service';
 import { type FlowObjectFilterGrouped } from './model';
 
 /**
- *  This alg iterates over the flowObjectFilters and creates a join for each flowObjectType
- *  and refDirection allowing to filter the flowObjects by the flowObjectType and refDirection
- * inclusivelly for each
- * @param flowObjectFiltersGrouped
- * @returns FlowObjectWhere
+ * Build where conditions for flow object filters as `OR` conditions.
+ * (This is done because we cannot have `AND` conditions on different values of the same column
+ * or use joiners)
  */
 export function buildWhereConditionsForFlowObjectFilters(
   flowObjectFiltersGrouped: FlowObjectFilterGrouped
@@ -16,18 +14,14 @@ export function buildWhereConditionsForFlowObjectFilters(
   for (const [flowObjectType, group] of flowObjectFiltersGrouped.entries()) {
     for (const [direction, ids] of group.entries()) {
       const condition = {
-        [Cond.AND]: [
-          {
-            objectType: flowObjectType,
-            refDirection: direction,
-            objectID: { [Op.IN]: ids },
-          },
-        ],
+        objectType: flowObjectType,
+        refDirection: direction,
+        objectID: { [Op.IN]: ids },
       };
 
       ANDConditions.push(condition);
     }
   }
 
-  return { [Cond.AND]: ANDConditions };
+  return { [Cond.OR]: ANDConditions };
 }

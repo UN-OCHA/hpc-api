@@ -490,96 +490,43 @@ export class FlowService {
     return mappedParkedParentOrganizations;
   }
 
-  async getParkedParentFlowsByFlowObjectFilter(
+  /**
+   * (All parents are considered `parked`, if they are not parked, it means there is corruption in the data)
+   */
+  async getParkedParentsChildrenByFlowObjectFilter(
     models: Database,
     flowObjectFilters: FlowObjectFilterGrouped
   ): Promise<UniqueFlowEntity[]> {
-    // 1. Retrieve the parked category
-    const parkedCategory = await models.category.findOne({
-      where: {
-        name: 'Parked',
-        group: 'flowType',
-      },
-    });
-    if (!parkedCategory) {
-      throw new Error('Parked category not found');
-    }
+    // 1. Create where conditions from flow object filters
+    const flowObjectsWhere =
+      buildWhereConditionsForFlowObjectFilters(flowObjectFilters);
 
-    // 2. Get all category references for parked flows
-    const categoryRefs = await models.categoryRef.find({
-      where: {
-        categoryID: parkedCategory.id,
-        objectType: 'flow',
-      },
-      distinct: ['objectID', 'versionID'],
-    });
+    // 2. Extract number of conditions from flow object filters
+    const numberOfConditions = flowObjectFilters
+      .values()
+      .flatMap((m) => [...m.values()])
+      .toArray()
+      .flat().length;
 
-    // Build list of parent IDs from categoryRefs
-    const parentIDs: FlowId[] = categoryRefs.map((ref) =>
-      createBrandedValue(ref.objectID)
+    // 3. Retrieve flow objects matching the conditions
+    const flowObjects = await this.flowObjectService.getFlowFromFlowObjects(
+      models,
+      flowObjectsWhere,
+      numberOfConditions
     );
 
-    // 3. Retrieve flow links where the parent is among those references and depth > 0
+    // 4. Retrieve flow links where the parent is among those references and depth > 0
     const flowLinks = await models.flowLink.find({
       where: {
         depth: { [Op.GT]: 0 },
-        parentID: { [Op.IN]: parentIDs },
+        parentID: {
+          [Op.IN]: flowObjects.map((fo) => createBrandedValue(fo.id)),
+        },
       },
       distinct: ['parentID', 'childID'],
     });
-
-    // Create a reference list of parent flows from the flow links
-    const parentFlowsRef: UniqueFlowEntity[] = flowLinks.map((flowLink) => ({
-      id: flowLink.parentID,
-      versionID: null,
-    }));
-
-    // 4. Query parent flows progressively in chunks
-    const parentFlows = await this.progresiveSearch(
-      models,
-      parentFlowsRef,
-      1000,
-      0,
-      false, // Do not stop on batch size
-      [],
-      { activeStatus: true }
-    );
-
-    // 5. Retrieve flow objects using the flow object filters
-    const flowObjectsWhere =
-      buildWhereConditionsForFlowObjectFilters(flowObjectFilters);
-    const flowObjects = await this.flowObjectService.getFlowFromFlowObjects(
-      models,
-      flowObjectsWhere
-    );
-
-    // 6. Build a Set for flowObjects for fast lookup (using a composite key of id and versionID)
-    const flowObjectsSet = new Set(
-      flowObjects.map(
-        (flowObject) => `${flowObject.id}|${flowObject.versionID}`
-      )
-    );
-
-    // 7. Filter parent flows that are present in the flowObjects list
-    const filteredParentFlows = parentFlows.filter((parentFlow) => {
-      const key = `${parentFlow.id}|${parentFlow.versionID}`;
-      return flowObjectsSet.has(key);
-    });
-
-    // 8. Build a Set of filtered parent flow IDs for quick membership checking
-    const filteredParentFlowIds = new Set(
-      filteredParentFlows.map((flow) => flow.id)
-    );
-
-    // 9. Extract child flow IDs from flowLinks where the parent is in the filtered set
-    const childFlowsIDsSet = new Set<FlowId>();
-    for (const flowLink of flowLinks) {
-      if (filteredParentFlowIds.has(flowLink.parentID)) {
-        childFlowsIDsSet.add(flowLink.childID);
-      }
-    }
-
-    // 10. Retrieve child flows
+    const childFlowsIDsSet = new Set<FlowId>(flowLinks.map((fl) => fl.childID));
+    // 5. Retrieve child flows that are active
     const childFlows = await models.flow.find({
       where: {
         activeStatus: true,
@@ -588,13 +535,14 @@ export class FlowService {
       distinct: ['id', 'versionID'],
     });
 
-    // 11. Map child flows to UniqueFlowEntity and return the result
-    const result = childFlows.map((ref) => ({
-      id: ref.id,
-      versionID: ref.versionID,
-    }));
-
-    return result;
+    // 6. Map child flows to UniqueFlowEntity and return the result
+    return childFlows.map(
+      (ref) =>
+        ({
+          id: ref.id,
+          versionID: ref.versionID,
+        }) satisfies UniqueFlowEntity
+    );
   }
 
   /**
